@@ -1,0 +1,5 @@
+# to avoid access to databse if SQLite is used
+
+Order deny,allow
+Deny from all
+Require all denied

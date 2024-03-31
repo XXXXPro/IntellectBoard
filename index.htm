@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<title>Установка Intellect Board: не работает перенаправление запросов</title>
+<style type="text/css">
+html { height: 100% }
+body { height: 100%; padding: 0; margin: 0; font-size: 62.5%; font-family: Tahoma, Verdana, Arial, sans-serif }
+form { padding: 0; margin: 0 }
+fieldset { border: 0 }
+legend { display: none }        
+#ib_all { margin: auto; height: 100%; padding: 0 50px; font-size: 1.25em; width: 992px; position: relative }
+#header, #content, #footer { position: absolute; width: 992px; padding: 0 10px }
+#header { height: 6%;  }
+#content { height: 85%;  top: 10%; border: #D8EAFF 1px solid; }
+#content form { line-height : 180% }
+#content li { line-height: normal }
+#content ul { margin: 0 }
+#content h4 { padding: 0.1em 0 0 0; margin: 0 }
+#footer { height: 5%; position: absolute; top: 95% }
+#ib_all address.copyright { text-align: center; font-size: 90%; font-style: normal; margin: 10px }
+
+#ib_all h1 { font-size: 180%; margin: 1em 0 0.2em 0; color: #0101C4; padding: 0; font-weight: bold; font-family: 'Constantia', 'Times New Roman', serif  }
+#ib_all h2 { padding: 0.2em 0 0.5em 0; margin: 0; color: #333; }
+#header { background: #E5F1FF; border-left: #D8EAFF 1px solid;
+border-right: #D8EAFF 1px solid; position: relative; font-family: 'Constantia', 'Times New Roman', serif; padding-top: 1% }
+#header .site_title { font-size: 2.5em; text-align: center; color: #2524b0; line-height: 100%; vertical-align: middle; }
+
+</style>
+</head>
+<body>
+<div id="ib_all">
+<div id="header">
+<div class="site_title">Установка Intellect Board Pro</div>
+</div>
+
+<div id="content">
+<h1>Не работает перенаправление запросов</h1>
+<p>Если вместо установки Intellect Board у вас появляется эта страница или ошибка 500, у вас некорректно настроено переаправление запросов.</p>
+<p>Попробуйте выполнить следующие действия:</p>
+<ul>
+<li>Проверьте, что у вас включен mod_rewrite. Если у вас собственный сервер, это делается в файле конфигурации Apache 
+(файл httpd.cond, нужно раскомментировать строку LoadModule rewrite_module modules/mod_rewrite.so). На хостингах данная опция может быть в панели 
+управления, если ее там нет, обратитесь в техническую поддержку хостинга.</li>
+<li>Проверьте, что разрешено использование файлов .htacccess. На своем сервере это можно настроить с помощью директивы AllowOverride All в файле виртуального хоста.
+На хостинге необходимо обратиться в техническую поддержку.</li>
+<li>Убедитесь, что файл .htaccess из корня дистрибутива корректно загружен. Для старых версий Apache его требуется загружать по FTP в текстовом режиме (режим ASCII).</li>
+<li>Если вы ставите Intellect Board в поддомен (т.е адрес вида forum.test.ru), желательно настроить корневой каталог (DocumentRoot) так, 
+чтобы он указывал на подкаталог www в дистрибутиве Intellect Board, это даст небольшой плюс к производительности. </li>
+</ul>
+</div>
+
+<div id="footer">
+<address class="copyright">Программа установки <a href="http://intbpro.ru">Intellect Board Pro</a>, © 2013-2015, 4X_Pro.</address>
+</div>
+
+</div>
+</body></html>

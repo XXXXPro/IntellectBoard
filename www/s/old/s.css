@@ -1,0 +1,137 @@
+/* Общая часть, которую имеет смысл копировать во все шаблоны */
+html { font-size: 100.01% }
+body { padding: 0; margin: 0; font-size: 62.5%; font-family: Tahoma, Verdana, Arial, sans-serif }
+div { padding: 0; margin: 0 }
+img { border: 0; padding: 0; margin: 0 }
+td { vertical-align: top; padding: 4px }
+form { padding: 0; margin: 0 }
+ul { padding: 0; margin: 0; vertical-align: top; list-style-position: inside }
+li { padding: 0; margin: 0 }
+form { padding: 0; margin: 0 }
+fieldset { padding: 0; margin: 0 }
+select { margin: 2px 0 }
+
+table.design { padding: 0; margin: 0; border-spacing: 0; empty-cells: show; border-collapse: collapse; width: 100%; table-layout: fixed }
+.dbg { display:block; border: #888 1px solid }
+.invis { display: none }
+
+/* Типовые формы */
+#ib_all .ibform {  }
+#ib_all .ibform fieldset { border-wdth: 1px; border-style: solid; margin: 0;}
+#ib_all .ibform legend { display: block; width: 100%; margin: 0; padding: 3px; background: #ddf; font-size: 150%; text-align: center }
+#ib_all .ibform div { padding: 2px 0; clear: both }
+#ib_all .ibform .sceditor-button div { padding: 0; clear: none; }
+#ib_all .ibform div:nth-child(even) { background: #eee }
+#ib_all .ibform div small { display: block; font-size: 80% }
+#ib_all .ibform span { display: block; width: 40%; text-align: right; padding: 2px 5px; float: left }
+#ib_all .ibform .submit { padding-left: 40%; }
+#ib_all .ibform .submit button { margin-left: 9px; font-size: 140%; padding: 3px 10px; font-weight: bold }
+
+#ib_all .smallform { }
+#ib_all .smallform fieldset { border: 0; font-size: 90%; padding: 4px }
+#ib_all .smallform legend { display: none }
+#ib_all .smallform input, #ib_all .smallform select  { font-size: 90%; padding: 0 }
+
+#ib_all .center { text-align: center }
+
+#ib_all .username { color: #800; font-weight: bold }
+#ib_all .left { display: block; float: left }
+#ib_all .right { display: block; float: right } 
+
+/* Информационные блоки (объявления, список пользователей онлайн и т.п. */
+#ib_all .block { background: #eee; border: #ccc 1px solid; line-height: 120%; font-size: 90% }
+#ib_all .block div { padding: 4px 8px}
+#ib_all .block .headline { font-size: 120%; font-weight: bold; color: #FFF; background: #2279FD}
+
+/* Типовые таблицы */
+#ib_all .ibtable { width: 100%; table-layout: fixed; border-collapse: collapse; border: #ccc 2px solid }
+
+/* Сообщения */
+#ib_all div.msg_error, #ib_all div.msg_warn, #ib_all div.msg_ok { padding: 4px 10px; margin: 2px 0; border-width: 1px; border-style: solid }
+#ib_all div.msg_error { background: #FEE; border-color: #800 }
+#ib_all div.msg_warn { background: #FFE; border-color: #993 }
+#ib_all div.msg_ok { background: #EFE; border-color: #080 }
+#ib_all span.msg_error { color: #800 }
+#ib_all span.msg_warn { color: #993 }
+#ib_all span.msg_ok { color: #080 }
+
+#ib_all address.copyright { text-align: center; font-size: 90%; font-style: normal; margin: 10px }
+
+/* Типовое горизонтальное меню */
+#ib_all .hmenu { display: block; list-style: none; }
+#ib_all .hmenu li { display: inline; white-space: nowrap; }
+
+/* Типовые фото и аватар */
+#ib_all .smallphoto { height: 200px; max-width: 400px }
+
+/* Общие элементы сайта */
+#ib_all .header { background: #eef; border-left: #dde 1px solid;
+border-right: #dde 1px solid; padding: 0 10px; height: 70px; position: relative }
+#ib_all .header .site_logo { position: absolute; height: 70px; width: 300px }
+#ib_all .header .site_title { font-size: 2.4em; text-align: center; padding: 7px 0; color: #339 }
+#ib_all .header .site_descr { font-size: 1.5em; text-align: right; color: #999 }
+#ib_all #uLogin { display: inline-block; margin-left: 2em; vertical-align: bottom }
+
+#ib_all .location_path { list-style : none; display: block; border: #ccc 1px dotted; font-size: 120%;
+padding: 5px 10px; margin: 10px 0 }
+#ib_all .location_path li { display: inline; white-space: nowrap }
+#ib_all .rss_link { display: block; float: right; border: 0; padding: 10px 5px }
+#ib_all .rss_link img { height: 13px; width: 30px }
+#ib_all .main_menu { background: #f4f4ff; padding: 8px 0px; font-size: 1.1em; margin: 0px 0; clear: both; border: #dde 1px solid }
+#ib_all .main_menu li { padding: 0 10px }
+
+#ib_all .welcome { margin: 5px 0; padding: 0 10px; border: #eee 1px solid; line-height: 200%; color: #999 }
+#ib_all .welcome .avatar { float: left; margin-right: 5px; margin-left: -10px }
+#ib_all .welcome .username { font-size: 110%; }
+#ib_all .welcome big { margin-right: 50px }
+#ib_all .welcome .usermenu { display: inline; }
+#ib_all .welcome .usermenu li { display: inline; padding-right: 10px }
+#ib_all .welcome fieldset { border: 0 }
+#ib_all .welcome legend { display: none }
+#ib_all .welcome input { padding: 0; font-size: 90% }
+#ib_all .welcome .pm_new { font-size: 125%; color: #C00; font-weight: bold; text-decoration: blink; }
+
+/* Компоненты дизайна сайта */
+#ib_all .captcha { vertical-align: top }
+#ib_all .announce { width: 45%; float: right; height: 100%; margin: -1px -11px 0 10px; color: #000 }
+#ib_all .start_text { margin: 10px 0px; font-size: 110% }
+#ib_all .online { clear: both }
+
+/* Разбиение на страницы */
+#ib_all .pages { line-height: 180% }
+#ib_all .pages ul { list-style: none; display: inline }
+#ib_all .pages li { display: inline;  }
+#ib_all .pages li a, #ib_all .pages li b { padding: 4px; background-color: #def }
+
+/* Кнопки-ссылки **/
+#ib_all .actionbtn { display: inline-block; border: #ccc 3px solid; border-radius: 16px; padding: 2px 16px; margin: 4px 0; background: none;
+text-decoration: none; font-weight: bold; font-size: 110%; color: #006 }
+#ib_all .warnbtn { background-color: #fbb } 
+
+#ib_all .mod_actions { text-align: right; font-size: 90%;  }
+#ib_all .mod_actions b { font-size: 150%; color: #800 }
+#ib_all a.small_link { text-decoration: none; font-size: 90%; color: #669 }
+
+@media screen and (max-width: 1024px) {
+	body { font-size: 0.8em }
+	#ib_all { min-width: initial; max-width: none; width: auto; margin: auto; padding: 0 4px }
+	#ib_all .header { height: auto }
+  #ib_all .header .site_logo { position: static; display: block; max-width: 100% }
+  #ib_all .header .site_title { font-size: 130%; color: #339; text-align: left }
+  #ib_all .header .site_descr { display: none }
+  #ib_all .welcome label { display: block }
+  #ib_all a { line-height: 180%; padding: 4px; vertical-align: top }	
+  #ib_all .announce { width: auto; float: none; margin: 4px }
+  .share42init { display: none }
+}
+
+@media print {
+#ib_all { min-width: none; max-width: none; width: auto; margin: auto }
+#ib_all .main_menu { display: none }
+#ib_all .welcome { display: none }
+#ib_all .actionbtn { display: none }
+#ib_all .mod_actions { display: none }
+#ib_all .pages { float: none; clear: all; text-align: right }
+#ib_all .location_path li { white-space: normal; }
+.share42init { display: none }
+}

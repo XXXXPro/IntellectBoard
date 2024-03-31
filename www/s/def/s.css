@@ -1,0 +1,253 @@
+/* Общая часть, которую имеет смысл копировать во все шаблоны */
+html { font-size: 100.01% }
+body { padding: 0; margin: 0; font-size: 62.5%; font-family: 'Liberation Sans','Nimbus Sans','Open Sans', Tahoma, Verdana, Arial, sans-serif }
+div { padding: 0; margin: 0 }
+img { border: 0; padding: 0; margin: 0; max-width: 100%; height: auto; }
+td { vertical-align: top; padding: 4px }
+form { padding: 0; margin: 0 }
+ul { padding: 0; margin: 0; vertical-align: top; list-style-position: inside }
+li { padding: 0; margin: 0 }
+form { padding: 0; margin: 0 }
+fieldset { padding: 0; margin: 0 }
+select { margin: 2px 0 }
+
+table.design { padding: 0; margin: 0; border-spacing: 0; empty-cells: show; border-collapse: collapse; width: 100%; table-layout: fixed }
+.dbg { display:block; border: #888 1px solid }
+.invis { display: none }
+
+/* Типовые формы */
+#ib_all .ibform {  }
+#ib_all .ibform fieldset { border-width: 1px; border-style: solid; margin: 0;}
+#ib_all .ibform legend { display: block; width: 100%; margin: 0; padding: 3px 1px; background: #BFDDFF; font-size: 150%; text-align: center; cursor: pointer; }
+#ib_all .ibform div { padding: 2px 0; clear: both }
+#ib_all .ibform .sceditor-button div { padding: 0; clear: none; }
+#ib_all .ibform div:nth-child(even) { background: #F6F6F6 }
+#ib_all .ibform div small { display: block; font-size: 80% }
+#ib_all .ibform span { display: block; width: 40%; text-align: right; padding: 2px 5px; float: left }
+#ib_all .ibform .submit { padding-left: 40%; }
+#ib_all .ibform .submit button, #ib_all .postform .submit button { padding: 3px 11px; margin: 4px 9px 4px 0; text-decoration: none;
+   background: #3d98ff; color: #fff;  font-weight: bold; margin-left: 9px; font-size: 133%; padding: 3px 10px; border: #A3CEFF 1px solid }
+#ib_all .postform .submit input[type="button"] { background: #fff; border: rgb(118,118,118) 1px solid; padding: 3px 11px; font-size: 133%; }
+
+#ib_all .smallform { }
+#ib_all .smallform fieldset { border: 0; font-size: 90%; padding: 4px }
+#ib_all .smallform legend { display: none }
+#ib_all .smallform input, #ib_all .smallform select  { font-size: 90%; padding: 0 }
+
+#ib_all .center { text-align: center }
+
+#ib_all .username, #ib_all a.username:visited { color: #800; font-weight: bold; user-select: all; }
+#ib_all .ptext .username { user-select: text }
+#ib_all .left { display: block; float: left }
+#ib_all .right { display: block; float: right } 
+
+/* Информационные блоки (объявления, список пользователей онлайн и т.п. */
+#ib_all .block { background: #f0f0f0; border: #ddd 1px solid; line-height: 120%; font-size: 90% }
+#ib_all .block div { padding: 4px 8px}
+#ib_all .block .headline { font-size: 120%; font-weight: bold; color: #FFF; background: #0101C4 }
+
+/* Типовые таблицы */
+#ib_all .ibtable { width: 100%; table-layout: fixed; border-collapse: collapse; border: #C1DEFF 2px solid }
+
+/* Сообщения */
+#ib_all div.msg_error, #ib_all div.msg_warn, #ib_all div.msg_ok { padding: 4px 10px; margin: 2px 0; border-width: 1px; border-style: solid }
+#ib_all div.msg_error { background: #FEE; border-color: #800 }
+#ib_all div.msg_warn { background: #FFE; border-color: #993 }
+#ib_all div.msg_ok { background: #EFE; border-color: #080 }
+#ib_all span.msg_error { color: #800 }
+#ib_all span.msg_warn { color: #993 }
+#ib_all span.msg_ok { color: #080 }
+
+#ib_all address.copyright { text-align: center; font-size: 90%; font-style: normal; margin: 10px }
+
+/* Типовое горизонтальное меню */
+#ib_all .hmenu { display: block; list-style: none; }
+#ib_all .hmenu li { display: inline; white-space: nowrap; }
+
+/* Типовые фото и аватар */
+#ib_all .smallphoto { height: 200px; max-width: 400px }
+
+/* Общие элементы сайта */
+#ib_all { margin: auto; padding: 0 50px; font-size: 1.25em; max-width: 1220px; min-width: 992px }
+#ib_all .main_menu li, #ib_all .welcome li { display: inline-block; list-style: none}
+#ib_all a { color : #3c5cc0 }
+#ib_all a:visited { color : #283E7F }
+#ib_all .fa, #ib_all .fas { padding-right: 5px }
+#ib_all .header { background: #E5F1FF; border-left: #D8EAFF 1px solid;
+border-right: #D8EAFF 1px solid; padding: 0 10px; height: 70px; position: relative; font-family: 'Constantia', 'Times New Roman', serif }
+#ib_all .header .site_logo { position: absolute; height: 70px; width: 300px }
+#ib_all .header .site_title { font-size: 2.5em; text-align: center; padding: 7px 0; color: #2524b0; line-height: 100% }
+#ib_all .header .site_descr { font-size: 1.5em; text-align: right; color: #7A7A7A }
+#ib_all #uLogin { display: inline-block; margin-left: 2em; vertical-align: bottom }
+#ib_all h1 { font-size: 180%; margin: 1em 0 0.2em 0; color: #0101C4; padding: 0; font-weight: bold; font-family: 'Constantia', 'Times New Roman', serif  }
+
+#ib_all .location_path { list-style : none; display: block; border: #E5F1FF 1px dotted; font-size: 120%;
+padding: 5px 10px; margin: 10px 0 }
+#ib_all .location_path li { display: inline; white-space: nowrap }
+#ib_all .rss_link { display: block; float: right; border: 0; padding: 10px 5px }
+#ib_all .rss_link img { height: 13px; width: 30px }
+#ib_all .main_menu { background: #F2F8FF; padding: 8px 0px; font-size: 1.1em; margin: 0px 0; clear: both; border: #D8EAFF 1px solid }
+#ib_all .main_menu li { padding: 0 10px }
+#ib_all .main_menu a { color : #2524b0; text-decoration: none }
+#ib_all .main_menu a:hover { text-decoration: underline }
+#ib_all .main_menu input, #ib_all .main_menu label { display: none;}
+#ib_all .welcome { margin: 5px 0; padding: 0 10px; border: #EAF4FF 1px solid; line-height: 200%; color: #7a7a7a }
+#ib_all .welcome .avatar { float: left; margin-right: 5px; margin-left: -10px; max-height: 72px }
+#ib_all .welcome .username { font-size: 110%; }
+#ib_all .welcome #greet { margin-right: 50px }
+#ib_all .welcome .usermenu { display: inline; }
+#ib_all .welcome .usermenu li { display: inline; padding-right: 10px }
+#ib_all .welcome fieldset { border: 0 }
+#ib_all .welcome legend { display: none }
+#ib_all .welcome input { padding: 0; font-size: 90%; margin-right: 5px }
+#ib_all .welcome .pm_new { font-size: 125%; color: #C00; font-weight: bold; text-decoration: blink; }
+#ib_all .welcome #logout { margin-left: 12px }
+
+/* Компоненты дизайна сайта */
+#ib_all .captcha{vertical-align:middle}
+#ib_all .announce { width: 45%; float: right; height: 100%; margin: -1px -11px 0 10px; color: #000 }
+#ib_all .start_text { margin: 10px 0px; font-size: 110% }
+#ib_all .online { clear: both }
+
+/* Разбиение на страницы */
+#ib_all .pages { line-height: 180% }
+#ib_all .pages ul { list-style: none; display: inline }
+#ib_all .pages li { display: inline;  }
+#ib_all .pages li a, #ib_all .pages li b { padding: 4px; background-color: #def }
+#ib_all .load_more { text-align: center; display: block; background: #EDF5FF; padding: 4px 0 8px 0; margin-bottom: 2px }
+
+/* Кнопки-ссылки **/
+#ib_all .actionbtn, #ib_all a.actionbtn { display: inline-block; border: #A3CEFF 2px solid; padding: 3px 11px; margin: 4px 5px 4px 0; background: none;
+text-decoration: none; font-size: 110%; color: #0101C4 }
+#ib_all .mainbtn, #ib_all .actionbtn.mainbtn { background: #1482ff; color: #fff; font-weight: bold; border: #1482ff 2px solid }
+#ib_all a.minbtn { border: 0 }
+#ib_all .warnbtn { border-color: #600; color: #a00 }
+#ib_all .bad_link { color: #600; padding: 0 5px }
+
+#ib_all .location_path a { color: #2524b0 }
+#ib_all .postact a { font-size: 100%; padding: 5px }
+#ib_all .mod_actions { text-align: right; font-size: 90%; margin: 10px 0 }
+#ib_all .mod_actions b { font-size: 150%; color: #800 }
+#ib_all .mod_actions a { color: #000def }
+#ib_all a.small_link  { text-decoration: none; font-size: 90%; color: #000def }
+#ib_all .fa-rss-square { color:#f26522; font-size: 200%; margin-top: -8px }
+#ib_all .post.marked { border: #A00 5px solid }
+#ib_all blockquote{border:#dcddde 1px solid;font-size:90%;background:#eaecef;padding:4px;overflow:auto;max-height:7em;margin:5px 20px}
+#ib_all a.rules { display: block }
+
+#ib_all .postform{border:#dcddde 1px solid;box-sizing:initial;border-radius:3px}
+#ib_all .postform *{box-sizing:initial}
+#ib_all .postform .pseudo_comment { position: absolute; top: -1200px }
+#ib_all .postform fieldset{border:0;padding:0;margin:0}
+#ib_all .postform legend{display:block;width:100%;margin:0;padding:2px 0px;background:#BFDDFF;font-size:150%;text-align:center}
+#ib_all .postform div label span{display:block;width:18em;float:left}
+#ib_all .postform .sceditor-container div{padding:0}
+#ib_all .postform div.sceditor-dropdown{padding:10px}
+#ib_all .postform fieldset div{padding:2px 5px}
+#ib_all .postform textarea{width:98%}
+#ib_all .postform .extended{display:flex;flex-wrap:wrap}
+#ib_all .postform .postboxes{display:flex;flex-wrap:wrap;flex-basis:70%;flex-grow:1}
+#ib_all .postform .postboxes label{display:block;flex-basis:33%}
+#ib_all .postform .perms{font-size:80%;color:#666;flex-basis:25%}
+#ib_all .postform .submit{text-align:center;clear:both;background:#E0EFFF;line-height:250%}
+#ib_all .postform .attach span{display:inline-block;width:17.4em;text-align:right}
+#ib_all .postform div.sceditor-container{padding:0}
+#ib_all .postform .danger{color:#c00}
+#ib_all .postform .maintext{clear:both}
+#ib_all .postform .rules_reminder { float: right; color: #888; width: auto }
+#ib_all .postform .rules_reminder a { color: #888; }
+#ib_all .miniform legend{display:none}
+#ib_all .miniform fieldset{margin:0;padding:0}
+#ib_all .miniform .maintext span,#ib_all .miniform .maintext br{display:none}
+#ib_all .miniform fieldset>div>div>label>div{padding:0;margin:0}
+#ib_all .miniform .attach,#ib_all .miniform .extended{display:none}
+#ib_all .miniform .sceditor-button div{margin:2px 0}
+#ib_all .sceditor-container textarea{min-height:3em}
+
+#ib_all .postact { display:none; position: absolute; bottom: -1px; right: -1px;  border: #A3CEFF 1px solid; background: #f8f8f8; margin: 0; list-style: none }
+#ib_all .post:hover .postact { display: block }
+#ib_all .postact li { display: inline-block; font-size: 1.6em; padding: 5px 16px }
+#ib_all .post { position: relative; }
+#ib_all .post .pu, #ib_all .post .ptop, #ib_all .post .postact { user-select: none; }
+#ib_all .post .postact li:empty { font-size:0; display: none }
+#ib_all .postact a { text-decoration: none }
+#ib_all .postact .postedit { color: #880 }
+#ib_all .postact .postdelete { color: #800 }
+#ib_all .postact .postmark { color: #880  }
+#ib_all .postact .modaccept { color: #080  }
+#ib_all footer { clear: both }
+
+#ib_all .post .attach { color: #444; margin-top: 1.2em }
+#ib_all .post .attach ul { list-style: none; padding: 0; margin: 0}
+#ib_all .attach li { display: inline-block; margin: 5px 20px 0 0; text-align: center; max-width: 280px; }
+#ib_all .attach li a { word-break: break-all }
+#ib_all .attach audio, #ib_all .attach video, #ib_all .attach img { max-width: 280px; vertical-align: middle; display: block;  }
+#ib_all .attach i.fa-file-alt { font-size: 54px;  display: block;  }
+
+#quotemenu { position: absolute; z-index: 1011; background: #fff; font-size: 15px; border: #A3CEFF 2px solid; 
+  list-style: none; margin: 4px 0; user-select: none; padding: 0}
+#quotemenu li { margin: 4px; padding: 0 6px; line-height: 200%; cursor: pointer;}
+#quotemenu li:hover { background: #EDF5FF; }
+#quotemenu li i { padding: 0 6px }
+
+
+@media screen and (max-width: 980px) {
+  body { font-size: 0.64em }
+  #ib_all { min-width: initial; max-width: none; width: auto; margin: auto; padding: 0 4px }
+  #ib_all .header { height: auto }
+  #ib_all .header .site_logo { position: static; display: block; max-width: 100% }
+  #ib_all .header .site_title { font-size: 130%; color: #339; text-align: left }
+  #ib_all .header .site_descr { display: none }
+  #ib_all .welcome label { display: block }
+  #ib_all .hmenu a { line-height: 180%; padding: 4px; vertical-align: top }	
+  #ib_all .announce { width: auto; float: none; margin: 4px }
+  .share42init { display: none }
+  #ib_all .postact { display: block; width: 100% }
+  #ib_all .postact a {line-height:normal}
+  #ib_all .ibform span { width: auto; min-width: 30% }
+  #ib_all .ibform input { max-width: 65% }
+  #ib_all .welcome { padding: 0; line-height: normal }
+  #ib_all .welcome .avatar { margin-left: 0 }
+  #ib_all .welcome br { display: none }
+  #ib_all .welcome .usermenu { display: block }
+  #ib_all .welcome .usermenu li { display: inline-block } 
+}
+
+@media screen and (max-width: 480px) {
+  #ib_all .header, #ib_all .main_menu { margin: 0 -5px }
+  #ib_all .ibform span { /*display: block;*/ float: none; text-align: left; }
+  #ib_all .ibform label { display: block }
+  #ib_all .ibform .submit { padding-left: 0; text-align: center;}
+  #ib_all .ibform textarea, #ib_all .ibform select, #ib_all .ibform input[type=text], #ib_all .ibform input[type=password] { width: 96%; margin: 0 5px; max-width: none; }
+  #ib_all .ibform span select { width: auto; margin: 0 }
+
+
+  #ib_all .main_menu .sandwich ~ ul { display: none }
+  #ib_all .main_menu .sandwich:checked ~ ul { display: block; position: absolute; background: #fff; border: #339 2px solid;
+  top: 40px; right: 5px; z-index: 65011; padding: 4px 10px; max-width: 90%; box-shadow: #888 5px 5px 5px; }
+  #ib_all .main_menu ul li { display: block; padding: 4px 0; border-top: #E5F1FF 1px solid }
+  #ib_all .main_menu ul li:first-child { border: none }
+  #ib_all .main_menu .sandwich { width: 30px; height: 30px; cursor: pointer; clip: rect(0,0,0,0); position: absolute; }
+  #ib_all .main_menu .sandwich ~ label { width: 30px; height: 30px; display: inline-block; font-size: 30px; position: absolute; top: 8px; right: 5px; color: #339; }
+  #ib_all .main_menu { padding: 0 }
+  #ib_all .postform input[type=text] { width: 98% }
+  #ib_all .postform .postboxes label { flex-basis: 50% }
+}
+
+@media print {
+#ib_all { min-width: none; max-width: none; width: auto; margin: auto }
+#ib_all .main_menu { display: none }
+#ib_all .welcome { display: none }
+#ib_all .actionbtn, #ib_all a.actionbtn { display: none }
+#ib_all .mod_actions { display: none }
+#ib_all .pages { display: none }
+#ib_all .location_path { border: none }
+#ib_all .rss_link { display: none }
+#ib_all .location_path li { white-space: normal; }
+#ib_all .prating a, #ib_all .prating .norate { display: none }
+#ib_all .ptop .fold { display: none }
+#ib_all .post code { max-height: none }
+#ib_all .post pre { max-height: none }
+#ib_all .post blockquote { max-height: none }
+#ib_all .noprint { display: none }
+}

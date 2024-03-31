@@ -1,0 +1,23 @@
+User-Agent: *
+Disallow: /category
+Disallow: /bookmark
+Disallow: /help
+Disallow: /search
+Disallow: /users/search
+Disallow: /user
+Disallow: /online
+Disallow: */post-*
+Disallow: */reply.htm
+Disallow: */last.htm
+Disallow: *rules.htm
+Disallow: /newtopics
+Disallow: /moderate
+Disallow: /privmsg 
+Disallow: /admin
+Disallow: *?tags=*
+Disallow: */tags.htm
+Disallow: *?from
+Disallow: */new.htm
+Disallow: /team.htm
+
+Disallow: /test

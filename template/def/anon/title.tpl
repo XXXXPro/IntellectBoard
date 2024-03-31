@@ -1,0 +1,1 @@
+{% include 'stdforum/title.tpl' %}

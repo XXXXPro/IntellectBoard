@@ -1,0 +1,18 @@
+#ib_all .photos { padding: 0; margin: 0; display: flex; flex-wrap: wrap; list-style: none; }
+#ib_all .photos li { padding: 5px; margin: 5px; border: #eee 1px solid; position: relative; border-radius: 1px; box-sizing: border-box; }
+#ib_all .photos a>div { display: none}
+#ib_all .photos a:hover>div { display: block; width: 100%; opacity: 0.66; background: #fff; 
+  text-align: center; top: 56%; left:0; position: absolute; padding: 4px }
+#ib_all .photos a:hover>div>span { font-size: 125%; line-height: 180%; color: #0101C4; font-weight: bold; }
+
+#ib_all .comment { clear: both; margin: 8px 0; padding: 12px 0; display: flex; position: relative }
+#ib_all .postact { margin-bottom: -8px }
+#ib_all .comment_avatar { min-width: 140px; order:1; height:100%; padding-right: 20px; text-align:right }
+#ib_all .comment_body { order: 2; width: 100% }
+#ib_all .comment_top { width: 100%; border-bottom: #f6f8fa 1px solid; margin-bottom: 6px; padding-bottom: 6px;display: flex}
+#ib_all .comment_avatar img { max-width: 120px }
+
+#ib_all .blogpost_text pre, #ib_all .blogpost_text code, #ib_all .comment_text code{overflow:auto;background:#eaecef;border:1px solid #dcddde;display:block;padding:8px 10px;margin:5px 0;white-space:pre}
+#ib_all .blogpost_text pre br{display:none}
+#ib_all .comment_text .ib_outer_table { table-layout: fixed; width: 100% }
+#ib_all .comment_text .ib_outer_table td { padding: 0; overflow: auto }
