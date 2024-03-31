@@ -142,11 +142,19 @@ INSERT INTO `ib_forum_type` VALUES ('anon','Анонимный форум','1','
 ^<<<hurl>>>/([\w\-\d]+)/((\d+)\.htm)?$ blog.php?f=<<<id>>>&t=$1&a=view_topic&page=$3
 ^<<<hurl>>>/([\w\-\d]+)/(\w+)\.htm$ blog.php?f=<<<id>>>&t=$1&a=$2
 ^moderate/<<<hurl>>>/((\w+)/)?(\w+)\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2
+<<<<<<< HEAD
 ','0'),('gallery','Фотогалерея','1','1','1','0','1',6,'^<<<hurl>>>/((\d+)\.htm)?$ gallery.php?f=<<<id>>>&a=view_forum&page=$2
 ^<<<hurl>>>/((\w+)\.htm)?$ gallery.php?f=<<<id>>>&a=$2
 ^<<<hurl>>>/([\w\-\d]+)/((\d+)\.htm)?$ gallery.php?f=<<<id>>>&t=$1&a=view_topic&page=$3
 ^<<<hurl>>>/([\w\-\d]+)/(\w+)\.htm$ gallery.php?f=<<<id>>>&t=$1&a=$2
 ^moderate/<<<hurl>>>/((\w+)/)?(\w+)\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2
+=======
+','0'),('gallery','Фотогалерея','1','1','1','0','1',6,'^<<<hurl>>>/((\d+)\.htm)?$ gallery.php?f=<<<id>>>&a=view_forum&page=$2
+^<<<hurl>>>/((\w+)\.htm)?$ gallery.php?f=<<<id>>>&a=$2
+^<<<hurl>>>/([\w\-\d]+)/((\d+)\.htm)?$ gallery.php?f=<<<id>>>&t=$1&a=view_topic&page=$3
+^<<<hurl>>>/([\w\-\d]+)/(\w+)\.htm$ gallery.php?f=<<<id>>>&t=$1&a=$2
+^moderate/<<<hurl>>>/((\w+)/)?(\w+)\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 ','0'),('link','Ссылка на внешний ресурс','0','0','0','0','0',4,'^<<<hurl>>>/?$ link.php?f=<<<id>>>&a=view','1'),('micro','Микроблог','1','1','1','0','1',7,'^<<<hurl>>>/((\w+)\.htm)?$ micro.php?f=<<<id>>>&a=$2
 ^moderate/<<<hurl>>>/edit_foreword.htm$ moderate.php?f=<<<id>>>&a=edit_foreword
 ^moderate/<<<hurl>>>/((\w+)/)?(\w+)\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2
@@ -399,9 +407,15 @@ CREATE TABLE `ib_text` (
 ,  `tx_lastmod` integer  NOT NULL DEFAULT 0
 ,  PRIMARY KEY (`id`,`type`)
 );
+<<<<<<< HEAD
 INSERT INTO `ib_text` VALUES (0,0,'Правила форума разрабатываются. А пока просим придерживаться общих принципов вежливости и доброжелательности.',0),(1,2,'Если вы читаете этот текст, то установка Intellect Board прошла успешно. 
 В дальнейшем его можно будет заменить на информацию о вашем проекте или просто удалить.
 Этот раздел имеет тип "Статическая страница". Обычный раздел с темами и соощениями вы можете 
+=======
+INSERT INTO `ib_text` VALUES (0,0,'Правила форума разрабатываются. А пока просим придерживаться общих принципов вежливости и доброжелательности.',0),(1,2,'Если вы читаете этот текст, то установка Intellect Board прошла успешно. 
+В дальнейшем его можно будет заменить на информацию о вашем проекте или просто удалить.
+Этот раздел имеет тип "Статическая страница". Обычный раздел с темами и соощениями вы можете 
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 создать в Центре Администрирования.',0);
 CREATE TABLE `ib_timeout` (
   `time` integer NOT NULL
@@ -574,5 +588,8 @@ CREATE INDEX "idx_ib_search_result_relevancy" ON "ib_search_result" (`sid`,`rele
 CREATE INDEX "idx_ib_privmsg_post_thread" ON "ib_privmsg_post" (`pm_thread`,`postdate`);
 CREATE INDEX "idx_ib_poll_variant_poll_tid" ON "ib_poll_variant" (`tid`);
 CREATE INDEX "idx_ib_file_oid" ON "ib_file" (`oid`,`type`);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 END TRANSACTION;

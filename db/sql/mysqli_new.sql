@@ -1,3 +1,27 @@
+<<<<<<< HEAD
+=======
+-- MariaDB dump 10.19  Distrib 10.6.11-MariaDB, for debian-linux-gnu (x86_64)
+--
+-- Host: localhost    Database: ib_current
+-- ------------------------------------------------------
+-- Server version	10.6.11-MariaDB-2
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `ib_access`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_access`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -19,7 +43,25 @@ CREATE TABLE `ib_access` (
   PRIMARY KEY (`gid`,`fid`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_access` VALUES (0,0,'1','1','0','0','0','0','0','0','0','0','0','0'),(50,0,'1','1','1','0','1','0','0','0','0','0','1','1'),(100,0,'1','1','1','1','1','0','0','1','0','1','1','1'),(120,0,'1','1','1','1','1','0','0','1','0','1','1','1'),(140,0,'1','1','1','1','1','1','0','1','1','1','1','1'),(160,0,'1','1','1','1','1','1','0','1','1','1','1','1'),(180,0,'1','1','1','1','1','1','0','1','1','1','1','1'),(499,0,'1','1','1','1','1','1','0','1','1','1','1','1'),(500,0,'1','1','1','1','1','1','0','1','1','1','1','1'),(1000,0,'1','1','1','1','1','1','1','1','1','1','1','1'),(1024,0,'1','1','1','1','1','1','1','1','1','1','1','1');
+=======
+
+--
+-- Dumping data for table `ib_access`
+--
+
+LOCK TABLES `ib_access` WRITE;
+/*!40000 ALTER TABLE `ib_access` DISABLE KEYS */;
+INSERT INTO `ib_access` VALUES (0,0,'1','1','0','0','0','0','0','0','0','0','0','0'),(50,0,'1','1','1','0','1','0','0','0','0','0','1','1'),(100,0,'1','1','1','1','1','0','0','1','0','1','1','1'),(120,0,'1','1','1','1','1','0','0','1','0','1','1','1'),(140,0,'1','1','1','1','1','1','0','1','1','1','1','1'),(160,0,'1','1','1','1','1','1','0','1','1','1','1','1'),(180,0,'1','1','1','1','1','1','0','1','1','1','1','1'),(499,0,'1','1','1','1','1','1','0','1','1','1','1','1'),(500,0,'1','1','1','1','1','1','0','1','1','1','1','1'),(1000,0,'1','1','1','1','1','1','1','1','1','1','1','1'),(1024,0,'1','1','1','1','1','1','1','1','1','1','1','1');
+/*!40000 ALTER TABLE `ib_access` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_banned_ip`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_banned_ip`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -30,6 +72,23 @@ CREATE TABLE `ib_banned_ip` (
   PRIMARY KEY (`start`,`end`,`till`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_banned_ip`
+--
+
+LOCK TABLES `ib_banned_ip` WRITE;
+/*!40000 ALTER TABLE `ib_banned_ip` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_banned_ip` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_bots`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_bots`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -41,7 +100,25 @@ CREATE TABLE `ib_bots` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_bots` VALUES (1,'YandexBot','Яндекс',0),(2,'Googlebot','Google',0),(3,'bingbot','Bing!',0),(5,'Yahoo! Slurp','Yahoo!',0),(6,'mail.ru','@Mail.Ru',0),(7,'W3C_Validator','W3C Validator',0);
+=======
+
+--
+-- Dumping data for table `ib_bots`
+--
+
+LOCK TABLES `ib_bots` WRITE;
+/*!40000 ALTER TABLE `ib_bots` DISABLE KEYS */;
+INSERT INTO `ib_bots` VALUES (1,'YandexBot','Яндекс',0),(2,'Googlebot','Google',0),(3,'bingbot','Bing!',0),(5,'Yahoo! Slurp','Yahoo!',0),(6,'mail.ru','@Mail.Ru',0),(7,'W3C_Validator','W3C Validator',0);
+/*!40000 ALTER TABLE `ib_bots` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_captcha`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_captcha`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -55,6 +132,23 @@ CREATE TABLE `ib_captcha` (
   KEY `lastmod` (`lastmod`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Коды CAPTCHA для соответствующего модуля';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_captcha`
+--
+
+LOCK TABLES `ib_captcha` WRITE;
+/*!40000 ALTER TABLE `ib_captcha` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_captcha` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_category`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -66,6 +160,23 @@ CREATE TABLE `ib_category` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_category`
+--
+
+LOCK TABLES `ib_category` WRITE;
+/*!40000 ALTER TABLE `ib_category` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_category` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_complain`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_complain`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -80,6 +191,23 @@ CREATE TABLE `ib_complain` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Жалобы пользователей на сообщения';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_complain`
+--
+
+LOCK TABLES `ib_complain` WRITE;
+/*!40000 ALTER TABLE `ib_complain` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_complain` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_crontab`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_crontab`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -95,7 +223,25 @@ CREATE TABLE `ib_crontab` (
   KEY `nextrun` (`nextrun`,`period`)
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Список заданий, выполняемых по времени';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_crontab` VALUES (1,'antibot','captcha_clear','24','Очистка старых данных CAPTCHA',0,32768),(2,'maintain','log_rotate','5','Ротация логов в каталоге logs',0,1440),(3,'antibot','timeout_clear','24','Очистка старых данных о таймаутах',0,1441),(4,'maintain','search_results_clear','7','Очистка старых результатов поиска',0,1443),(5,'maintain','mod_logs_clear','90','Удаление старых данных о модераторских действиях',0,10079),(6,'maintain','light_optimize','','Малая оптимизация баз данных (только часто изменяемые таблицы)',0,4300),(7,'maintain','heavy_optimize','','Полная оптимизация базы данных (все таблицы)',0,44643),(8,'maintain','update_mark_all','90','Отметка прочитанными всех тем, которые обновились, но не были просмотрены в течение заданного количества дней',0,10081),(9,'delete','inactive_users_clear','30','Удаление пользователей, не активировавших свой профиль в течение указанного количества дней',0,4320),(10,'maintain','online_clear','3','Очистка списка последних действий пользователей',0,1440),(11,'instagram','getdata','вставьте свой token','Обновление списка фотографий из Instagram',0,60),(12,'sitemap','generate','','Генерация файла sitemap.xml',0,180),(13,'instagram','refresh','','Обновление access token для Instagram',0,10080);
+=======
+
+--
+-- Dumping data for table `ib_crontab`
+--
+
+LOCK TABLES `ib_crontab` WRITE;
+/*!40000 ALTER TABLE `ib_crontab` DISABLE KEYS */;
+INSERT INTO `ib_crontab` VALUES (1,'antibot','captcha_clear','24','Очистка старых данных CAPTCHA',0,32768),(2,'maintain','log_rotate','5','Ротация логов в каталоге logs',0,1440),(3,'antibot','timeout_clear','24','Очистка старых данных о таймаутах',0,1441),(4,'maintain','search_results_clear','7','Очистка старых результатов поиска',0,1443),(5,'maintain','mod_logs_clear','90','Удаление старых данных о модераторских действиях',0,10079),(6,'maintain','light_optimize','','Малая оптимизация баз данных (только часто изменяемые таблицы)',0,4300),(7,'maintain','heavy_optimize','','Полная оптимизация базы данных (все таблицы)',0,44643),(8,'maintain','update_mark_all','90','Отметка прочитанными всех тем, которые обновились, но не были просмотрены в течение заданного количества дней',0,10081),(9,'delete','inactive_users_clear','30','Удаление пользователей, не активировавших свой профиль в течение указанного количества дней',0,4320),(10,'maintain','online_clear','3','Очистка списка последних действий пользователей',0,1440),(11,'instagram','getdata','вставьте свой token','Обновление списка фотографий из Instagram',0,60),(12,'sitemap','generate','','Генерация файла sitemap.xml',0,180),(13,'instagram','refresh','','Обновление access token для Instagram',0,10080);
+/*!40000 ALTER TABLE `ib_crontab` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_file`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_file`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -116,6 +262,23 @@ CREATE TABLE `ib_file` (
   KEY `oid` (`oid`,`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Приложенные файлы';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_file`
+--
+
+LOCK TABLES `ib_file` WRITE;
+/*!40000 ALTER TABLE `ib_file` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_file` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_forum`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_forum`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -161,7 +324,25 @@ CREATE TABLE `ib_forum` (
   KEY `hurl` (`hurl`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_forum` VALUES (1,'statpage','О проекте','Информация о нашем сайте','about',0,0,0,1,'0',0,0,'','0','1',16,0,255,0,0,'1','0','1','','','DESC','last_post_time','1',0,'2','2',0,0,'0','1','0');
+=======
+
+--
+-- Dumping data for table `ib_forum`
+--
+
+LOCK TABLES `ib_forum` WRITE;
+/*!40000 ALTER TABLE `ib_forum` DISABLE KEYS */;
+INSERT INTO `ib_forum` VALUES (1,'statpage','О проекте','Информация о нашем сайте','about',0,0,0,1,'0',0,0,'','0','1',16,0,255,0,0,'1','0','1','','','DESC','last_post_time','1',0,'2','2',0,0,'0','1','0');
+/*!40000 ALTER TABLE `ib_forum` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_forum_type`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_forum_type`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -179,7 +360,25 @@ CREATE TABLE `ib_forum_type` (
   PRIMARY KEY (`module`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Описание типов разделов';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_forum_type` VALUES ('anon','Анонимный форум','1','1','1','0','0',3,'^<<<hurl>>>/((\\d+)\\.htm)?$ anon.php?f=<<<id>>>&a=view_forum&page=$2\n^<<<hurl>>>/((\\w+)\\.htm)?$ anon.php?f=<<<id>>>&a=$2\n^<<<hurl>>>/([\\w\\-\\d]+)/((\\d+)\\.htm)?$ anon.php?f=<<<id>>>&t=$1&a=view_topic&page=$3\n^<<<hurl>>>/([\\w\\-\\d]+)/(\\w+)\\.htm$ anon.php?f=<<<id>>>&t=$1&a=$2\n^moderate/<<<hurl>>>/((\\w+)/)?(\\w+)\\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2\n','0'),('blog','Блог или новости','1','1','1','0','1',6,'^<<<hurl>>>/((\\d+)\\.htm)?$ blog.php?f=<<<id>>>&a=view_forum&page=$2\n^<<<hurl>>>/((\\w+)\\.htm)?$ blog.php?f=<<<id>>>&a=$2\n^<<<hurl>>>/([\\w\\-\\d]+)/((\\d+)\\.htm)?$ blog.php?f=<<<id>>>&t=$1&a=view_topic&page=$3\n^<<<hurl>>>/([\\w\\-\\d]+)/(\\w+)\\.htm$ blog.php?f=<<<id>>>&t=$1&a=$2\n^moderate/<<<hurl>>>/((\\w+)/)?(\\w+)\\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2\n','0'),('gallery','Фотогалерея','1','1','1','0','1',6,'^<<<hurl>>>/((\\d+)\\.htm)?$ gallery.php?f=<<<id>>>&a=view_forum&page=$2\r\n^<<<hurl>>>/((\\w+)\\.htm)?$ gallery.php?f=<<<id>>>&a=$2\r\n^<<<hurl>>>/([\\w\\-\\d]+)/((\\d+)\\.htm)?$ gallery.php?f=<<<id>>>&t=$1&a=view_topic&page=$3\r\n^<<<hurl>>>/([\\w\\-\\d]+)/(\\w+)\\.htm$ gallery.php?f=<<<id>>>&t=$1&a=$2\r\n^moderate/<<<hurl>>>/((\\w+)/)?(\\w+)\\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2\r\n','0'),('link','Ссылка на внешний ресурс','0','0','0','0','0',4,'^<<<hurl>>>/?$ link.php?f=<<<id>>>&a=view','1'),('micro','Микроблог','1','1','1','0','1',7,'^<<<hurl>>>/((\\w+)\\.htm)?$ micro.php?f=<<<id>>>&a=$2\n^moderate/<<<hurl>>>/edit_foreword.htm$ moderate.php?f=<<<id>>>&a=edit_foreword\n^moderate/<<<hurl>>>/((\\w+)/)?(\\w+)\\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2\n','1'),('statpage','Статическая страница','0','1','1','1','0',2,'^<<<hurl>>>/((\\w+)\\.htm)?$ statpage.php?f=<<<id>>>&a=$2\n^moderate/<<<hurl>>>/edit_foreword.htm$ statpage.php?f=<<<id>>>&a=edit\n','1'),('stdforum','Обычный форум','1','1','1','1','0',1,'^<<<hurl>>>/((\\d+)\\.htm)?$ stdforum.php?f=<<<id>>>&a=view_forum&page=$2\n^<<<hurl>>>/((\\w+)\\.htm)?$ stdforum.php?f=<<<id>>>&a=$2\n^<<<hurl>>>/([\\w\\-\\d]+)/((\\d+)\\.htm)?$ stdforum.php?f=<<<id>>>&t=$1&a=view_topic&page=$3\n^<<<hurl>>>/([\\w\\-\\d]+)/(\\w+)\\.htm$ stdforum.php?f=<<<id>>>&t=$1&a=$2\n^<<<hurl>>>/([\\w\\-\\d]+)/(\\w+)\\.htm$ stdforum.php?f=<<<id>>>&t=$1&a=$2\n^<<<hurl>>>/([\\w\\-\\d]+)/post-(\\d+)\\.htm$ stdforum.php?f=<<<id>>>&t=$1&a=post&post=$2 \n^moderate/<<<hurl>>>/(([\\w\\-\\d]+)/)?(\\w+)\\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2','0');
+=======
+
+--
+-- Dumping data for table `ib_forum_type`
+--
+
+LOCK TABLES `ib_forum_type` WRITE;
+/*!40000 ALTER TABLE `ib_forum_type` DISABLE KEYS */;
+INSERT INTO `ib_forum_type` VALUES ('anon','Анонимный форум','1','1','1','0','0',3,'^<<<hurl>>>/((\\d+)\\.htm)?$ anon.php?f=<<<id>>>&a=view_forum&page=$2\n^<<<hurl>>>/((\\w+)\\.htm)?$ anon.php?f=<<<id>>>&a=$2\n^<<<hurl>>>/([\\w\\-\\d]+)/((\\d+)\\.htm)?$ anon.php?f=<<<id>>>&t=$1&a=view_topic&page=$3\n^<<<hurl>>>/([\\w\\-\\d]+)/(\\w+)\\.htm$ anon.php?f=<<<id>>>&t=$1&a=$2\n^moderate/<<<hurl>>>/((\\w+)/)?(\\w+)\\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2\n','0'),('blog','Блог или новости','1','1','1','0','1',6,'^<<<hurl>>>/((\\d+)\\.htm)?$ blog.php?f=<<<id>>>&a=view_forum&page=$2\n^<<<hurl>>>/((\\w+)\\.htm)?$ blog.php?f=<<<id>>>&a=$2\n^<<<hurl>>>/([\\w\\-\\d]+)/((\\d+)\\.htm)?$ blog.php?f=<<<id>>>&t=$1&a=view_topic&page=$3\n^<<<hurl>>>/([\\w\\-\\d]+)/(\\w+)\\.htm$ blog.php?f=<<<id>>>&t=$1&a=$2\n^moderate/<<<hurl>>>/((\\w+)/)?(\\w+)\\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2\n','0'),('gallery','Фотогалерея','1','1','1','0','1',6,'^<<<hurl>>>/((\\d+)\\.htm)?$ gallery.php?f=<<<id>>>&a=view_forum&page=$2\r\n^<<<hurl>>>/((\\w+)\\.htm)?$ gallery.php?f=<<<id>>>&a=$2\r\n^<<<hurl>>>/([\\w\\-\\d]+)/((\\d+)\\.htm)?$ gallery.php?f=<<<id>>>&t=$1&a=view_topic&page=$3\r\n^<<<hurl>>>/([\\w\\-\\d]+)/(\\w+)\\.htm$ gallery.php?f=<<<id>>>&t=$1&a=$2\r\n^moderate/<<<hurl>>>/((\\w+)/)?(\\w+)\\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2\r\n','0'),('link','Ссылка на внешний ресурс','0','0','0','0','0',4,'^<<<hurl>>>/?$ link.php?f=<<<id>>>&a=view','1'),('micro','Микроблог','1','1','1','0','1',7,'^<<<hurl>>>/((\\w+)\\.htm)?$ micro.php?f=<<<id>>>&a=$2\n^moderate/<<<hurl>>>/edit_foreword.htm$ moderate.php?f=<<<id>>>&a=edit_foreword\n^moderate/<<<hurl>>>/((\\w+)/)?(\\w+)\\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2\n','1'),('statpage','Статическая страница','0','1','1','1','0',2,'^<<<hurl>>>/((\\w+)\\.htm)?$ statpage.php?f=<<<id>>>&a=$2\n^moderate/<<<hurl>>>/edit_foreword.htm$ statpage.php?f=<<<id>>>&a=edit\n','1'),('stdforum','Обычный форум','1','1','1','1','0',1,'^<<<hurl>>>/((\\d+)\\.htm)?$ stdforum.php?f=<<<id>>>&a=view_forum&page=$2\n^<<<hurl>>>/((\\w+)\\.htm)?$ stdforum.php?f=<<<id>>>&a=$2\n^<<<hurl>>>/([\\w\\-\\d]+)/((\\d+)\\.htm)?$ stdforum.php?f=<<<id>>>&t=$1&a=view_topic&page=$3\n^<<<hurl>>>/([\\w\\-\\d]+)/(\\w+)\\.htm$ stdforum.php?f=<<<id>>>&t=$1&a=$2\n^<<<hurl>>>/([\\w\\-\\d]+)/(\\w+)\\.htm$ stdforum.php?f=<<<id>>>&t=$1&a=$2\n^<<<hurl>>>/([\\w\\-\\d]+)/post-(\\d+)\\.htm$ stdforum.php?f=<<<id>>>&t=$1&a=post&post=$2 \n^moderate/<<<hurl>>>/(([\\w\\-\\d]+)/)?(\\w+)\\.htm$ moderate.php?f=<<<id>>>&a=$3&t=$2','0');
+/*!40000 ALTER TABLE `ib_forum_type` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_group`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_group`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -200,7 +399,25 @@ CREATE TABLE `ib_group` (
   PRIMARY KEY (`level`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_group` VALUES (0,'Гость','1',90,0,2048,0,'0','0','0','0',0,'nofollow'),(50,'Сомнительный тип','1',90,3,0,0,'0','0','0','0',0,'none'),(100,'Новичок','0',30,6,1024,0,'0','0','0','0',0,'none'),(120,'Начинающий','0',30,10,1024,5,'0','0','0','0',2,'nofollow'),(140,'Участник','0',10,25,2048,25,'0','0','0','0',4,'nofollow'),(160,'Почетный участник','0',5,60,2048,100,'1','0','0','0',7,'allow'),(180,'Долгожитель форума','0',3,240,4096,500,'1','0','0','0',30,'allow'),(499,'Участник команды','1',0,0,4096,0,'1','0','1','0',0,'allow'),(500,'Модератор','1',0,0,4096,0,'1','0','1','0',0,'allow'),(1000,'Администратор','1',0,0,65535,0,'1','1','1','1',0,'allow'),(1024,'Создатель форума','1',0,0,65535,0,'1','1','1','1',0,'allow');
+=======
+
+--
+-- Dumping data for table `ib_group`
+--
+
+LOCK TABLES `ib_group` WRITE;
+/*!40000 ALTER TABLE `ib_group` DISABLE KEYS */;
+INSERT INTO `ib_group` VALUES (0,'Гость','1',90,0,2048,0,'0','0','0','0',0,'nofollow'),(50,'Сомнительный тип','1',90,3,0,0,'0','0','0','0',0,'none'),(100,'Новичок','0',30,6,1024,0,'0','0','0','0',0,'none'),(120,'Начинающий','0',30,10,1024,5,'0','0','0','0',2,'nofollow'),(140,'Участник','0',10,25,2048,25,'0','0','0','0',4,'nofollow'),(160,'Почетный участник','0',5,60,2048,100,'1','0','0','0',7,'allow'),(180,'Долгожитель форума','0',3,240,4096,500,'1','0','0','0',30,'allow'),(499,'Участник команды','1',0,0,4096,0,'1','0','1','0',0,'allow'),(500,'Модератор','1',0,0,4096,0,'1','0','1','0',0,'allow'),(1000,'Администратор','1',0,0,65535,0,'1','1','1','1',0,'allow'),(1024,'Создатель форума','1',0,0,65535,0,'1','1','1','1',0,'allow');
+/*!40000 ALTER TABLE `ib_group` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_last_visit`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_last_visit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -217,6 +434,23 @@ CREATE TABLE `ib_last_visit` (
   PRIMARY KEY (`oid`,`uid`,`type`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Данные о посещении раздела или темы пользователем';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_last_visit`
+--
+
+LOCK TABLES `ib_last_visit` WRITE;
+/*!40000 ALTER TABLE `ib_last_visit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_last_visit` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_log_action`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_log_action`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -232,6 +466,23 @@ CREATE TABLE `ib_log_action` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Лог модераторских действий с возможностью отката измеений';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_log_action`
+--
+
+LOCK TABLES `ib_log_action` WRITE;
+/*!40000 ALTER TABLE `ib_log_action` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_log_action` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_mark_all`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_mark_all`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -242,6 +493,23 @@ CREATE TABLE `ib_mark_all` (
   PRIMARY KEY (`uid`,`fid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Данные об отметке раздела или всего форума как прочтенного';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_mark_all`
+--
+
+LOCK TABLES `ib_mark_all` WRITE;
+/*!40000 ALTER TABLE `ib_mark_all` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_mark_all` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_menu`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_menu`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -252,7 +520,25 @@ CREATE TABLE `ib_menu` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Список различных меню, используемых движком';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_menu` VALUES (1,'Главное меню','1'),(2,'Меню Центра Администрирования','1');
+=======
+
+--
+-- Dumping data for table `ib_menu`
+--
+
+LOCK TABLES `ib_menu` WRITE;
+/*!40000 ALTER TABLE `ib_menu` DISABLE KEYS */;
+INSERT INTO `ib_menu` VALUES (1,'Главное меню','1'),(2,'Меню Центра Администрирования','1');
+/*!40000 ALTER TABLE `ib_menu` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_menu_item`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_menu_item`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -270,7 +556,25 @@ CREATE TABLE `ib_menu_item` (
   KEY `mid` (`mid`,`sortfield`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Элементы меню';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_menu_item` VALUES (1,1,'О проекте','about/',1,'1','1','1','1'),(2,1,'Правила','rules.htm',2,'1','1','1','1'),(3,1,'Участники','users/',5,'1','1','1','1'),(4,1,'Команда','team.htm',4,'1','1','1','1'),(5,1,'Последние сообщения','newtopics/',3,'1','1','1','1'),(6,1,'Поиск','search/',7,'1','1','1','1'),(7,1,'Справка','help/',8,'1','1','1','1'),(8,1,'Сейчас присутствуют','online/',6,'1','1','1','1');
+=======
+
+--
+-- Dumping data for table `ib_menu_item`
+--
+
+LOCK TABLES `ib_menu_item` WRITE;
+/*!40000 ALTER TABLE `ib_menu_item` DISABLE KEYS */;
+INSERT INTO `ib_menu_item` VALUES (1,1,'О проекте','about/',1,'1','1','1','1'),(2,1,'Правила','rules.htm',2,'1','1','1','1'),(3,1,'Участники','users/',5,'1','1','1','1'),(4,1,'Команда','team.htm',4,'1','1','1','1'),(5,1,'Последние сообщения','newtopics/',3,'1','1','1','1'),(6,1,'Поиск','search/',7,'1','1','1','1'),(7,1,'Справка','help/',8,'1','1','1','1'),(8,1,'Сейчас присутствуют','online/',6,'1','1','1','1');
+/*!40000 ALTER TABLE `ib_menu_item` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_moderator`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_moderator`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -281,6 +585,23 @@ CREATE TABLE `ib_moderator` (
   PRIMARY KEY (`fid`,`uid`,`role`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC COMMENT='Данные о модераторах и экспертах форума';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_moderator`
+--
+
+LOCK TABLES `ib_moderator` WRITE;
+/*!40000 ALTER TABLE `ib_moderator` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_moderator` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_oauth_code`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_oauth_code`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -296,6 +617,23 @@ CREATE TABLE `ib_oauth_code` (
   KEY `uid` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Коды для авторизации по протоколу OAuth';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_oauth_code`
+--
+
+LOCK TABLES `ib_oauth_code` WRITE;
+/*!40000 ALTER TABLE `ib_oauth_code` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_oauth_code` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_oauth_token`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_oauth_token`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -307,6 +645,23 @@ CREATE TABLE `ib_oauth_token` (
   `expires` int(11) unsigned NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_oauth_token`
+--
+
+LOCK TABLES `ib_oauth_token` WRITE;
+/*!40000 ALTER TABLE `ib_oauth_token` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_oauth_token` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_online`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_online`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -323,6 +678,23 @@ CREATE TABLE `ib_online` (
   KEY `uid` (`uid`) USING HASH
 ) ENGINE=MEMORY DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_online`
+--
+
+LOCK TABLES `ib_online` WRITE;
+/*!40000 ALTER TABLE `ib_online` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_online` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_poll`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_poll`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -335,6 +707,23 @@ CREATE TABLE `ib_poll` (
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Таблица опросов';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_poll`
+--
+
+LOCK TABLES `ib_poll` WRITE;
+/*!40000 ALTER TABLE `ib_poll` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_poll` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_poll_variant`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_poll_variant`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -347,6 +736,23 @@ CREATE TABLE `ib_poll_variant` (
   KEY `poll_tid` (`tid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_poll_variant`
+--
+
+LOCK TABLES `ib_poll_variant` WRITE;
+/*!40000 ALTER TABLE `ib_poll_variant` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_poll_variant` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_post`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_post`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -374,6 +780,23 @@ CREATE TABLE `ib_post` (
   KEY `author_uid` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Данные о сообщениях в темах и разделах';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_post`
+--
+
+LOCK TABLES `ib_post` WRITE;
+/*!40000 ALTER TABLE `ib_post` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_post` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_privmsg_link`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_privmsg_link`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -383,6 +806,23 @@ CREATE TABLE `ib_privmsg_link` (
   PRIMARY KEY (`uid`,`pm_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Связь сообщений в теме и пользователей, у которых их видно';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_privmsg_link`
+--
+
+LOCK TABLES `ib_privmsg_link` WRITE;
+/*!40000 ALTER TABLE `ib_privmsg_link` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_privmsg_link` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_privmsg_post`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_privmsg_post`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -402,6 +842,23 @@ CREATE TABLE `ib_privmsg_post` (
   KEY `thread` (`pm_thread`,`postdate`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Личные сообщения ';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_privmsg_post`
+--
+
+LOCK TABLES `ib_privmsg_post` WRITE;
+/*!40000 ALTER TABLE `ib_privmsg_post` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_privmsg_post` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_privmsg_thread`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_privmsg_thread`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -411,6 +868,23 @@ CREATE TABLE `ib_privmsg_thread` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Таблица тем ЛС.';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_privmsg_thread`
+--
+
+LOCK TABLES `ib_privmsg_thread` WRITE;
+/*!40000 ALTER TABLE `ib_privmsg_thread` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_privmsg_thread` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_privmsg_thread_user`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_privmsg_thread_user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -423,6 +897,23 @@ CREATE TABLE `ib_privmsg_thread_user` (
   PRIMARY KEY (`uid`,`pm_thread`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Данные о теме, специфичные для пользователя';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_privmsg_thread_user`
+--
+
+LOCK TABLES `ib_privmsg_thread_user` WRITE;
+/*!40000 ALTER TABLE `ib_privmsg_thread_user` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_privmsg_thread_user` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_rating`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_rating`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -435,6 +926,23 @@ CREATE TABLE `ib_rating` (
   PRIMARY KEY (`id`,`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Информация о том, когда было отрейтинговано сообщение';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_rating`
+--
+
+LOCK TABLES `ib_rating` WRITE;
+/*!40000 ALTER TABLE `ib_rating` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_rating` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_relation`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_relation`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -445,6 +953,23 @@ CREATE TABLE `ib_relation` (
   PRIMARY KEY (`from_`,`to_`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_relation`
+--
+
+LOCK TABLES `ib_relation` WRITE;
+/*!40000 ALTER TABLE `ib_relation` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_relation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_search`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_search`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -459,6 +984,23 @@ CREATE TABLE `ib_search` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Таблица для хранения результатов поиска FULLTEXT или Sphynx';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_search`
+--
+
+LOCK TABLES `ib_search` WRITE;
+/*!40000 ALTER TABLE `ib_search` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_search` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_search_result`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_search_result`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -470,6 +1012,23 @@ CREATE TABLE `ib_search_result` (
   KEY `relevancy` (`sid`,`relevancy`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Таблица для хранения результатов поиска';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_search_result`
+--
+
+LOCK TABLES `ib_search_result` WRITE;
+/*!40000 ALTER TABLE `ib_search_result` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_search_result` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_smile`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_smile`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -482,7 +1041,25 @@ CREATE TABLE `ib_smile` (
   PRIMARY KEY (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_smile` VALUES ('8-)','cool.png','','dropdown',4),(':\'(','cwy.png','','dropdown',5),(':(','sad.png','','dropdown',9),(':)','smile.png','','dropdown',1),(':alien:','alien.png','','more',100),(':angel:','angel.png','','dropdown',2),(':angry:','angry.png','','dropdown',3),(':blink:','blink.png','','more',101),(':blush:','blush.png','','more',102),(':cheerful:','cheerful.png','','more',103),(':D','grin.png','','dropdown',7),(':devil:','devil.png','','more',104),(':dizzy:','dizzy.png','','more',105),(':ermm:','ermm.png','','dropdown',6),(':face:','face.png','','more',119),(':getlost:','getlost.png','','more',106),(':happy:','happy.png','','more',107),(':kissing:','kissing.png','','more',108),(':laughing:','laughing.png','','more',120),(':love:','wub.png','','hidden',501),(':ninja:','ninja.png','','more',109),(':O','shocked.png','','dropdown',10),(':P','tongue.png','','dropdown',11),(':pinch:','pinch.png','','more',110),(':pouty:','pouty.png','','more',111),(':sick:','sick.png','','more',112),(':sideways:','sideways.png','','more',113),(':silly:','silly.png','','more',114),(':sleeping:','sleeping.png','','more',115),(':unsure:','unsure.png','','more',116),(':wassat:','wassat.png','','more',118),(':whistling:','whistling.png','','hidden',500),(':woot:','w00t.png','','more',117),(';)','wink.png','','dropdown',12),('<3','heart.png','','dropdown',8);
+=======
+
+--
+-- Dumping data for table `ib_smile`
+--
+
+LOCK TABLES `ib_smile` WRITE;
+/*!40000 ALTER TABLE `ib_smile` DISABLE KEYS */;
+INSERT INTO `ib_smile` VALUES ('8-)','cool.png','','dropdown',4),(':\'(','cwy.png','','dropdown',5),(':(','sad.png','','dropdown',9),(':)','smile.png','','dropdown',1),(':alien:','alien.png','','more',100),(':angel:','angel.png','','dropdown',2),(':angry:','angry.png','','dropdown',3),(':blink:','blink.png','','more',101),(':blush:','blush.png','','more',102),(':cheerful:','cheerful.png','','more',103),(':D','grin.png','','dropdown',7),(':devil:','devil.png','','more',104),(':dizzy:','dizzy.png','','more',105),(':ermm:','ermm.png','','dropdown',6),(':face:','face.png','','more',119),(':getlost:','getlost.png','','more',106),(':happy:','happy.png','','more',107),(':kissing:','kissing.png','','more',108),(':laughing:','laughing.png','','more',120),(':love:','wub.png','','hidden',501),(':ninja:','ninja.png','','more',109),(':O','shocked.png','','dropdown',10),(':P','tongue.png','','dropdown',11),(':pinch:','pinch.png','','more',110),(':pouty:','pouty.png','','more',111),(':sick:','sick.png','','more',112),(':sideways:','sideways.png','','more',113),(':silly:','silly.png','','more',114),(':sleeping:','sleeping.png','','more',115),(':unsure:','unsure.png','','more',116),(':wassat:','wassat.png','','more',118),(':whistling:','whistling.png','','hidden',500),(':woot:','w00t.png','','more',117),(';)','wink.png','','dropdown',12),('<3','heart.png','','dropdown',8);
+/*!40000 ALTER TABLE `ib_smile` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_subaction`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_subaction`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -503,7 +1080,25 @@ CREATE TABLE `ib_subaction` (
   KEY `intb_subaction_module_IDX` (`module`,`action`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_subaction` VALUES (1,'Блок тегов на обычном форуме','stdforum','view_forum',0,0,'blocks','block_tag_list','action_start','0','20',1),(2,'Блок «Сейчас присутствуют» на главной','mainpage','view',0,0,'online','get_online_users','page_bottom','1','2',10),(3,'Блок «Сейчас присутствуют» в разделах','*','view_forum',0,0,'online','get_online_users','page_bottom','0','2',10),(4,'Блок «Сейчас присутствуют» в темах','*','view_topic',0,0,'online','get_online_users','page_bottom','0','2',10),(5,'Блок объявлений','*','*',0,0,'blocks','block_announce','welcome_start','1','1',1),(6,'Блок с количеством личных сообщений','*','*',0,0,'blocks','block_pm_unread','pm_notify','1','',1),(7,'Блок фотографий из Instagram','statpage','view',0,0,'instagram','block_instagram','page_bottom','0','4,Добавьте свой Instagram token',20);
+=======
+
+--
+-- Dumping data for table `ib_subaction`
+--
+
+LOCK TABLES `ib_subaction` WRITE;
+/*!40000 ALTER TABLE `ib_subaction` DISABLE KEYS */;
+INSERT INTO `ib_subaction` VALUES (1,'Блок тегов на обычном форуме','stdforum','view_forum',0,0,'blocks','block_tag_list','action_start','0','20',1),(2,'Блок «Сейчас присутствуют» на главной','mainpage','view',0,0,'online','get_online_users','page_bottom','1','2',10),(3,'Блок «Сейчас присутствуют» в разделах','*','view_forum',0,0,'online','get_online_users','page_bottom','0','2',10),(4,'Блок «Сейчас присутствуют» в темах','*','view_topic',0,0,'online','get_online_users','page_bottom','0','2',10),(5,'Блок объявлений','*','*',0,0,'blocks','block_announce','welcome_start','1','1',1),(6,'Блок с количеством личных сообщений','*','*',0,0,'blocks','block_pm_unread','pm_notify','1','',1),(7,'Блок фотографий из Instagram','statpage','view',0,0,'instagram','block_instagram','page_bottom','0','4,Добавьте свой Instagram token',20);
+/*!40000 ALTER TABLE `ib_subaction` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_tagentry`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_tagentry`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -513,6 +1108,23 @@ CREATE TABLE `ib_tagentry` (
   PRIMARY KEY (`tag_id`,`item_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_tagentry`
+--
+
+LOCK TABLES `ib_tagentry` WRITE;
+/*!40000 ALTER TABLE `ib_tagentry` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_tagentry` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_tagname`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_tagname`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -525,6 +1137,23 @@ CREATE TABLE `ib_tagname` (
   UNIQUE KEY `tagname` (`tagname`,`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_tagname`
+--
+
+LOCK TABLES `ib_tagname` WRITE;
+/*!40000 ALTER TABLE `ib_tagname` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_tagname` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_task`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_task`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -538,6 +1167,23 @@ CREATE TABLE `ib_task` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Очередь из разово выполняемых задач';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_task`
+--
+
+LOCK TABLES `ib_task` WRITE;
+/*!40000 ALTER TABLE `ib_task` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_task` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_text`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_text`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -550,7 +1196,25 @@ CREATE TABLE `ib_text` (
   FULLTEXT KEY `search` (`data`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_text` VALUES (0,0,'Правила форума разрабатываются. А пока просим придерживаться общих принципов вежливости и доброжелательности.',0),(1,2,'Если вы читаете этот текст, то установка Intellect Board прошла успешно. \r\nВ дальнейшем его можно будет заменить на информацию о вашем проекте или просто удалить.\r\nЭтот раздел имеет тип \"Статическая страница\". Обычный раздел с темами и соощениями вы можете \r\nсоздать в Центре Администрирования.',0);
+=======
+
+--
+-- Dumping data for table `ib_text`
+--
+
+LOCK TABLES `ib_text` WRITE;
+/*!40000 ALTER TABLE `ib_text` DISABLE KEYS */;
+INSERT INTO `ib_text` VALUES (0,0,'Правила форума разрабатываются. А пока просим придерживаться общих принципов вежливости и доброжелательности.',0),(1,2,'Если вы читаете этот текст, то установка Intellect Board прошла успешно. \r\nВ дальнейшем его можно будет заменить на информацию о вашем проекте или просто удалить.\r\nЭтот раздел имеет тип \"Статическая страница\". Обычный раздел с темами и соощениями вы можете \r\nсоздать в Центре Администрирования.',0);
+/*!40000 ALTER TABLE `ib_text` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_timeout`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_timeout`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -562,6 +1226,23 @@ CREATE TABLE `ib_timeout` (
   KEY `time` (`time`,`action`,`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Таблица хранения таймаутов между действиями (типа регистраци';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_timeout`
+--
+
+LOCK TABLES `ib_timeout` WRITE;
+/*!40000 ALTER TABLE `ib_timeout` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_timeout` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_topic`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_topic`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -591,6 +1272,23 @@ CREATE TABLE `ib_topic` (
   FULLTEXT KEY `Fulltext_title` (`title`,`descr`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_topic`
+--
+
+LOCK TABLES `ib_topic` WRITE;
+/*!40000 ALTER TABLE `ib_topic` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_topic` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_user`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -618,7 +1316,25 @@ CREATE TABLE `ib_user` (
   KEY `location` (`location`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_user` VALUES (1,'Guest','*',1,'','U',NULL,' ',0,'guest','',111,'Гость','none','none','null@intbpro.ru',''),(2,'System','*',1,'','U',NULL,'',0,'system','',222,'System','none','none','null@intbpro.ru',''),(3,'New User','*',5,'','U',NULL,'',0,'NewUser','',333,'New User','none','none','null2@intbpro.ru','');
+=======
+
+--
+-- Dumping data for table `ib_user`
+--
+
+LOCK TABLES `ib_user` WRITE;
+/*!40000 ALTER TABLE `ib_user` DISABLE KEYS */;
+INSERT INTO `ib_user` VALUES (1,'Guest','*',1,'','U',NULL,' ',0,'guest','',111,'Гость','none','none','null@intbpro.ru',''),(2,'System','*',1,'','U',NULL,'',0,'system','',222,'System','none','none','null@intbpro.ru',''),(3,'New User','*',5,'','U',NULL,'',0,'NewUser','',333,'New User','none','none','null2@intbpro.ru','');
+/*!40000 ALTER TABLE `ib_user` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_user_award`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_user_award`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -632,6 +1348,23 @@ CREATE TABLE `ib_user_award` (
   KEY `uid` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_user_award`
+--
+
+LOCK TABLES `ib_user_award` WRITE;
+/*!40000 ALTER TABLE `ib_user_award` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_user_award` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_user_contact`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_user_contact`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -642,6 +1375,23 @@ CREATE TABLE `ib_user_contact` (
   PRIMARY KEY (`uid`,`cid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_user_contact`
+--
+
+LOCK TABLES `ib_user_contact` WRITE;
+/*!40000 ALTER TABLE `ib_user_contact` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_user_contact` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_user_contact_type`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_user_contact_type`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -656,7 +1406,25 @@ CREATE TABLE `ib_user_contact_type` (
   PRIMARY KEY (`cid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_user_contact_type` VALUES (2,'Skype','icons/c/skype.gif','skype:%s',50,'','0'),(3,'ВКонтакте','icons/c/vk.gif','http://vk.com/%s',30,'vkontakte','0'),(4,'ICQ','icons/c/icq.gif','',80,'','0'),(5,'Jabber/XMPP','icons/c/jabber.gif','xmpp:%s',100,'','0'),(6,'МойМир@Mail.Ru','icons/c/agent.gif','http://my.mail.ru/%s',60,'mailru','0'),(7,'LiveJournal','icons/c/lj.gif','http://%s.livejournal.com',70,'livejournal','0'),(8,'Telegram','icons/c/telegram.png','https://t-do.ru/%s',20,'telegram','0'),(9,'GTalk/GMail','icons/c/gtalk.gif','mailto:%s@gmail.com',40,'google','0'),(10,'Одноклассники','icons/c/odno.gif','http://www.odnoklassniki.ru/profile/%s',35,'odnoklassniki','0'),(11,'Facebook','icons/c/facebook.gif','https://www.facebook.com/profile.php?id=%s',37,'facebook','0'),(12,'Twitter','icons/c/twitter.gif','http://twitter.com/%s',90,'twitter','0'),(13,'Webmoney ID','icons/c/webmoney.gif','https://passport.webmoney.ru/asp/CertView.asp?wmid=%s',120,'webmoney','0'),(14,'OpenID','icons/c/openid.gif','%s',110,'openid','0'),(15,'Личный сайт','','%s',100,'','1'),(16,'Личный блог','','%s',100,'','1');
+=======
+
+--
+-- Dumping data for table `ib_user_contact_type`
+--
+
+LOCK TABLES `ib_user_contact_type` WRITE;
+/*!40000 ALTER TABLE `ib_user_contact_type` DISABLE KEYS */;
+INSERT INTO `ib_user_contact_type` VALUES (2,'Skype','icons/c/skype.gif','skype:%s',50,'','0'),(3,'ВКонтакте','icons/c/vk.gif','http://vk.com/%s',30,'vkontakte','0'),(4,'ICQ','icons/c/icq.gif','',80,'','0'),(5,'Jabber/XMPP','icons/c/jabber.gif','xmpp:%s',100,'','0'),(6,'МойМир@Mail.Ru','icons/c/agent.gif','http://my.mail.ru/%s',60,'mailru','0'),(7,'LiveJournal','icons/c/lj.gif','http://%s.livejournal.com',70,'livejournal','0'),(8,'Telegram','icons/c/telegram.png','https://t-do.ru/%s',20,'telegram','0'),(9,'GTalk/GMail','icons/c/gtalk.gif','mailto:%s@gmail.com',40,'google','0'),(10,'Одноклассники','icons/c/odno.gif','http://www.odnoklassniki.ru/profile/%s',35,'odnoklassniki','0'),(11,'Facebook','icons/c/facebook.gif','https://www.facebook.com/profile.php?id=%s',37,'facebook','0'),(12,'Twitter','icons/c/twitter.gif','http://twitter.com/%s',90,'twitter','0'),(13,'Webmoney ID','icons/c/webmoney.gif','https://passport.webmoney.ru/asp/CertView.asp?wmid=%s',120,'webmoney','0'),(14,'OpenID','icons/c/openid.gif','%s',110,'openid','0'),(15,'Личный сайт','','%s',100,'','1'),(16,'Личный блог','','%s',100,'','1');
+/*!40000 ALTER TABLE `ib_user_contact_type` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_user_ext`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_user_ext`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -674,7 +1442,25 @@ CREATE TABLE `ib_user_ext` (
   KEY `user_group` (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_user_ext` VALUES (1,10,0,0,0,0,0,1411401372,'0'),(2,0,0,0,0,0,0,1411401372,'0'),(3,0,0,0,0,0,100,1411401372,'0');
+=======
+
+--
+-- Dumping data for table `ib_user_ext`
+--
+
+LOCK TABLES `ib_user_ext` WRITE;
+/*!40000 ALTER TABLE `ib_user_ext` DISABLE KEYS */;
+INSERT INTO `ib_user_ext` VALUES (1,10,0,0,0,0,0,1411401372,'0'),(2,0,0,0,0,0,0,1411401372,'0'),(3,0,0,0,0,0,100,1411401372,'0');
+/*!40000 ALTER TABLE `ib_user_ext` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_user_field`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_user_field`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -688,6 +1474,23 @@ CREATE TABLE `ib_user_field` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Задаваемые поля для профиля пользователя';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_user_field`
+--
+
+LOCK TABLES `ib_user_field` WRITE;
+/*!40000 ALTER TABLE `ib_user_field` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_user_field` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_user_settings`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_user_settings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -718,7 +1521,25 @@ CREATE TABLE `ib_user_settings` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
 INSERT INTO `ib_user_settings` VALUES (1,0,0,'','ASC','None',10800,'1','1','1','1','0','0',1,'1','1','1','1',50,0,'0','1','0'),(3,15,20,'','ASC','My',10800,'1','1','1','1','0','0',1,'1','1','1','1',50,0,'0','2','0');
+=======
+
+--
+-- Dumping data for table `ib_user_settings`
+--
+
+LOCK TABLES `ib_user_settings` WRITE;
+/*!40000 ALTER TABLE `ib_user_settings` DISABLE KEYS */;
+INSERT INTO `ib_user_settings` VALUES (1,0,0,'','ASC','None',10800,'1','1','1','1','0','0',1,'1','1','1','1',50,0,'0','1','0'),(3,15,20,'','ASC','My',10800,'1','1','1','1','0','0',1,'1','1','1','1',50,0,'0','2','0');
+/*!40000 ALTER TABLE `ib_user_settings` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_user_value`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_user_value`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -729,6 +1550,23 @@ CREATE TABLE `ib_user_value` (
   PRIMARY KEY (`uid`,`fdid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Значения задаваемых полей профиля пользователя';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_user_value`
+--
+
+LOCK TABLES `ib_user_value` WRITE;
+/*!40000 ALTER TABLE `ib_user_value` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_user_value` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_user_warning`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_user_warning`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -744,6 +1582,23 @@ CREATE TABLE `ib_user_warning` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Предупреждения и наказания пользователей';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_user_warning`
+--
+
+LOCK TABLES `ib_user_warning` WRITE;
+/*!40000 ALTER TABLE `ib_user_warning` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_user_warning` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_views`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_views`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -754,6 +1609,23 @@ CREATE TABLE `ib_views` (
   PRIMARY KEY (`oid`,`type`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_views`
+--
+
+LOCK TABLES `ib_views` WRITE;
+/*!40000 ALTER TABLE `ib_views` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_views` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ib_vote`
+--
+
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 DROP TABLE IF EXISTS `ib_vote`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -766,3 +1638,26 @@ CREATE TABLE `ib_vote` (
   PRIMARY KEY (`tid`,`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Результаты голосования отдельных пользователей';
 /*!40101 SET character_set_client = @saved_cs_client */;
+<<<<<<< HEAD
+=======
+
+--
+-- Dumping data for table `ib_vote`
+--
+
+LOCK TABLES `ib_vote` WRITE;
+/*!40000 ALTER TABLE `ib_vote` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ib_vote` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2024-03-30  1:11:54
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)

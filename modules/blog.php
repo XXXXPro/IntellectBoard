@@ -94,9 +94,14 @@ class blog extends stdforum {
     $this->out->comments_remain=min($perpage,$this->topic['post_count']-count($this->out->posts)-1); 
     if (isset($_REQUEST['more']) && $this->get_request_type()==1) $this->out->comments_remain=$this->topic['post_count']-intval($_REQUEST['more'])-$perpage-1;
     if (empty($this->topic['descr'])) {
+<<<<<<< HEAD
       $text = strip_tags($this->out->article['text']);
       $descr = substr($text,0,strpos($text,'.')+1);
       $this->meta('description',strip_tags($descr));
+=======
+      $descr = substr($this->out->article['text'],0,strpos($this->out->article['text'],'.')+1);
+      $this->meta('description',$descr);
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
     }
   }
 
