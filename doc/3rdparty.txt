@@ -1,0 +1,13 @@
+Список стороннего программного обеспечения, использованного в Intellect Board Pro:
+
+* Шаблонизатор Twig. Автор: Fabien Potencier. Сайт: http://twig.sensiolabs.org/ Тип лицензии: BSD-новая (http://twig.sensiolabs.org/license)
+* Библиотека HeadJS. Авторы: Tero Piirainen, Robert Hoffmann. Сайт: http://headjs.com/ Тип лицензии: MIT (http://bit.ly/mit-license)
+
+* Библиотека jQuery. Сайт: http://jquery.com/. Разработчик:  The jQuery Foundation. Тип лицензии: MIT (http://en.wikipedia.org/wiki/MIT_License)
+* Визуальный редактор SCEditor (дополнение к jQuery). Автор: Sam Clarke. Сайт: http://www.sceditor.com/. Тип лицензии: MIT (http://www.sceditor.com/documentation/support-licensing/#licensing)
+* Модуль построения графиков flot (дополнение к jQuery). Разработчики: IOLA и Ole Laursen. Сайт: http://www.flotcharts.org/ . Тип лицензии: MIT 
+* Модуль отображения фото Colorbox (дополнение к jQuery). Автор: Jack Moore. Сайт: http://www.jacklmoore.com/colorbox/. Тип лицензии:  MIT
+* Модуль выбора даты Zebra_DatePicker (дополнение к jQuery). Автор: Stefan Gabos. Сайт: http://stefangabos.ro/jquery/zebra-datepicker/. Тип лицензии: LGPL (http://www.gnu.org/licenses/lgpl-3.0.txt).
+
+* Набор значков Font Awesome. Автор: Fonticons, Inc. Сайт: https://fontawesome.com/ Тип лицензии: SIL OFL 1.1 License (https://github.com/FortAwesome/Font-Awesome)
+* Набор смайликов Nomicons: The Full Monty (авторы Oscar Gruno aka Nominell v. 2.0 и Andy Fedosjeenko aka Nightwolf). Распространяются свободно при указании авторства.

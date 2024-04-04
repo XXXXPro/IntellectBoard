@@ -1,0 +1,92 @@
+#ib_all #blog_forum_view h1, #ib_all #tags h1 { color: #283E7F }
+#ib_all #blog_forum_view .start_text { line-height: 150%; color: #657786; font-size: 100%}
+#ib_all .blogpost+.blogpost { margin-top: 16px; border-top: #D8EAFF 1px solid}
+#ib_all .blogpost h3 { font-size: 140%; padding-top: 4px; }
+#ib_all .blogpost_date, #ib_all .blogcomment_date { padding-left: 10px; color: #657786; flex-grow: 1 }
+#ib_all #blog_view_topic article .blogpost_date, #ib_all #gallery_view_topic article .blogpost_date { padding-left: 0 }
+#ib_all .blogpost_text { padding: 20px 0; clear: both; font-size: 16px }
+#ib_all .prating { display: inline; font-size: 120% }
+#ib_all .blogpost:first-child { margin-top: 0; border-top: 0 }
+#ib_all .blogpost a { text-decoration: none;}
+#ib_all .blogpost a:hover { text-decoration: underline; }
+#ib_all .blogpost_text a { text-decoration: underline; }
+#ib_all .blogpost_text { line-height: 180%; padding: 20px 0; clear: both; font-size: 120% }
+#ib_all .blogpost_text code br { display: none }
+#ib_all .blogpost_text br { line-height: 2.5em }
+#ib_all .blogpost_text .foldlink { display: none }
+#ib_all .prating { display: inline; font-size: 140% }
+#ib_all .blogpost_avatar { float: left; margin: 0 12px 10px 0 }
+#ib_all .blogpost_avatar img { max-height: 48px; max-width: 48px }
+#ib_all .blogpost_top { line-height: 140%; color: #657786; }
+#ib_all .blogpost_info { color: #657786 }
+#ib_all .blogpost_info br { display: none }
+#ib_all .blogpost_info .tags li { padding: 3px 8px; font-size: 100%; }
+#ib_all .blogpost_info .tags { display: block; padding: 5px 0; margin: 0 0 10px 0}
+#ib_all .blogpost_info .tags li { display: inline-block; list-style: none; margin-right: 5px; background: #def }
+#ib_all .blogpost_info a { color: #657786; padding: 0 8px; text-decoration: none;  }
+#ib_all .blogpost .avatar img {height:16px; width:16px; vertical-align: bottom;}
+#ib_all .comment_avatar { float: left; margin-right: 10px }
+#ib_all .comment+.comment:not(.marked) { border-top: #D8EAFF 1px solid }
+
+#ib_all .post .attach { color: #444; margin-top: 1.2em }
+#ib_all .postform .attach * { vertical-align: middle }
+#ib_all .post .attach ul { list-style: none; padding: 0; margin: 0}
+#ib_all .post .attach li { padding: 0 20px }
+#ib_all .post .attach li.attach_preview { display: inline; padding: 0 20px 0 0 }
+
+#ib_all .topic_tags li { display: inline-block; padding: 4px 8px; }
+#ib_all .topic_tags li a { text-decoration: none }
+#ib_all #blog_tags .topic_tags { font-size: 250%; text-align: center }
+
+#ib_all .blog_sticky { padding-bottom: 0 }
+#ib_all .blog_sticky h4 { margin:  20px 0 0 0; }
+#ib_all .blog_sticky ul { padding: 0 15px; }
+#ib_all .comment { clear: both; margin: 8px 0; padding: 12px 0; display: flex; position: relative }
+#ib_all .postact { margin-bottom: -8px }
+#ib_all .comment_avatar { min-width: 140px; order:1; height:100%; padding-right: 20px; text-align:right }
+#ib_all .comment_body { order: 2; width: 100% }
+#ib_all .comment_top { width: 100%; border-bottom: #f6f8fa 1px solid; margin-bottom: 6px; padding-bottom: 6px;display: flex}
+#ib_all .comment_avatar img { max-width: 120px }
+#ib_all #blog_forum_view .rss, #ib_all #blog_tags .rss {display:block; float:right; font-size:280%}
+#ib_all #uLogin { display:inline-block; line-height: 110%}
+
+#ib_all .blogpost_text pre, #ib_all .blogpost_text code, #ib_all .comment_text code{overflow:auto;background:#eaecef;border:1px solid #dcddde;display:block;padding:8px 10px;margin:5px 0;white-space:pre}
+#ib_all .blogpost_text pre br{display:none}
+#ib_all .comment_text .ib_outer_table { table-layout: fixed; width: 100% }
+#ib_all .comment_text .ib_outer_table td { padding: 0; overflow: auto }
+
+#ib_all .more_comments{display: block; background: #F2F8FF; padding: 5px; border: #D8EAFF 1px solid; margin: auto; text-align: center }
+#ib_all .more_comments::after { content: "▼"; text-decoration: none; display: inline-block}
+
+#ib_all .poll { padding-bottom: 20px }
+#ib_all .poll fieldset { border: 0; margin: 0 }
+#ib_all .poll legend { display: none }
+#ib_all .poll .quest { font-size: 120%; } 
+#ib_all .poll .submit, #ib_all .poll .pollend { text-align: left; margin-top: 10px }
+#ib_all .poll td { text-align: right }
+#ib_all .poll .myresult { font-style: italic }
+#ib_all .poll .pollbar1 { border: #800 1px solid; background: #c00 }
+#ib_all .poll .pollbar2 { border: #080 1px solid; background: #0c0 }
+#ib_all .poll .pollbar3 { border: #008 1px solid; background: #00c }
+#ib_all .poll .pollbar4 { border: #880 1px solid; background: #cc0 }
+#ib_all .poll .pollbar5 { border: #088 1px solid; background: #0cc }
+#ib_all .poll .pollbar0 { border: #808 1px solid; background: #c0c }
+
+@media screen and (max-width:980px) {
+  #ib_all .postact { display: block; width: 100% }
+  #ib_all .postact a {line-height:normal}
+  #ib_all .poll table col:nth-child(1) { width: auto }
+}
+
+#ib_all .photos { padding: 0; margin: 0 -11px; display: flex; flex-wrap: wrap; list-style: none; clear: both; }
+#ib_all .photos li { padding: 5px; margin: 5px; border: #eee 1px solid; position: relative; border-radius: 1px; box-sizing: border-box }
+#ib_all .photos li:hover { border-color: #3c5cc0 }
+#ib_all #gallery_view_topic .photos a { cursor: zoom-in }
+#ib_all .photos a>div { display: block; width: 100%; opacity: 0.7; background: #fff; 
+  text-align: center; top: 56%; left:0; position: absolute; padding: 4px; box-sizing: border-box; }
+#ib_all .photos a>div>span { font-size: 125%; line-height: 180%; color: #0101C4; font-weight: bold; }
+#ib_all .photo_descr { margin-top: 0 }
+#ib_all .gallery_item { text-align: right; }
+#ib_all .gallery_item_info ul { list-style: none; margin: 0; padding: 0; line-height: 130%; }
+#ib_all .gallery_item_info ul li { color: #666 }
+#ib_all .gallery_item_info ul li span { color: initial }

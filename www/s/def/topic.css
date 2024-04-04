@@ -1,0 +1,53 @@
+#ib_all .topic_list thead { background: #BFDDFF }
+#ib_all .topic_item { text-align: center }
+#ib_all .topic_item td { vertical-align: middle }
+#ib_all .topic_item:nth-child(odd) { background: #EDF5FF }
+#ib_all .topic_item.valued  { background: #ffe }
+#ib_all #stdforum_view_forum .right .smallform { display: none }
+#ib_all .t_title { text-align: left }
+#ib_all .t_title ul { list-style: none; display: inline }
+#ib_all .t_title li { display: inline; font-size: 70% }
+#ib_all .t_title li a { color: #666; text-decoration: none; font-size: 120%; padding-left: 4px; }
+#ib_all .t_icon, #ib_all .t_new, #ib_all .t_hot { display: block; float: left; font-size: 24px; width: 24px; height: 24px; margin: 6px 12px; position: relative; color: #1F3C91; text-decoration: none }
+#ib_all .t_sticky, #ib_all .t_locked, #ib_all .t_posted, #ib_all .t_poll { display: block; width: 12px; height: 12px; position: absolute; color: #1F3C91; font-size: 12px; text-decoration: none }
+#ib_all .t_title .t_sticky  { left: -8px; top: -2px }
+#ib_all .t_title .t_locked { left: -8px; bottom: -4px }
+#ib_all .t_title .t_posted { right: -8px; bottom: -4px }
+#ib_all .t_title .t_poll { right: -8px; top: -2px }
+#ib_all .t_title a { color: #2524b0 }
+#ib_all .t_last { text-decoration: none; color: inherit; }
+#ib_all .t_last i { color: #808080 }
+#ib_all .t_legend dd { line-height: 36px }
+#ib_all .t_legend_r { width: 35% }
+#ib_all .t_legend_r dd { line-height: 20px }
+#ib_all .t_legend_r dt { line-height: 20px; position: relative }
+#ib_all .t_perms { font-size: 80%; color: #666; text-align: right }
+#ib_all .notopics { text-align: center }
+#ib_all .topic_tags li { display: inline-block; padding-right: 5px; }
+#ib_all .topic_tags li a { text-decoration: none }
+#ib_all #stdforum_tags .topic_tags { font-size: 250% }
+
+@media screen and (max-width: 1024px) {
+  #ib_all .topic_list { width: auto; table-layout: auto; }
+  #ib_all .pages.right { float: none; clear: both; text-align: right }
+  #ib_all .t_icon { padding: 0; margin-top: 1px }
+  #ib_all .topic_list thead { display: none }
+  #ib_all .topic_list tr { display: block; text-align: left; min-height: 2.5em; clear: both; padding: 6px 0 }
+  #ib_all .topic_list td { display: inline  }
+  #ib_all .topic_list td br { display: none }
+  #ib_all .topic_list td:nth-child(2) { display: none; width: 1px }
+  #ib_all .topic_list td:nth-child(4)::before { content: '  Сообщений: ' }
+  #ib_all .topic_list td:nth-child(4) small::before { content: ' (' }
+  #ib_all .topic_list td:nth-child(4) small::after { content: ')' }
+  #ib_all .topic_list td:nth-child(4) small { white-space: nowrap; }
+  #ib_all .topic_list td:nth-child(3), #ib_all .topic_list td:nth-child(5) { display: none }
+  #ib_all .topic_list td:nth-child(6)::before { content: '  Последнее: ' }
+  #ib_all #bookmark_view .topic_list td:nth-child(3), #ib_all #bookmark_view .topic_list td:nth-child(5) { display: none }
+  #ib_all #bookmark_view .topic_list td { display: inline }
+  #ib_all .topic_list col { display: none }
+}
+
+@media (max-width: 414px) {
+  #ib_all h1 { font-size: 150%; line-height: 100% }
+  #ib_all h1, #ib_all p.descr { padding: 0 10px }
+}

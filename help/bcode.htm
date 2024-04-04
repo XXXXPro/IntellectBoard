@@ -1,0 +1,197 @@
+<h1>Теги BoardCode</h1>
+
+Теги BBCode — это определенные ключевые слова, записанные в квдаратных скобках. 
+Они позволяют добавлять различные эффекты в текст сообщения, например, выделять жирным, курсивом, цветом, и т.п.
+Большинство тегов записывается в таком виде: [тег]текст, к которому нужно применить эффект[/тег],
+в этом случае в сообщении будет изменена только та часть, котоорая находится между [тег] и [/тег].
+Но бывают и одиночные теги, например, для вставки картинки и видео.
+Для некоторых тегов требууется указать дополнительную информацию (например, для гиперссылки — адрес, куда она ведет),
+это делается так: [тег=параметр].
+Далее приведены примеры использования различных тегов, сами теги выделенны красным цветом. 
+
+<div class="post">
+<h3>Оформление текста</h3>
+<dl class="bcode_help" >
+<dt>Текст <span>[b]</span>можно выделить жирным<span>[/b]</span>.</dt>
+<dd>Текст <b>можно выделить жирным</b>.</dd>
+<dt>Или <span>[i]</span>курсивом<span>[/i]</span>.</dt>
+<dd>Или <i>курсивом</i>.</dd>
+<dt>Также можно <span>[u]</span>подчеркнуть<span>[/u]</span>.</dt>
+<dd>Также можно <u>подчеркнуть</u>.</dd>
+<dt>Или даже <span>[s]</span>зачеркнуть<span>[/s]</span>.</dt>
+<dd>Или даже <s>зачеркнуть</s>.</dd>
+<dt>Поместить в <span>[sup]</span>верхний<span>[/sup]</span> и <span>[sub]</span>нижний<span>[/sub]</span> индексы.</dt>
+<dd>Поместить в <sup>верхний</sup> и <sub>нижний</sub> индексы.</dd>
+<dt>Можно раскрасить текст <span>[color=yellow]</span>разными<span>[/color]</span> <span>[color=#000040]</span>цветами<span>[/color]</span>.</dt>
+<dd>Можно раскрасить текст <span style="color: yellow">разными</span> <span style="color:blue">цветами</span>.
+<small>Название подходящего цвета можно посмотреть <a href="colors.htm">в таблице цветов</a></small></dd>
+<!-- <dt>Или даже сделать <span>[grad=#007000,000800,1]</span>градиент<span>[/grad]</span>.</dt>
+<dd>Или даже сделать <span style="color: #007000">г</span><span style="color: #007800">р</span><span style="color: #008000">а</span><span style="color: #008800">д</span><span style="color: #009000">и</span><span style="color: #009800">е</span><span style="color: #00A000">н</span><span style="color: #00A800">т</span>.
+<small>До первой запятой указываем начальный цвет, после нее &mdash; приращение, после нее &mdash; количество символов, которые должны быть одного цвета (не обязательно, по умолчанию -- один).
+Внутри тега grad не должно быть других тегов. Если на сервере выключен модуль mbstring, тег работать не будет.</small></dd>-->
+<dt>Можно и <span>[font=Comic Sans]</span>поиграться со шрифтами<span>[/font]</span>.</dt>
+<dd>Можно и <span style="font-family: 'Comic Sans'">поиграться со шрифтами</span>.
+<small>Однако помните, что если у других пользователей нет такого шрифта в системе, они увидят в лучшем случае обычный текст, в худшем &mdash; набор квадратиков.</small></dd>
+<dt>И <span>[size=5]</span>с размером<span>[/size]</span> тоже.</dt>
+<dd>И <span style="font-size: 150%">с размером</span> тоже.
+<small>Размер шрифта может быть от 1 до 7, при этом 3 соответствует нормальному размеру шрифта на форуме, 1 и 2 &mdash; более мелкий размер, 4&ndash;7 более крупный.</small></dd>
+<dt>А еще можно <span>[shadow=2,#888]</span>сделать тексту тень<span>[/shadow]</span>.</dt>
+<dd>А еще можно <span style="text-shadow: 2px 2px 2px #888">сделать тексту тень</span>.
+<small>До запятой указывается размер тени в пикселях, после — цвет (не обязательно).</small></dd>
+</dl>
+
+<h3>Вставка ссылок и медийных файлов</h3>
+<dl class="bcode_help">
+<dt>Cсылка: <span>[url]</span>https://intbpro.ru<span>[/url]</span>.</dt>
+<dd>Ссылка: <a href="https://intbpro.ru">https://intbpro.ru</a>.</dd>
+<dt>Cсылка с описанием: <span>[url=https://intbpro.ru]</span>форумный движок Intellect Board<span>[/url]</span>.</dt>
+<dd>Ссылка с описанием: <a href="https://intbpro.ru">форумный движок Intellect Board</a>.</dd>
+<dt>Блочная ссылка с автоматической подгрузкой описания и изображения: <span>[blocklink=https://intbpro.ru]</span><br />
+</dt>
+<dd>Блочная ссылка с автоматической подгрузкой описания и изображения: 
+<a class="blocklink" href="https://intbpro.ru"><b>Intellect Board — скрипт форума с открытым исходным кодом</b>
+<span class="linkdesc">Расширяемый движок форума с разделами разных типов :: 209 тем, 1573 сообщения, 83 участника</span>
+<span class="linkdomain">intbpro.ru</span></a>
+<small>Примечание: описание и изображение подгружаются, если сайт поддерживает разметку OpenGraph или используются meta-теги.</small>
+</dd>
+<dt>Email можно записать несколькими способами: <span>[email]</span>info@intboard.ru<span>[/email]</span>, <span>[email=admin@intboard.ru]</span>, <span>[email=all@intboard.ru]</span>и вот так<span>[/email]</span>.</dt>
+<dd>Email можно записать несколькими способами: <a href="mailto:info@intboard.ru">info@intboard.ru</a>, <a href="mailto:sales@intboard.ru">admin@intboard.ru</a>, <a href="mailto:all@intboard.ru">и вот так</a>.</dd>
+<dt>Картинка:<br /><span>[img=https://intbpro.ru/s/def/logo.gif]</span> или <span>[img]</span>https://intbpro.ru/s/def/logo.gif<span>[/img]</span>.</dt>
+<dd>Картинка:<br /><img class="lightbox" src="https://intbpro.ru/s/def/logo.gif" alt="" /> или <img class="lightbox" src="https://intbpro.ru/s/def/logo.gif" alt="" />.</dd>
+<dt>Аудио-файл:<br /><span>[audio=http://intbpro.ru/test/test.mp3]</span><br />или<br /><span>[audio]</span>audio=http://intbpro.ru/test/test.mp3<span>[/audio]</span>.</dt>
+<dd>Аудио-файл:<br /><audio src="https://intbpro.ru/test/test.mp3" controls>Ваш броузер не поддерживает воспроизведение аудио. Попробуйте <a href="http://intbpro.ru/test/test.mp3">скачать файл</a>.</audio> или 
+<audio src="http://intbpro.ru/test/test.mp3" controls>Ваш броузер не поддерживает воспроизведение аудио. Попробуйте <a href="https://intbpro.ru/test/test.mp3">скачать файл</a>.</audio>.</dd>
+<dt>Видео-файл:<br /><span>[video=https://download.samplelib.com/mp4/sample-5s.mp4]</span><br />или<br /><span>[video]</span>https://download.samplelib.com/mp4/sample-5s.mp4<span>[/video]</span>.</dt>
+<dd>Видео-файл:<br /> <video src="https://download.samplelib.com/mp4/sample-5s.mp4" controls>Ваш броузер не поддерживает воспроизведение видео. Попробуйте <a href="https://download.samplelib.com/mp4/sample-5s.mp4">скачать файл</a>.</video>
+ <br />или <br />
+<video src="https://download.samplelib.com/mp4/sample-5s.mp4" controls>Ваш броузер не поддерживает воспроизведение видео. Попробуйте <a href="https://download.samplelib.com/mp4/sample-5s.mp4">скачать файл</a>.</audio>.</dd>
+<dt>Видео с Youtube:<br /><span>[youtube=https://youtu.be/Lf1Rixx8YMo]</span><br />или<br /><span>[youtube]</span>https://youtu.be/Lf1Rixx8YMo<span>[/youtube]</span>.</dt>
+<dd>Видео с Youtube:<br /><iframe width="560" height="315" src="https://www.youtube.com/embed/Lf1Rixx8YMo" frameborder="0" allowfullscreen></iframe><br />или<br />
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Lf1Rixx8YMo" frameborder="0" allowfullscreen></iframe>.</dd>
+<dt>Ссылка на приложенный файл: <span>[attach=N]</span><br />
+(N — порядковый номер файла, начиная с единицы).</dt>
+<dd>Ссылка на приложенный файл: <a href="#" class="attach">имя_прикрепленного_файла.txt (1 Кб)</a><br />
+(N — порядковый номер файла, начиная с единицы).</dd>
+<dt>Ссылка на приложенный файл с произольным текстом:<br /><span>[attachlink=N]</span>смотрите в приложенном файле<span>[/attachlink]</span><br />
+<dd>Ссылка на приложенный файл с произольным текстом:<br /><a href="#" class="attach">смотрите в приложенном файле</a><br />
+</dl>
+
+<h3>Расположение блоков текста</h3>
+<dl class="bcode_help">
+<dt><span>[left]</span>Выравнивание текста по левому краю.<span>[/left]</span></dt>
+<dd><div style="text-align: left">Выравнивание текста по левому краю.</div></dd>
+<dt><span>[right]</span>Выравнивание текста по правому краю.<span>[/right]</span></dt>
+<dd><div style="text-align: right">Выравнивание текста по правому краю.</div></dd>
+<dt><span>[center]</span>Выравнивание текста по центру.<span>[/center]</span></dt>
+<dd><div style="text-align: center">Выравнивание текста по центру.</div></dd>
+<dt><span>[justify]</span>Выравнивание текста по ширине.<span>[/justify]</span></dt>
+<dd><div style="text-align: justify">Выравнивание текста по ширине.</div></dd>
+<dt><span>[float=left]</span>Врезка слева.<span>[/float]</span>Основной текст сообщения будет обтекать врезку.</dt>
+<dd><div class="left">Врезка слева.</div>Основной текст сообщения будет обтекать врезку.</dd>
+<dt><span>[float=right]</span>Врезка справа.<span>[/float]</span>Основной текст сообщения будет обтекать врезку.</dt>
+<dd><div class="right">Врезка справа.</div>Основной текст сообщения будет обтекать врезку.</dd>
+</dl>
+
+<h3>Блоки с особым оформлением</h3>
+<dl class="bcode_help">
+<dt>Разделитель <span>[hr]</span> позволяет отделить часть текста чертой.</dt>
+<dd>Разделитель <hr /> позволяет отделить часть текста чертой.</dd>
+<dt>Цитата простая: <span>[q]</span>То что срочно, не бывает важно. То что важно, не бывает срочно. (Приписывается Лао-Цзы.)<span>[/q]</span></dt>
+<dd>Цитата простая: <div class="quote"><blockquote>То что срочно, не бывает важно. То что важно, не бывает срочно. (Приписывается Лао-Цзы.)</blockquote></div></dd>
+<dt>Цитата сообщения: <span>[q=Administrator]</span>Это первое сообщение форума!<span>[/q]</span></dt>
+<dd>Цитата сообщения: <div class="quote"><span class="username">Administrator</span> написал(а):
+<blockquote>Это первое сообщение форума!</blockquote></div></dd>
+
+<dt><span>[list]</span><span>[*]</span>Первый пункт списка<span>[*]</span>Второй пункт списка<span>[/list]</span></dt>
+<dd><ul><li>Первый пункт списка</li><li>Второй пункт списка</li></ul>
+<small>Вместо [list] можно также использовать тег [ul].</small></dd>
+<dt><span>[ol=нумерация]</span><span>[*]</span>Первый пункт нумерованного списка<span>[*]</span>Второй пункт нумерованного списка<span>[/ol]</span></dt>
+<dd><ol><li>Первый пункт списка</li><li>Второй пункт списка</li></ol>
+<small>Возможные варианты нумерации:  decimal &mdash; арабские цифры (по умолчанию), lower-alpha &mdash; строчные латинские буквы, upper-latin
+ &mdash; заглавные латинские, lower-roman &mdash; строчные римские цифры, upper-roman &mdash; заглавные римские цифры.</small></dd>
+<dt><span>[off]</span>Текст не по теме можно оформлять оформлять специальным тегом, чтобы снизить его заметность.<span>[/off]</span></dt>
+<dd><span class="offtopic">Текст не по теме можно оформлять оформлять специальным тегом, чтобы снизить его заметность.</span></dd>
+<dt><span>[pre]</span>Текст с сохранением отступов:<br />
+<div style="font-family: monospace;">
+&#160;&#160;&#160;*<br />
+&#160;&#160;**<br />
+&#160;***<br />  
+****</div><span>[/pre]</span></dt>
+<dd><pre>Текст с сохранением отступов:
+    *
+   **
+  ***  
+ ****</pre></dd>
+<dt><div style="white-space: pre; line-height: 120%"><span>[code]</span><br />
+/* Тег code нужен для оформления исходного текста программы */<br />
+#include &lt;stdio.h&gt;<br />
+int main(int argc, char** argv) {<br />
+  printf("Hello world!");<br />
+  return 0;<br />
+}<br /><span>[/code]</span></div></dt>
+<dd><code><br />
+/* Тег code нужен для оформления исходного текста программы */<br />
+#include &lt;stdio.h&gt;<br />
+int main(int argc, char** argv) {<br />
+  printf("Hello world!");<br />
+  return 0;<br />
+}</code><br />
+<small>В отличие от тега [pre], внутри тега [code] не производится обработка других тегов BBCode и смайликов, что гарантирует тот факт, что код программы не будет искажен.</small></dd>
+<dt><div style="white-space: pre; line-height: 120%"><span>[php]</span>/* Для PHP можно выводить код с подсветкой синтаксиса */<br />
+$str = 'Hello world!';
+print $str;
+exit();<span>[/php]</span></div></dt>
+<dd><code>/* Для PHP можно выводить код с подсветкой синтаксиса */
+$str = 'Hello world!';
+print $str;
+exit();</code></dd>
+
+<dt>
+  <div>Формула в тексте (формат TeX): <span>[math]</span>x = {-b \pm \sqrt{b^2-4ac} \over 2a}.<span>[/math]</span></div>
+  <div>Формула в отдельном блоке: <span>[mathblock]</span>x = {-b \pm \sqrt{b^2-4ac} \over 2a}.<span>[/mathblock]</span></div>
+  <div>Формула в формате AsciiMath: <span>[asciimath]</span>x = (-b +- sqrt(b^2-4ac))/(2a) .<span>[/asciimath]</span> </div>
+</dt>
+<dd>
+  <div>Формула в тексте (формат TeX): <span class="mathtex">\(x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\)</span></div>
+  <div>Формула в отдельном блоке: <div class="mathtex">$$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$</span>
+  </div>
+  <div>Формула в формате AsciiMath: <span class="asciimath">`x = (-b +- sqrt(b^2-4ac))/(2a) .`</span>
+  </div>
+</dd>
+
+</dl>
+
+<h3>Ограничение видимости текста</h3>
+<dl class="bcode_help ptext post" style="border: 0">
+<dt><span>[cut]</span>Этот текст можно прочитать только по щелчку мышью.<span>[/cut]</span></dt>
+<dd><a class="cutlink" href="#">Показать скрытый текст</a>
+<span class="invis">Этот текст можно прочитать только по щелчку мышью.</span></dd>
+<dt><span>[cut=Щелкните, чтобы прочитать весь текст]</span>Этот текст можно прочитать только по щелчку мышью.<span>[/cut]</span></dt>
+<dd><a class="cutlink" href="#">Щелкните, чтобы прочитать весь текст</a>
+<span class="invis">Этот текст можно прочитать только по щелчку мышью.</span></dd>
+<dt><span>[spoiler]</span>Этот текст будет в разворачиваемом блоке.<span>[/spoiler]</span></dt>
+<dd><div class="spoiler"><a href="#">Развернуть скрытый текст</a>
+<div class="invis">Этот текст будет в разворачиваемом блоке.</div></div></dd>
+<dt><span>[spoiler=Здесь можно задать свой текст]</span>Этот текст будет в разворачиваемом блоке.<span>[/spoiler]</span></dt>
+<dd><div class="spoiler"><a href="#">Здесь можно задать свой текст</a>
+<div class="invis">Этот текст будет в разворачиваемом блоке.</div></div></dd>
+<dt><span>[level=уровень]</span>Этот текст будет виден только зарегистрированным пользователям.<span>[/level]</span></dt>
+<dd>Гости и пользователи, уровень которых ниже указанного, увидят следующее: 
+<div class="nolevel">У вас недостаточный уровень для просмотра сообщения</div>
+<small>Уровни, имеющиеся на форуме, можно посмотреть в <a href="levels.htm">таблице уровней доступа</a></small></dd>
+</dl>
+
+<h3>Отключение обработки тегов</h3>
+<dl class="bcode_help">
+<dt><span>[nocode]</span>Если нужно вставить теги BBCode так, чтобы они остались как есть, например, [off]оффтопик[/off] или [b]жирный[/b], то можно воспользоваться тегом nocode.<span>[/nocode]</span></dt>
+<dd>Если нужно вставить теги BBCode так, чтобы они остались как есть, например, [off]оффтопик[/off] или [b]жирный[/b], то можно воспользоваться тегом nocode.</dd>
+<dt><span>[nohtml]</span>Похожий тег есть и для &lt;b&gt;HTML&lt;/b&gt;.<span>[/nohtml]</span></dt>
+<dd>Похожий тег есть и для &lt;b&gt;HTML&lt;/b&gt;.</dd>
+</dl>
+
+<p style="clear: both; padding-top: 20px">Теги можно комбинировать между собой. 
+При этом закрывающие части ([/тег]) должны идти в обратном порядке по сравнению с открывающими, например:<br />
+[size=6][color=red][shadow=3,#c00]Это будет большой красный текст с тенью[/shadow][/color][/size].<br />
+Также произвоится автоматическая замена следующих символов: <b>--</b> заменяется на <b>&mdash;</b>, 
+<b>(c)</b> заменяется на <b>&copy;</b>, <b>(r)</b> заменяется на <b>&reg;</b>, <b>(tm)</b> заменяется на <b>&trade;</b>.</p>
+</div>

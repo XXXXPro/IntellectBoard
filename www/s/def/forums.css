@@ -1,0 +1,30 @@
+#ib_all .categories td, #ib_all .categories th { border: #d8eaff 1px solid }
+#ib_all .categories .cat_icon { width: 5% }
+#ib_all .categories .cat_name { width: 55% }
+#ib_all .categories .cat_views { width: 10% }
+#ib_all .categories .cat_topics { width: 15% }
+#ib_all .categories .cat_last { width: 15% }
+#ib_all .categories .category { padding: 3px 25px; font-size: 130%; font-weight: normal; background: #EDF5FF }
+#ib_all .categories .category a { text-decoration: none; color: #304A99 }
+#ib_all a.mainpage_forumlink { font-size: 110%; text-decoration: none; font-weight: bold; color: #1F3C91 }
+#ib_all #mainpage_subtext { margin: 10px 8px }
+#ib_all .mainpage_stats { text-align: right; margin: 10px 0;  width: 50%; float: right }
+#ib_all .icon_forum, #ib_all .icon_newforum { height: 30px; width: 30px }
+#ib_all a.small_link { display: block; margin: 0.4em 0}
+#ib_all .forum_icon { font-size: 160%; color: #1F3C91; padding: 4px }
+#ib_all .mainpage_forum ul { margin: 5px 10px; list-style: none}
+#ib_all .mainpage_forum li { white-space: nowrap; text-overflow: ellipsis; line-height: 150% }
+
+@media screen and (max-width: 980px) {
+   #ib_all .categories.ibtable { width: auto; margin: auto }
+   #ib_all .categories.ibtable thead { display: none }
+   #ib_all .categories.ibtable td br { display: none }
+   #ib_all .categories td:nth-child(3) { display: none }
+   #ib_all .categories td:nth-child(4)::before { content: ' Всего ' }
+   #ib_all .categories td:nth-child(5)::before { content: ' Последнее: ' }
+   #ib_all .categories td { display: inline; border: none; line-height: 180%; padding: 0 }
+   #ib_all .categories tr { padding: 0 4px }
+   #ib_all .categories tr { display: block; border: #ccc 1px solid }
+   #ib_all .mainpage_forum li { white-space: normal}
+   #ib_all .categories .category { display: block; margin: 0 -4px }
+}

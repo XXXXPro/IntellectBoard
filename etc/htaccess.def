@@ -1,0 +1,128 @@
+##### Внимание! Файл www/.htaccess генерируется автоматически при каждом создании или измении раздела!
+##### Для внесения изменений редактируйте файл шаблона etc/htaccess.txt или шаблоны для каждого типа разделов в таблице forum_types.
+
+##### Блок настроек кеширования для Apache 2.x #############################################
+### Сжатие файлов
+<IfModule mod_setenvif.c>
+AddOutputFilterByType DEFLATE text/html
+AddOutputFilterByType DEFLATE text/xml
+AddOutputFilterByType DEFLATE text/css
+AddOutputFilterByType DEFLATE application/javascript
+</IfModule>
+
+<IfModule mod_headers.c>
+### Разрешение кеширования файлов на стороне клиента
+<FilesMatch .*\.(css|js|gif|jpg|jpeg|png|ico|svg|ttf|otf|eot|woff|woff2)$>
+  Header append Cache-Control public,max-age=31536000
+</FilesMatch>
+
+### Заголовок, включающий защиту от XSS-атак в броузере
+Header set X-XSS-Protection 1
+
+### Защита от подмены Content-Type
+Header set X-Content-Type-Options nosniff
+
+### Настройка того, что передавать в referer: полный путь на своём сайте, только доменное имя при переходе на чужие
+### С одной стороны, это позволит уберечь от потенциального раскрытия информации (например, о существовании скрытого раздела), 
+### с другой — на сайте-получаетеле не будет видно, из какой темы совершен переход, что может быть нежелательно.
+### Для возврата к обычному режиму замените на unsafe-url
+Header set Referrer-Policy: origin-when-cross-origin 
+
+### Следующие опции могут нарушить работу сайта, поэтому по умолчанию закомментированы. Раскомментируйте, если знаете, зачем они нужны
+### Запрет показывать сайт во фрейме. По умолчанию закомментирован, так как не позволяет использовать Вебвизор
+# Header set X-Frame-Options deny
+
+### Настройка источников, из которых можно брать скрипты, CSS и тому подобное. По умолчанию разрешена загрузка скриптов и CSS только со своего сайта и систем аналитики, изображений — с любых источников
+# Если вы используете подгрузку jQuery с внешнего CDN, его необходимо добавить в перечень после script-src
+# Header set Content-Security-Policy: "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://mc.yandex.ru https://www.google-analytics.com https://www.youtube.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://mc.yandex.ru https://www.google-analytics.com; img-src *; frame-src https://www.youtube.com"
+
+### На всякий случай разрешаем разворот на полный экран
+Header set Permissions-Policy: fullscreen=(self)
+</IfModule>
+
+### Страницы ошибок
+# Данная директива сработает только если форум установлен в корне, если нет, вам необходимо откорректировать путь самостоятельно
+ErrorDocument 404 /404.htm
+ErrorDocument 403 /403.htm
+
+### Общая часть правил обработки запросов
+<IfModule mod_rewrite.c>
+RewriteEngine On
+# Если обработка роутинга работает некорректно, нужно раскомментировать следующую директиву и вписать туда путь относительно корня сайта
+#RewriteBase /
+
+# Нужно для того, чтобы ловить токен авторизации
+RewriteRule micropub\.htm - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+## Центр Администрирования
+RewriteRule ^admin/$ admin/settings/view.htm [R=301]
+RewriteRule ^admin/(\w+)/(\w+).htm$ admin.php?m=$1&a=$2 [L,QSA]
+
+# Правила для .well-known, oauth и прочих протоколов идут в самом начале, чтобы не попадали под редиректы 
+RewriteRule ^\.well-known/host-meta fediverse.php?a=host_meta [L]
+RewriteRule ^\.well-known/(\w+) fediverse.php?a=$1 [L,QSA]
+RewriteRule ^\.oauth/(\w+) oauth.php?a=$1 [L,QSA]
+
+## добавление / в конец адреса для корректной работы ссылок и избежания ложных дублей с точки зрения поисковиков
+RewriteCond %{THE_REQUEST} //+\sHTTP
+RewriteRule ^ / [L,R=301]
+RewriteRule ^(\w+)$ http://%{HTTP_HOST}/$1/ [R=301,L,QSA]
+RewriteRule ^(.*/\w+)$ http://%{HTTP_HOST}/$1/ [R=301,L,QSA]
+# RewriteRule ^index\.(.*) http://%{HTTP_HOST}/ [R=301,L,QSA]
+## Защита от дублирования страниц
+RewriteRule ^(\w+)/(\w+)/[01]\.htm$ $1/$2/ [R=301,L,QSA]
+## убираем URL, кончающиеся на ?
+RewriteCond %{THE_REQUEST} \?
+RewriteCond %{QUERY_STRING} ^$
+RewriteRule ^(.*)$ http://%{HTTP_HOST}/$1 [R=301,L,QSD]
+RewriteCond %{REQUEST_URI} ^/index.php$
+RewriteRule ^(.*)$ http://%{HTTP_HOST}/ [R=301,L,QSA]
+
+RewriteRule ^users/profiles/(\d+)\.htm$ user.php?a=view_user&uid=$1 [L,QSA]
+RewriteRule ^users/$ user.php?a=view [L,QSA]
+RewriteRule ^users/search_redir.htm$ user.php?a=search_redir [L,QSA]
+RewriteRule ^users/search/$ user.php?a=search [L,QSA]
+RewriteRule ^users/search/(\w+)-(.+?)/((\d+)\.htm)?$ user.php?a=search&$1=$2&page=$4 [L,QSA]
+RewriteRule ^users/search/tags.htm$ user.php?a=all_tags [L,QSA]
+RewriteRule ^user/$ users/ [L,R=301]
+RewriteRule ^user/(\w+)\.htm?$ user.php?a=$1& [L,QSA]
+RewriteRule ^online/ online.php [L]
+RewriteRule ^help/levels\.htm$ misc.php?a=levels [L]
+RewriteRule ^help/(.*\.htm)$ misc.php?a=help&help=$1 [L]
+RewriteRule ^help/$ misc.php?a=help [L]
+RewriteRule ^address_book/$ addrbook.php?a=view [L]
+RewriteRule ^address_book/(\w+).htm addrbook.php?a=$1 [L,QSA]
+RewriteRule ^bookmark/(delete|mytopics|subscr|favorites)/(\d+\.htm)?$ bookmark.php?a=$1&page=$2 [L,QSA]
+RewriteRule ^bookmark/((delete|unsubscr|updated_rss)\.htm)?$ bookmark.php?a=$2 [L,QSA]
+RewriteRule ^newtopics/((\d+)\.htm)?$ bookmark.php?a=updated&page=$2 [L,QSA]
+RewriteRule ^newtopics/unread.htm$ bookmark.php?a=unread [L,QSA]
+RewriteRule ^newtopics/unanswered.htm$ bookmark.php?a=unanswered [L,QSA]
+RewriteRule ^newtopics/rss.htm$ bookmark.php?a=updated_rss [L,QSA]
+RewriteRule ^privmsg/((\w+)\.htm)?$ privmsg.php?a=$2 [L,QSA]
+RewriteRule ^privmsg/(\d+)$ privmsg/$1/ [R=301,L,QSA]
+RewriteRule ^privmsg/(\d+)/$ privmsg.php?a=thread&id=$1 [L,QSA]
+RewriteRule ^privmsg/(\d+)/(\w+)\.htm$ privmsg.php?a=$2&id=$1 [L,QSA]
+RewriteRule ^search/((\w+)\.htm)?$ search.php?a=$2 [L,QSA]
+RewriteRule ^search/(\d+)/((\d+)\.htm)?$ search.php?a=results&id=$1&page=$3 [L,QSA]
+RewriteRule ^(.*)/rules\.htm$ misc.php?a=rules&forum=$1 [L,QSA]
+RewriteRule ^rules\.htm$ misc.php?a=rules [L,QSA]
+RewriteRule ^team\.htm$ misc.php?a=team [L]
+RewriteRule ^mark_all\.htm$ misc.php?a=mark_all [L]
+RewriteRule ^(.*)/mark_all\.htm$ misc.php?a=mark_all&forum=$1 [L]
+RewriteRule category/(\d+)\.htm index.php?cat=$1 [L,QSA]
+<<<index_route>>>
+
+## Sitemap
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+RewriteRule ^sitemap\.(\d+)\.xml$ sitemap.php?file=$1 [L]
+
+## Прикрепленные файлы
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^f/up/(\d+)/pr/(\d+)x(\d+)/(\d+\-\w+\.\w+)$ preview.php?dir=$1&x=$2&y=$3&filename=$4 [L]
+RewriteRule ^f/up/(\d+)/(\d+\-\w+)/(.*)$ f/up/$1/$2.dat [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*) index.php
+
+</IfModule>

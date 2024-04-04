@@ -1,0 +1,30 @@
+#ib_all #user_view_user ul { display: block; list-style: none; padding: 0 }
+
+#ib_all .userleft { float: left; width: 220px }
+#ib_all .userleft .userphoto { max-width: 220px }
+#ib_all .userleft, #ib_all .userright { padding: 5px }
+#ib_all .userright { margin-left: 250px }
+#ib_all .userright .avatar { float: right; margin: 0 10px 10px 0 }
+#ib_all .actionbtn { width: 160px }
+#ib_all .pm_buttons { text-align: center }
+
+#ib_all .userright .data span { width: 14em; color: #888; text-align: right; display:inline-block; padding-right: 10px  }
+
+#ib_all .forums { width: 100%; text-align: right; border-collapse: collapse; border: #ccc 1px solid }
+#ib_all .forums th { text-align: center; background: #eef; padding: 5px }
+#ib_all .forums td {  padding: 3px 5% }
+#ib_all .forums td.forum_name { text-align: left; padding: 5px }
+
+#ib_all .ignore_add { background: #fee }
+#ib_all .contacts li { list-style-position: inside; padding: 5px 25px; background-repeat: no-repeat; background-position: left center }
+
+#ib_all .friendlist .from:before { content: '⇐'; color: #008; font-weight: bold; font-size: 125% }
+#ib_all .friendlist .to:before { content: '⇒'; color: #080; font-weight: bold; font-size: 125% }
+#ib_all .friendlist .mutual:before { content: '⇔'; color: #088; font-weight: bold; font-size: 125% }
+
+@media screen and (max-width: 480px) {
+  #ib_all .userleft, #ib_all .userright { float: none; margin: auto; padding: 0; width: auto }
+  #ib_all #contacts li { display: inline-block; }
+  #ib_all .userright .data span { width: auto }
+  #ib_all .forums th { padding: 1px }
+}

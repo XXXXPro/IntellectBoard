@@ -1,0 +1,50 @@
+#ib_all .topic_list thead { background: #dde }
+#ib_all .topic_item { text-align: center }
+#ib_all .topic_item td { vertical-align: middle }
+#ib_all .topic_item:nth-child(odd) { background: #eef }
+#ib_all .topic_item.valued  { background: #ffe }
+#ib_all .t_title { text-align: left }
+#ib_all .t_title ul { list-style: none; display: inline }
+#ib_all .t_title li { display: inline; font-size: 70% }
+#ib_all .t_title li a { color: #666; text-decoration: none }
+#ib_all .t_icon, #ib_all .t_new, #ib_all .t_hot { display: block; float: left; width: 32px; height: 32px; margin: 0 8px; position: relative }
+#ib_all .t_sticky, #ib_all .t_locked, #ib_all .t_posted, #ib_all .t_poll { display: block; width: 16px; height: 16px; position: absolute }
+#ib_all .t_icon { background: url('icons/t_nonew.gif'); }
+#ib_all .t_new { background: url('icons/t_new.gif'); }
+#ib_all .t_hot { background: url('icons/t_newhot.gif'); }
+#ib_all .t_sticky { background: url('icons/t_sticky.gif'); } 
+#ib_all .t_title .t_sticky	{ left: -6px; top: -2px }
+#ib_all .t_locked { background: url('icons/t_locked.gif');}
+#ib_all .t_title .t_locked { left: -6px; bottom: -2px } 
+#ib_all .t_posted { background: url('icons/t_posted.gif'); }
+#ib_all .t_title .t_posted { right: -6px; bottom: -2px }
+#ib_all .t_poll { background: url('icons/t_poll.gif'); }
+#ib_all .t_title .t_poll { right: -6px; top: -2px }
+#ib_all .t_last { background: url('icons/gotolast.gif'); padding-right: 20px; text-decoration: none; color: inherit; 
+background-repeat: no-repeat; background-position: right bottom }
+#ib_all .t_legend dd { line-height: 36px }
+#ib_all .t_legend_r { width: 35% }
+#ib_all .t_legend_r dd { line-height: 20px }
+#ib_all .t_legend_r dt { line-height: 20px; position: relative }
+#ib_all .t_perms { font-size: 80%; color: #666; text-align: right } 
+#ib_all .notopics { text-align: center }
+
+@media screen and (max-width: 1024px) {
+	#ib_all .topic_list { width: auto; table-layout: auto; }
+	#ib_all .pages.right { float: none; clear: both; text-align: right }
+	#ib_all .t_icon { padding: 0; margin-top: 1px }
+	#ib_all .topic_list thead { display: none }
+	#ib_all .topic_list tr { display: block; text-align: left }
+	#ib_all .topic_list td { display: inline  }
+	#ib_all .topic_list td br { display: none }
+	#ib_all .topic_list td:nth-child(2) { display: none; width: 1px }
+	#ib_all .topic_list td:nth-child(3)::before { content: '  Сообщений: ' }
+	#ib_all .topic_list td:nth-child(3) small::before { content: ' (' }
+	#ib_all .topic_list td:nth-child(3) small::after { content: ')' }
+	#ib_all .topic_list td:nth-child(3) small { white-space: nowrap; }
+	#ib_all .topic_list td:nth-child(4) { display: none }
+  #ib_all .topic_list td:nth-child(5)::before { content: '  Последнее: ' }
+  #ib_all #bookmark_view .topic_list td:nth-child(4) { display: none }
+  #ib_all #bookmark_view .topic_list td { display: inline }
+  #ib_all .topic_list col { display: none }
+}

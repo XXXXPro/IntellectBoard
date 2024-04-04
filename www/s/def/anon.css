@@ -1,0 +1,28 @@
+#ib_all .user_info { width: 110px; float: left; text-align: center; margin-right: 10px}
+#ib_all .anon_item { clear: both; border-bottom: #ccc 1px solid; padding: 10px 0; margin: 10px 0; color: #415e6b; font-size: 120%;
+font-weight: bold;  position: relative }
+#ib_all .anon_comment { clear: both; border-bottom: #ccc 1px solid; padding: 10px 0; margin: 10px 0 10px 90px; position: relative; }
+#ib_all .sender, #ib_all .actions  { margin-bottom: 10px; font-size: 12px; font-weight: normal; color: #363636 }
+#ib_all .actions { margin-top: 10px }
+#ib_all .actions a { padding-left: 15px }
+#ib_all .modlink { float: right;  margin: -0.5em -0.5em 0 0 }
+#ib_all .modlink a { color: #c00; font-size: 2.0em; text-decoration: none; }
+#ib_all .post code { display: block; white-space: pre; line-height: 100%; border: #ccc 1px solid; padding: 10px; max-height: 20em; overflow: auto; margin: 5px 20px; background: #eee; font-size: 125%; max-height: 15em; overflow: auto }
+#ib_all .post pre { display: block; white-space: pre; overflow: auto }
+#ib_all .post blockquote { border: #ddd 1px solid; font-size: 90%; background: #f4f4ff; padding: 4px; overflow: auto; max-height: 7em; margin: 5px 20px }
+#ib_all .post .ptext img { max-width: 100% }
+
+#ib_all .post .attach ul { list-style: none; padding: 0; margin: 0}
+#ib_all .post .attach li { padding: 0 20px }
+#ib_all .post .attach li.attach_preview { display: inline; padding: 0 20px 0 0 }
+#ib_all .post img { max-width: 100%; }
+
+#ib_all .postform { border: #ccc 3px solid; margin-top: 10px}
+#ib_all .postform fieldset { border: 0 }
+#ib_all .postform legend { display: block; width: 99%; margin: 0; padding: 3px; background: #ddf; font-size: 150%; text-align: center }
+#ib_all .postform div { padding: 0 5px }
+#ib_all .postform div label span { display: block; width: 18em; float: left }
+#ib_all .postform textarea { width: 98% }
+#ib_all .postform .perms { font-size: 80%; color: #666 }
+#ib_all .postform .submit { clear: both; background : #eef; line-height: 250% }
+#ib_all .postform .attach span { display: inline-block; width: 17.4em; text-align: right }

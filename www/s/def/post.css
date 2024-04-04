@@ -1,0 +1,119 @@
+#ib_all .topic_start { margin-bottom: 1.2em }
+#ib_all .post { border: #A3CEFF 3px solid; margin: 6px 0; clear: both;  background : #EDF5FF; }
+#ib_all .post .postin { margin-left: 18em;  border-left: #A3CEFF 1px solid; background: #fff  }
+#ib_all .valued .postin { background: #ffe  }
+#ib_all .flood .postin { background: #eee  }
+#ib_all .post .pu { width: 18em; margin-left: -18em; float: left; text-align: center; line-height: 160%; }
+#ib_all .post .puinfo { font-size: 80%; }
+#ib_all .post .pu .username { display: block; padding: 5px; font-size: 110%; text-decoration: none }
+#ib_all .post .pu.banned .username { text-decoration: line-through; }
+#ib_all .post .pu .pwarn { color: #d00 }
+#ib_all .post .pd { padding: 8px; position: relative }
+#ib_all .post .ptop { line-height: 220%; background : #EDF5FF; border-bottom: #A3CEFF 1px solid; margin: -8px -8px  8px -9px; padding-left: 5px }
+#ib_all .post .ptop .edited { font-size: 90%; color: #666 }
+#ib_all .post .psign { display: block; padding-top: 10px; font-size: 90%; color: #666 }
+#ib_all .post .psign hr { width: 25%; margin-left: 0 }
+#ib_all .post .postsys { text-align: center; padding: 8px }
+#ib_all .post .offtopic { font-size: 90%; color: #666 }
+#ib_all .post .offtopic:before { content: 'Оффтопик: '; color: #999 }
+#ib_all .post code { display: block; white-space: pre; line-height: 100%; border: #A3CEFF 1px solid; padding: 10px; max-height: 20em; overflow: auto; margin: 5px 20px; background: #eee; font-size: 125%; max-height: 15em; overflow: auto }
+#ib_all .post pre { display: block; white-space: pre; overflow: auto }
+#ib_all .post blockquote { border: #ddd 1px solid; font-size: 90%; background: #f4f4ff; padding: 4px; overflow: auto; max-height: 7em; margin: 5px 20px }
+#ib_all .post .ptext { font-size: 110%; line-height: 133%; overflow: hidden; }
+#ib_all .post .ptext img { max-width: 100% }
+#ib_all .post .postnumber { float: right; text-decoration: none; font-size: 120%; padding-right: 3px; }
+#ib_all .post .unfolded { max-height: none }
+#ib_all .post .foldlink { position: relative; display: block; left: 86%; text-align: center; width: 6.4em; background: #234; padding: 5px; 
+color: #fff; font-weight: bold; text-decoration: none; margin-bottom: -1.3em;  }
+#ib_all .post a.avatar { display: block; text-decoration: none; text-align: center }
+#ib_all .post .spoiler { border: #ddd 1px solid; background: #f4fff4; margin: 5px 20px }
+#ib_all .post .spoiler>a { text-decoration: none; font-weight: bold; display: block; padding: 5px; background: #e0f0e0 }
+#ib_all .post .spoiler>div { border-top: #ddd 1px solid; padding: 5px }
+#ib_all .post img { max-width: 100%; }
+#ib_all .post .ptext h2.pt_title { font-size: 120%; margin-top: 0px }
+#ib_all .post .ptext .ib_outer_table { table-layout: fixed; width: 100% }
+#ib_all .post .ptext .ib_outer_table td { padding: 0; overflow: auto }
+
+#ib_all .post .pu a.male:after { content: 'М'; color: #003; padding: 5px; font-size: 80%; font-weight: normal }
+#ib_all .post .pu a.female:after { content: 'Ж'; color: #FCC; padding: 5px; font-size: 80%; font-weight: normal}
+#ib_all .post .pu .prating { padding-top: 5px }
+
+#ib_all .post a.blocklink { padding: 9px; border: #dcddde 1px solid; display: block; text-decoration: none; max-width: 480px; margin: 6px 0; }
+#ib_all .post a.blocklink b { display: block; font-size: 120%; border-bottom: #dcddde 1px solid; padding: 0 6px 6px 6px; color: #0101C4; margin-bottom: 10px; }
+#ib_all .post a.blocklink img { display: block; margin: 10px 0; max-height: 200px }
+#ib_all .post a.blocklink .linkdesc { padding: 0 6px; display: block; }
+#ib_all .post a.blocklink .linkdomain { display: block; font-size: 100%; color: #A3CEFF; font-weight: bold; padding: 6px 6px 0 6px }
+
+#ib_all .nopost { font-size: 120%; text-align: center }
+#ib_all .prvalue { font-size: 200%; padding: 0 10px; color: #666 }
+#ib_all .norate { opacity: 0.33; cursor: default; }
+
+#ib_all .collapsed .pmain { max-height: 7em; overflow: auto }
+#ib_all .collapsed .puinfo { display: none }
+#ib_all .ptop .fold:after { font-size: 160%; content: '⇪'; float: left; border-bottom: 1px dotted #003 }
+#ib_all .collapsed .ptop .fold:after { font-size: 160%; content: '⇩'; float: left; border-bottom: 1px dotted #003 }
+#ib_all .sticky { border: #bdf 5px solid }
+
+#ib_all .postform .attach * { vertical-align: middle }
+#ib_all .poll { padding-bottom: 20px }
+#ib_all .poll fieldset { border: 0; margin: 0 25% }
+#ib_all .poll legend { display: none }
+#ib_all .poll .quest { font-size: 120%; text-align: center } 
+#ib_all .poll .submit, #ib_all .poll .pollend { text-align: center }
+#ib_all .poll table col:nth-child(2) { width: 2em }
+#ib_all .poll table col:nth-child(1) { width: 25% }
+#ib_all .poll td { text-align: right }
+#ib_all .poll .myresult { font-style: italic }
+#ib_all .poll .pollbar1 { border: #800 1px solid; background: #c00 }
+#ib_all .poll .pollbar2 { border: #080 1px solid; background: #0c0 }
+#ib_all .poll .pollbar3 { border: #008 1px solid; background: #00c }
+#ib_all .poll .pollbar4 { border: #880 1px solid; background: #cc0 }
+#ib_all .poll .pollbar5 { border: #088 1px solid; background: #0cc }
+#ib_all .poll .pollbar0 { border: #808 1px solid; background: #c0c }
+
+#ib_all .post .size1 { font-size: 70% }
+#ib_all .post .size2 { font-size: 90% }
+#ib_all .post .size4 { font-size: 120% }
+#ib_all .post .size4 { font-size: 150% }
+#ib_all .post .size5 { font-size: 180% }
+#ib_all .post .size6 { font-size: 210% }
+#ib_all .post .size7 { font-size: 250% }
+
+#ib_all .preview .post { border-color: #88f; }
+#ib_all .preview .post .postin { background:#f4f4ff }
+#ib_all .submit button.btn_preview { float: right; font-weight: normal; }
+
+#ib_all #stdforum_view_topic .tags li { padding: 3px 8px; font-size: 100%; }
+#ib_all #stdforum_view_topic .tags { display: block; padding: 5px 0; margin: 0 0 10px 0}
+#ib_all #stdforum_view_topic .tags li { display: inline-block; list-style: none; margin-right: 5px; background: #def }
+
+@media screen and (max-width:980px) {
+  #ib_all .post { border: #A3CEFF 1px solid; }
+  #ib_all .post .postin { margin-left: 0; }
+  #ib_all .post .pu { width: 100%; font-size: 90%; margin-left: 0; float: none; background: #EDF5FF }
+  #ib_all .post .pu .puinfo { display: none }
+  #ib_all .post .pu div, #ib_all .post .pu .username { display: inline; padding-right: 4px }
+  #ib_all .post .pu .prating { display: inline; padding-left: 8px }
+  #ib_all .post .pu br { display: none }
+  #ib_all .post .pu br+a { display: none }
+  #ib_all .post .pd { padding-bottom: 1.8em }
+  #ib_all .post .pu a.male:after, #ib_all .post .pu a.female:after { display: none }
+  #ib_all .post .psign { display: block; padding: 5px 0; font-size: 80%; color: #666 }
+  #ib_all .post .avatar { float: left }
+  #ib_all .post img.avatar { max-width: 24px; max-height: 24px }
+  #ib_all .post .foldlink { line-height: 120%; padding: 4px; font-size: 80%; font-weight: normal; left: 75% }
+  #ib_all .postform .perms { display: none }
+  #ib_all .post .ptop .edited { display: none }
+  #ib_all .post .ptop .fold { display: none }
+  #ib_all .prvalue { padding: 0 4px 0 4px; font-size: 140% }
+  #ib_all .post .ptop { margin: -8px -8px 8px -8px; }
+  #ib_all .poll table col:nth-child(1) { width: auto }
+}
+
+@media print {
+  #ib_all .topic_start { display: none }
+  #ib_all .postform { display: none }
+  #ib_all .post { page-break-inside: avoid; border-width: 1px }
+  #ib_all .post .prating img { display: none }
+  #ib_all .post .pd { padding: 4px }  	
+}

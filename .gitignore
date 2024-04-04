@@ -1,0 +1,11 @@
+test/*
+distr/*
+.zip
+tmp/
+logs/
+www/f/
+www/download/
+www/s/anon/
+www/*.html
+nbproject/
+

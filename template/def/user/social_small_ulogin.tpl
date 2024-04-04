@@ -1,0 +1,1 @@
+<div id="uLogin" data-ulogin="display=small;providers=vkontakte,odnoklassniki,mailru,facebook;hidden=twitter,googleplus,yandex,livejournal,openid,webmoney;fields=first_name,last_name,email,verify=1;optional=nickname,bdate,sex,photo,photo_big,city,country;redirect_uri={{ http(url('user/social_login.htm'))|url_encode }}"></div>

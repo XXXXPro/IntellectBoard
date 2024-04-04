@@ -1,0 +1,25 @@
+#ib_all #addrbook_view fieldset { border: 0 }
+#ib_all #addrbook_view legend{ display: none }
+#ib_all ul.friends, #ib_all ul.ignored { list-style: none; margin-top: 12px }
+#ib_all ul.friends li { float: left; width: 32%; height: 9em; border: #eee 1px solid; border-radius: 16px; font-size: 90%; margin-right: 1%; color: #888 }
+#ib_all ul.friends li .username { font-size: 120% }
+#ib_all ul.friends li .online { color: #0b0; font-weight: bold }
+#ib_all ul.friends div.avatar { float: left; margin: 10px }
+#ib_all ul.friends div.avatar img { border: #ccc 3px solid }
+#ib_all ul.friends div.mutual img { border: #090 3px solid }
+#ib_all ul.friends div.nofriend img { border: #900 3px solid }
+#ib_all ul.friends div.banned img { border: #990 3px solid }
+#ib_all ul.friends .dellink { float: right; display: block; line-height: 6em; padding: 0 8px; text-decoration: none; font-size: 150%; color: #c00 }
+#ib_all ul.friends .dellink:hover { background: #ffe }
+
+
+#ib_all ul.ignored li { float: left; width: 24%; height: 4em; border: #eee 1px solid; border-radius: 8px; font-size: 90%; margin-right: 1%; color: #888 }
+#ib_all ul.ignored li .username { font-size: 120% }
+#ib_all ul.ignored div.avatar { float: left; margin: 5px 8px }
+#ib_all ul.ignored div.avatar img { border: #ccc 2px solid; max-height: 24px }
+#ib_all ul.ignored .dellink { float: right; display: block; height: 100%; padding: 0 8px; text-decoration: none; font-size: 120%; color: #c00 }
+#ib_all ul.ignored .dellink:hover { background: #ffe }
+
+@media screen and (max-width: 1024px) {
+	#ib_all ul.friends li { float: none; width: auto; }
+}
