@@ -77,11 +77,7 @@ class search extends Application {
            'LEFT JOIN '.DB_prefix.'post p ON (p.id=tx.id) '.
            'LEFT JOIN '.DB_prefix.'topic t ON (p.tid=t.id) '.
            'LEFT JOIN '.DB_prefix.'forum f ON (f.id=t.fid) '.
-<<<<<<< HEAD
            'WHERE tx.type=16 AND '.$this->db->full_match('tx.data',$_REQUEST['search']['query']).' AND p.status=\'0\' AND t.status=\'0\' '.
-=======
-           'WHERE tx.type=16 AND '.$this->db->full_match('data',$_REQUEST['search']['query']).' AND p.status=\'0\' AND t.status=\'0\' '.
->>>>>>> 1a1624e (Initial commit for Intb 3.05)
            'AND '.$this->db->array_to_sql($forum_ids,'f.id');
         if (!empty($_REQUEST['extdata']['by_date'])) {
           if (!empty($_REQUEST['extdata']['start_date'])) $sql.=' AND p.postdate>='.strtotime($_REQUEST['extdata']['start_date']);
@@ -94,11 +90,7 @@ class search extends Application {
       }
       else { // если ищем по темам
         $sql = 'INSERT INTO '.DB_prefix.'search_result (sid,oid,relevancy) '.
-<<<<<<< HEAD
            'SELECT '.intval($data['id']).', t.id, '.$this->db->full_relevancy('t.title,t.descr',$data['query']).' AS relevancy '.
-=======
-           'SELECT '.intval($data['id']).', t.id, '.$this->db->full_relevancy('t.title, t.descr',$data['query']).' AS relevancy '.
->>>>>>> 1a1624e (Initial commit for Intb 3.05)
            'FROM '.DB_prefix.'topic t '.
            'LEFT JOIN '.DB_prefix.'forum f ON (f.id=t.fid) '.
            'WHERE '.$this->db->full_match('t.title,t.descr',$data['query']).' AND t.status=\'0\''.
