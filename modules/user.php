@@ -71,7 +71,7 @@ class user extends Application {
   function action_login() {
     if ($this->is_post()) {
       $userlib = $this->load_lib('userlib',true);
-      $long = isset($_POST['long']) ? 14 : 0; // если пользователь выбрал "запомнить", запоминаем его на 2 недели
+      $long = isset($_POST['long']) ? 90 : 0; // если пользователь выбрал "запомнить", запоминаем его на 90 дней
       if ($userlib->do_login($_POST['login'],$_POST['password'],$long)) {
         $referer = $this->referer();
         if (isset($_POST['referer']) && empty($_POST['referer'])) $referer=$this->url('/'); // если на шаге перед логином REFERER был пуст и не сохранился в форме, отправим пользователя на главную
