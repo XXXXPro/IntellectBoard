@@ -464,7 +464,7 @@ class user extends Application {
     if ($bbcode) $this->out->userdata['basic']['signature']=$bbcode->parse_sig($udata['basic']['signature'],$udata['ext_data']['links_mode']);
 
     $forums = $this->get_forum_list('read');
-    $sql = 'SELECT COUNT(*) AS count, SUM(CAST(p.value=\'1\' AS INTEGER)) AS valued, SUM(CAST(p.value=\'-1\' AS INTEGER)) AS flood, f.id, f.hurl, f.title, f.is_stats '.
+    $sql = 'SELECT COUNT(*) AS count, SUM(CASE WHEN p.value=\'1\' THEN 1 ELSE 0 END) AS valued, SUM(CASE WHEN p.value=\'-1\' THEN 1 ELSE 0 END) AS flood, f.id, f.hurl, f.title, f.is_stats '.
        'FROM '.DB_prefix.'forum f, '.DB_prefix.'topic t, '.DB_prefix.'post p '.
        'WHERE p.uid='.intval($uid).' AND p.tid=t.id AND t.fid=f.id AND p.status=\'0\' '.
        'GROUP BY f.id, f.hurl, f.title,f.is_stats '.
