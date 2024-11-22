@@ -60,6 +60,7 @@ class Database_mysqli extends Database implements iDBDriver {
 *  @param string $sql SQL query to execute.
 **/
   function _query($sql,$params=false) {
+    $sql = preg_replace('|^(\s*SELECT\s+.*?\W)CAST\((.*?)\s+AS\s+integer\)(.*?\s+FROM)|i','$1CAST($s AS unsigned integer)$3',$sql);    
     if (!empty($params)) {
       foreach ($params as $param) $sql = preg_replace('/\?/','\''.$this->slashes($param).'\'',$sql,1);
     }
