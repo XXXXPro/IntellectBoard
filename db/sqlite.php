@@ -40,9 +40,9 @@ class Database_sqlite extends Database implements iDBDriver {
   }
 
   function version() {
-    return "SQLite ".SQLite3::version();
+    $ver = SQLite3::version();
+    return "SQLite ".$ver['versionString'];
   }
-  
 
 /** Closes a connection to database server, opened with {@see function connect()}
 *  @return boolean
@@ -228,26 +228,37 @@ class Database_sqlite extends Database implements iDBDriver {
   function unlock_tables($tables) {
   }
 
-  /** Получение количественного показателя релевантности при полнотекстовом поиске **/
   function full_relevancy($column,$text) {
-    return $column.' MATCH "'.$this->slashes($text).'" ';
+    $text = str_replace('|',' or ',$text);
+    $text = str_replace('&',' and ',$text);
+    $text = preg_replace('/[\.,\?!;\-\[\]\(\)]+/','',$text);
+    if (trim($column)==='tx.data') return ' (SELECT -bm25('.DB_prefix.'post_fts) FROM '.DB_prefix.'post_fts(\''.$this->slashes($text).'\') WHERE rowid=tx.rowid) ';
+    elseif (trim($column)==='t.title,t.descr') return ' (SELECT -bm25('.DB_prefix.'topic_fts) FROM '.DB_prefix.'topic_fts(\''.$this->slashes($text).'\') WHERE rowid=t.id)';
   }
 
   /** Проверка наличия текста при полнетесктовом поиске **/
   function full_match($column,$text) {
-    return $column.' MATCH "'.$this->slashes($text).'" ';
+    $text = str_replace('|',' or ',$text);
+    $text = str_replace('&',' and ',$text);
+    $text = preg_replace('/[\.,\?!;\-\[\]\(\)]+/','',$text);
+    // очень костыльное решение, но иначе — никак, слишком уж FTS в SQLite отличается от других 
+    if (trim($column)==='tx.data') return ' tx.oid IN (SELECT rowid FROM '.DB_prefix.'post_fts(\''.$this->slashes($text).'\')) ';
+    elseif (trim($column)==='t.title,t.descr') return ' t.id IN (SELECT rowid FROM '.DB_prefix.'topic_fts(\''.$this->slashes($text).'\'))';
   }
-
 
 /** Transaction start for RBDMS with transactional support
 * @return boolean TRUE if successful
 **/
-  function begin() {}
+  function begin() {
+    $this->query('BEGIN TRANSACTION');
+  }
 
 /** Transaction commit for RBDMS with transactional support
 * @return boolean TRUE if successful
 **/
-  function commit() {}
+  function commit() {
+    $this->query('END TRANSACTION');
+  }
 
 /** Transaction abort for RBDMS with transactional support
 * @return boolean TRUE if successful
@@ -275,7 +286,7 @@ class Database_sqlite extends Database implements iDBDriver {
   }
 
   function has_fulltext() {
-    return false;
+    return true;
   }
 
   function slashes($text) {

@@ -195,10 +195,10 @@ class Library_bbcode extends Library {
 
   function process_bcode_ext($text) {
     if (empty(self::$ext_search) || empty(self::$ext_replace)) {
-      self::$ext_search[]='|\[audio\]([\d\w\./\?][^\]"\'])\[/audio\]|'; self::$ext_replace[]='<audio src="$1" controls>Ваш броузер не поддерживает воспроизведение аудио. Попробуйте <a href="$1">скачать файл</a>.</audio>';
-      self::$ext_search[]='|\[audio=([\d\w\./\?][^\]"\'])\]|'; self::$ext_replace[]='<audio src="$1" controls>Ваш броузер не поддерживает воспроизведение аудио. Попробуйте <a href="$1">скачать файл</a>.</audio>';
-      self::$ext_search[]='|\[video\]([\d\w\./\?][^\]"\'])\[/video\]|'; self::$ext_replace[]='<video src="$1" controls>Ваш броузер не поддерживает воспроизведение видео. Попробуйте <a href="$1">скачать файл</a>.</video>';
-      self::$ext_search[]='|\[video=([\d\w\./\?][^\]"\'])\]|'; self::$ext_replace[]='<video src="$1" controls>Ваш броузер не поддерживает воспроизведение видео. Попробуйте <a href="$1">скачать файл</a>.</video>';
+      self::$ext_search[]='|\[audio\](https?://[\d\w\.:/\?][^\]"\']+)\[/audio\]|'; self::$ext_replace[]='<audio src="$1" controls>Ваш броузер не поддерживает воспроизведение аудио. Попробуйте <a href="$1">скачать файл</a>.</audio>';
+      self::$ext_search[]='|\[audio=(https?://[\d\w\.:/\?][^\]"\']+)\]|'; self::$ext_replace[]='<audio src="$1" controls>Ваш броузер не поддерживает воспроизведение аудио. Попробуйте <a href="$1">скачать файл</a>.</audio>';
+      self::$ext_search[]='|\[video\](https?://[\d\w\.:/\?][^\]"\']+)\[/video\]|'; self::$ext_replace[]='<video src="$1" controls>Ваш броузер не поддерживает воспроизведение видео. Попробуйте <a href="$1">скачать файл</a>.</video>';
+      self::$ext_search[]='|\[video=(https?://[\d\w\.:/\?][^\]"\'])+\]|'; self::$ext_replace[]='<video src="$1" controls>Ваш броузер не поддерживает воспроизведение видео. Попробуйте <a href="$1">скачать файл</a>.</video>';      
       self::$ext_search[]='|\[youtube\](https?://youtu.be/)?([A-Za-z0-9_\-]+)\[/youtube\]|'; self::$ext_replace[]='<iframe width="560" height="315" src="https://www.youtube.com/embed/$2" frameborder="0" allowfullscreen></iframe>';
       self::$ext_search[]='|\[youtube=https?://youtu.be/([A-Za\-z0-9_\-]+)\]|'; self::$ext_replace[]='<iframe width="560" height="315" src="https://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>';
 
