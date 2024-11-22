@@ -550,7 +550,7 @@ class users extends Application_Admin {
     $uid=intval($_REQUEST['uid']);    
     $this->out->udata = $this->load_user($uid,0);
     if (empty($this->out->udata)) $this->output_404('Нет такого пользователя!');
-    $sql = 'SELECT t.title, f.hurl AS f_hurl, f.id AS fid, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl, f.title AS f_title, lv.visit1 FROM '.DB_prefix.'topic t, '.DB_prefix.'forum f, '.DB_prefix.'last_visit lv'.
+    $sql = 'SELECT t.title, f.hurl AS f_hurl, f.id AS fid, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR) END,\'/\') AS full_hurl, f.title AS f_title, lv.visit1 FROM '.DB_prefix.'topic t, '.DB_prefix.'forum f, '.DB_prefix.'last_visit lv'.
     ' WHERE t.fid=f.id AND lv.oid=t.id AND lv.uid='.intval($uid).' AND lv.type=\'topic\' ORDER BY visit1 DESC';
     $this->out->viewed_topics = $this->db->select_all($sql);
   }
