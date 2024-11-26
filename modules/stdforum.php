@@ -256,6 +256,7 @@ class stdforum extends Application_Forum {
     else $need_sticky = $this->topic['sticky_post'];  // иначе -- по настройкам темы
     $need_sticky = $need_sticky && (!empty($cond['start']) || $cond['sort']=='DESC'); // если вывод делается не с первой страницы или вывод идет в обратном порядке, и sticky_post включен
     if ($this->get_request_type()==1) $need_sticky = false; // если это AJAX-подгрузка следующей страницы, то sticky-сообщение не нужно при любых других параметрах
+    $start=isset($cond['start']) ? $cond['start'] : 0;
 
     if ($need_sticky) { // если первое сообщение в теме приклеенное, а тема выводится не с начала, извлекаем его отдельно
       $cond['id']=$this->topic['first_post_id'];

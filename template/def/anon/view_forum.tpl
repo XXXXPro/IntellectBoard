@@ -19,7 +19,7 @@
 
 <div>
 {% if perms.topic %}<!--noindex-->
-{% include 'stdforum/postform.tpl' %}
+{% include 'anon/form.tpl' %}
 <!--/noindex-->{% endif %}
 </div>
 {% if forum.topic_count %}<p class="topic_count">Всего вопросов: {{ forum.topic_count }}</p>{% endif %}
