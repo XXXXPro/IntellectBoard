@@ -256,10 +256,7 @@ class stdforum extends Application_Forum {
     else $need_sticky = $this->topic['sticky_post'];  // иначе -- по настройкам темы
     $need_sticky = $need_sticky && (!empty($cond['start']) || $cond['sort']=='DESC'); // если вывод делается не с первой страницы или вывод идет в обратном порядке, и sticky_post включен
     if ($this->get_request_type()==1) $need_sticky = false; // если это AJAX-подгрузка следующей страницы, то sticky-сообщение не нужно при любых других параметрах
-<<<<<<< HEAD
     $start=isset($cond['start']) ? $cond['start'] : 0;
-=======
->>>>>>> 1a1624e (Initial commit for Intb 3.05)
 
     if ($need_sticky) { // если первое сообщение в теме приклеенное, а тема выводится не с начала, извлекаем его отдельно
       $cond['id']=$this->topic['first_post_id'];
@@ -292,13 +289,8 @@ class stdforum extends Application_Forum {
 //        }
 //      }
     }
-<<<<<<< HEAD
     if ($count>0) { 
       if ($start==0) {
-=======
-    if ($count>0 && empty($cond['sticky'])) { // если раздел не пуст
-      if (empty($cond['start'])) {
->>>>>>> 1a1624e (Initial commit for Intb 3.05)
         if (!empty($this->topic['descr'])) $this->meta('description',$this->topic['descr']);
         else $this->meta('description','Автор: '.$result[0]['author'].', тема создана '.$this->long_date($result[0]['postdate']).' и содержит '.
           $this->incline($this->topic['post_count'],'%d сообщение','%d сообщения','%d сообщений').($this->topic['valued_count']? ', из них '.$this->incline($this->topic['valued_count'],'%d ценное','%d ценных','%d ценных'):'').'.');

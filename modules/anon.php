@@ -115,6 +115,7 @@ class anon extends stdforum {
       $result['value']=$perms['value']; // ценность сообщения разрешено задавать только при редактировании
       $result['lock_post']=$perms['lock']; // закрыть сообщение можно только при редактировании
       $result['tags']=$perms['tags'] && $topic; // теги можно редактировать только для тем
+      if ($topic) $result['topic_block']=true; // если редактируем пост с вопросом, показываем поле с темой
     }
     if ($topic) {
       $result['sticky']=false;
