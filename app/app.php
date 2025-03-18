@@ -171,8 +171,8 @@ class Application {
     $result = false;
     $start_url = preg_replace('|/+|', '/', $_SERVER['REQUEST_URI']);
     $base_url = substr($_SERVER['PHP_SELF'], 0, strrpos($_SERVER['PHP_SELF'], 'www/'));
-    if ($base_url) $url = str_replace($base_url, '', $start_url);
-    else $url = substr($start_url, 1);
+    if ($base_url!=='/') $url = str_replace($base_url, '', $start_url);
+    elseif ($base_url!=='/') $url = substr($start_url, 1);
     if (($pos = strpos($url, '?')) !== false) $url = substr($url, 0, $pos);
 
     for ($i = 0, $count = count($routes); $i < $count && !$result; $i++) { // поиск ведется до первого срабатывания рег. выражения
@@ -180,6 +180,7 @@ class Application {
       if (empty($data)) continue;
       list($regexp, $params) = explode(' ', $data, 2);
       $regexp = str_replace('/', '\\/', $regexp);
+      print "Regexp $regexp, trying to match $url<br />";
       if (preg_match('/' . $regexp . '/u', $url, $matches)) { // если выражение сработало, определяем параметры запроса
         if (strpos($params, '?') === false) $result = $params;
         else {
