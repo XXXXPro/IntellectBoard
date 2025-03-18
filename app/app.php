@@ -171,8 +171,8 @@ class Application {
     $result = false;
     $start_url = preg_replace('|/+|', '/', $_SERVER['REQUEST_URI']);
     $base_url = substr($_SERVER['PHP_SELF'], 0, strrpos($_SERVER['PHP_SELF'], 'www/'));
-    if ($base_url) $url = str_replace($base_url, '', $start_url);
-    else $url = substr($start_url, 1);
+    if ($base_url!=='/') $url = str_replace($base_url, '', $start_url);
+    elseif ($base_url!=='/') $url = substr($start_url, 1);
     if (($pos = strpos($url, '?')) !== false) $url = substr($url, 0, $pos);
 
     for ($i = 0, $count = count($routes); $i < $count && !$result; $i++) { // поиск ведется до первого срабатывания рег. выражения
@@ -180,6 +180,7 @@ class Application {
       if (empty($data)) continue;
       list($regexp, $params) = explode(' ', $data, 2);
       $regexp = str_replace('/', '\\/', $regexp);
+      print "Regexp $regexp, trying to match $url<br />";
       if (preg_match('/' . $regexp . '/u', $url, $matches)) { // если выражение сработало, определяем параметры запроса
         if (strpos($params, '?') === false) $result = $params;
         else {
@@ -366,7 +367,7 @@ class Application {
           list($uid, $key) = explode('-', $_COOKIE[$session_name.'_long']);
           $userdata = $this->load_user($uid, 1);
           $rightkey = $this->gen_long_key($userdata, $session_name); // генерируем правильный длинный ключ для данного пользователя
-          if ($_COOKIE[$session_name.'_long'] == $rightkey && !empty($userdata))  // вторая проверка нужна на случай удаления пользователя за время его отсутствия на форуме
+          if ($_COOKIE[$session_name.'_long'] == $rightkey && !empty($userata))  // вторая проверка нужна на случай удаления пользователя за время его отсутствия на форуме
             $this->set_user($userdata, 14); // если ключ правильный, выставляем данные о пользователе и создаем его сессию, а так же обновляем cookie еще на 14 дней
 // хотя в принципе длинного ключа достаточно для аутентификации, но взятие данных из сессии позволит выполнять аутентификацию быстрее, поэтому мы ее и создаем
           else
@@ -1178,7 +1179,7 @@ class Application {
       $userdata = $this->load_user($uid, 0);
     $url = str_replace('/./', '/', $url); // для случаев, если раздел является корневым и имеет HURL в виде точки
     $secret = $this->get_opt('site_secret'); // секретный ключ сайта, хранимый в настройках
-    return $uid.'-'.hash('sha256',$uid.$action.$secret.$userdata['rnd'].$url.$userdata['password'].$userdata['pass_crypt'].$userdata['email']);
+    return $uid.'-'.md5($uid.$action.$secret.$userdata['rnd'].$url.$userdata['password'].$userdata['pass_crypt'].$userdata['email']);
   }
 
   /** Генерация ключа для долгосрочной идентификации * */
@@ -1186,7 +1187,7 @@ class Application {
     if (!$session_name)
       $session_name = CONFIG_session;
     // TODO: возможно, доделать добавку очищенного User Agent
-    return $userdata['id'].'-'.hash('sha256',$userdata['id'].$userdata['password'].$userdata['rnd'].$userdata['pass_crypt'].$session_name);
+    return $userdata['id'].'-'.md5($userdata['id'].$userdata['password'].$userdata['rnd'].$userdata['pass_crypt'].$session_name);
   }
 
   /** Проверка, является ли пользователь гостем.
