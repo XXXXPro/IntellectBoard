@@ -13,7 +13,7 @@ class Library_topic extends Library {
   function get_topic($topic_url,$status=0,$user=false) {
       $user=$user && !Library::$app->is_guest();
       $params = array();
-      $sql = 'SELECT t.id, t.fid, t.title, t.descr, CONCAT(\''.Library::$app->forum['hurl'].'/\',CASE WHEN hurl!=\'\' THEN hurl ELSE CAST(t.id AS CHAR) END,\'/\') AS full_hurl, hurl, '.
+      $sql = 'SELECT t.id, t.fid, t.title, t.descr, CONCAT(\''.Library::$app->forum['hurl'].'/\',CASE WHEN hurl!=\'\' THEN hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl, hurl, '.
         't.status, t.lastmod, post_count, flood_count, valued_count, owner, ext_status, last_post_time, first_post_id, last_post_id, sticky_post, t.locked, favorites ';
       if ($user) $sql.=', visit2, bookmark, subscribe, p.uid as first_post_uid, p.author AS first_post_author ';
       $sql.='FROM '.DB_prefix.'topic t ';
@@ -115,13 +115,13 @@ class Library_topic extends Library {
     if (!empty($cond['first'])) $columns.=', p2.author AS starter, p2.uid AS starter_id, p2.postdate AS first_post_date';
 //    if (!empty($cond['first']) && !empty($cond['first_text'])) $columns.=', p2.html, p2.bcode, p2.smiles, p2.links, tx.data AS text';
     if (!empty($cond['forums'])) $columns.=', f.title AS forum_title, f.descr AS forum_descr, f.hurl AS forum_hurl, 
-    CONCAT(f.hurl,\'/\', CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR) END,\'/\') AS full_hurl';
+    CONCAT(f.hurl,\'/\', CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl';
     if (!empty($cond['views'])) $columns.=', v.views';
     if (!empty($cond['subscr']) || !empty($cond['posted'])) $columns.=', lv.bookmark, lv.subscribe, lv.posted ';
     if (!empty($cond['new_time']) && empty($cond['forums'])) $columns.=', CAST(COALESCE(t.last_post_time>lv.visit1,true) AND t.last_post_time>'.intval($cond['new_time']).' AS integer) AS new';
     if (!empty($cond['new_time']) && !empty($cond['forums'])) $columns.=', CAST(COALESCE(t.last_post_time>lv.visit1,true) AND t.last_post_time>COALESCE(ma.mark_time,0) AND t.last_post_time>'.intval($cond['new_time']).' AS integer) AS new';
     if (!empty($cond['polls'])) $columns.=', pl.id AS poll';
-    if (empty($cond['forums'])) $columns.=', CASE WHEN t.hurl!=\'\' THEN CONCAT(t.hurl,\'/\') ELSE CONCAT(CAST(t.id AS CHAR),\'/\') END AS t_hurl';
+    if (empty($cond['forums'])) $columns.=', CASE WHEN t.hurl!=\'\' THEN CONCAT(t.hurl,\'/\') ELSE CONCAT(CAST(t.id AS CHAR(11)),\'/\') END AS t_hurl';
     if (!empty($cond['attach'])) $columns.=', TRIM(file.fkey) AS fkey, file.filename, file.size, file.format, file.extension';
     if (!empty($cond['first']) && !empty($cond['attach_count'])) $columns.=', (SELECT COUNT(*) FROM '.DB_prefix.'file fac WHERE fac.oid=p2.id AND fac.type=1) AS attach_count';
     if (!empty($cond['curator'])) $columns.=', cur.id AS curator_id, cur.login AS curator_login, cur.display_name AS curator_display_name';
@@ -268,10 +268,10 @@ class Library_topic extends Library {
 
     if (!empty($cond['user'])) $columns.=', u.login, u.display_name, u.gender, u.location, u.signature, u.avatar, u.status, '.
       'g.level, CASE WHEN u.title!=\'\' AND custom_title=\'1\' THEN u.title ELSE g.name END AS user_title, g.links_mode, '.
-      'ue.post_count, ue.rating AS user_rating, ue.warnings, ue.reg_date, CAST(u.status=\'2\' OR ue.banned_till>='.intval(Library::$app->time).' AS int) AS banned, ue.banned_till';
-    if (!empty($cond['topics'])) $columns.=', t.title AS t_title, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR) END,\'/\') AS full_hurl, f.id AS fid, f.title AS f_title, f.hurl AS f_hurl';
+      'ue.post_count, ue.rating AS user_rating, ue.warnings, ue.reg_date, CAST(u.status=\'2\' OR ue.banned_till>='.intval(Library::$app->time).' AS INTEGER) AS banned, ue.banned_till';
+    if (!empty($cond['topics'])) $columns.=', t.title AS t_title, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl, f.id AS fid, f.title AS f_title, f.hurl AS f_hurl';
     if (!empty($cond['relation'])) $columns .= ', rl.type AS relation';
-    if (!empty($cond['ratings'])) $columns .= ', CAST(r.value IS NOT NULL AS INT) AS rated';
+    if (!empty($cond['ratings'])) $columns .= ', CAST(r.value IS NOT NULL AS INTEGER) AS rated';
     if (empty($cond['notext'])) $columns.= ', tx.data AS text, tx.tx_lastmod '; // если не указана выборка "без текста", то получаем и текст сообщения
     if (!empty($cond['blocklinks'])) $columns.= ', blcklink.data AS blocklinks'; // если указана загрузка данных о блочных ссылках
 
