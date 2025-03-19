@@ -899,7 +899,7 @@ class Application {
       if (defined('CONFIG_session_path') && CONFIG_session_path) session_save_path(CONFIG_session_path); // если в настройках выставлено сохранение сессий в отдельный путь
 
   // TODO: возможно, вынести часть параметров сессии в конфиг
-      session_set_cookie_params(false, $this->url('/'), false, !empty($_SERVER['HTTPS']), true); // последний параметр повышает безопасность cookies, делая их недоступными для JavaScript, если броузер пользователя такое поддерживает
+      session_set_cookie_params(false, $this->url('/'), false, $this->is_https(), true); // последний параметр повышает безопасность cookies, делая их недоступными для JavaScript, если броузер пользователя такое поддерживает
       session_start();
     }
     if (!isset($_SESSION['starttime'])) $_SESSION['starttime'] = $this->time;
@@ -1299,8 +1299,7 @@ class Application {
   /** Преобразует путь относительно корня движка в путь относитльно корня сайта
    *
    * @param string $rel_path Часть пути относительно корня
-   * @param boolean $fullpath
-   */
+      */
   function url($rel_path) {
     /*          if ($this->sitepath==='/') $site_path=''; // чтобы избежать двойного / в пути к корню.
       else $site_path = $this->sitepath;
@@ -1311,6 +1310,13 @@ class Application {
     return $this->sitepath.$rel_path; // после дорабтки алгоритма в $this->sitepath URL всегда кончается на /
   }
 
+  /** Проверяет, что запрос нужно обрабатывать как https (требуется для методов http и session) 
+   * @return boolean TRUE, если нужно использовать HTTPS.
+  */
+  function is_https() {
+    return $this->get_opt('force_https') || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off');
+  }
+
   /** Возвращает полную ссылку вида http://имя_сайта/путь или https://имя_сайта/путь из ссылки относительно корня сайта
    * При включенной опции force_https всегда будет возвращать URL с https
    *
@@ -1318,7 +1324,7 @@ class Application {
    * @return string Полная ссылка
    */
   function http($path) {
-    $result = $this->get_opt('force_https') || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off') ? 'https://' : 'http://';
+    $result =  $this->is_https() ? 'https://' : 'http://';
     $result.= $_SERVER['HTTP_HOST'].$path;
     return $result;
   }
