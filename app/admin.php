@@ -37,7 +37,7 @@ class Application_Admin extends Application {
     if ($_COOKIE[$cookie_name]!==$this->gen_admin_cookie($udata,$long)) return false;
     if ($long) {
       $cookie_time = $this->time + $this::LONG_COOKIE_TIME;
-      setcookie($cookie_name, $_COOKIE[$cookie_name], $cookie_time, $this->sitepath.'admin/', false, !empty($_SERVER['HTTPS']), true);
+      setcookie($cookie_name, $_COOKIE[$cookie_name], $cookie_time, $this->sitepath.'admin/', false, $this->is_https(), true);
     }
     return true;
   }
@@ -111,7 +111,7 @@ class Application_Admin extends Application {
           $cookie_time = !empty($_POST['long']) ? $this->time+$this::LONG_COOKIE_TIME : false;
 
           $path = $this->sitepath;
-          setcookie($cookie_name,$this->gen_admin_cookie($userdata,!empty($_POST['long'])),$cookie_time,$path.'admin/',false,!empty($_SERVER['HTTPS']),true);
+          setcookie($cookie_name,$this->gen_admin_cookie($userdata,!empty($_POST['long'])),$cookie_time,$path.'admin/',false,$this->is_https(),true);
           $this->redirect(substr($_SERVER['REQUEST_URI'],strlen($path)));
         }
       }
@@ -123,7 +123,7 @@ class Application_Admin extends Application {
   function action_logout() {
     $path = $this->sitepath;
     $cookie_name=(defined('CONFIG_session')) ?  CONFIG_session.'_a' : 'ib_sid_a';
-    setcookie($cookie_name,'',-1,$path.'admin/',false,!empty($_SERVER['HTTPS']),true);
+    setcookie($cookie_name,'',-1,$path.'admin/',false,$this->is_https(),true);
     $this->redirect('/');
   }
 
