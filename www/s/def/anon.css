@@ -11,6 +11,9 @@ font-weight: bold;  position: relative }
 #ib_all .post pre { display: block; white-space: pre; overflow: auto }
 #ib_all .post blockquote { border: #ddd 1px solid; font-size: 90%; background: #f4f4ff; padding: 4px; overflow: auto; max-height: 7em; margin: 5px 20px }
 #ib_all .post .ptext img { max-width: 100% }
+#ib_all .post .unfolded { max-height: none }
+#ib_all .post .foldlink { position: relative; display: block; left: 86%; text-align: center; width: 7em; background: #234; padding: 5px; 
+color: #fff; font-weight: bold; text-decoration: none; margin-bottom: -1.3em; clear: both;  }
 
 #ib_all .post .attach ul { list-style: none; padding: 0; margin: 0}
 #ib_all .post .attach li { padding: 0 20px }
