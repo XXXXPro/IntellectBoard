@@ -1,5 +1,7 @@
 {% import 'macro.tpl' as macros %}
-<div class="anon_comment post fadeout{% if item.marked %} marked{% endif %}" id="p{{ item.id }}">{% if get_opt('avatars','user') %}<div class="user_info">
+<div class="anon_comment post fadeout{% if item.marked %} marked{% endif %}" id="p{{ item.id }}">
+{% if item.uid!=2 and (item.relation!='ignore' or opts.filter=='nohide') %}
+{% if get_opt('avatars','user') %}<div class="user_info">
 {{ macros.avatar(item.uid,item.avatar) }}</div>{% endif %}
 <div class="postin">
 <div class="sender pu{% if item.uid==topic.first_post_uid %} topic_author{% endif %}{% if item.uid==topic.owner and topic.owner>0 %} topic_curator{% endif %}">
@@ -25,4 +27,9 @@
 <div class="actions">
 <a href="#reply">Ответить</a></div>
 <br style="clear: both" />
+{% elseif item.relation=='ignore' %}
+<div class="postsys">Сообщение пользователя {{ macros.user(item.author,item.uid) }} скрыто, так как он внесен вами в список игнорируемых. </div>
+{% else %}
+<div class="postsys">{{ item.text|raw }} </div>
+{% endif %}
 </div>
