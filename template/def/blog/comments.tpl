@@ -6,6 +6,7 @@
 <div class="comments">
 {% for post in posts %}
 <div class="comment post{% if post.marked %} marked{% endif %} fadeout" itemscope itemtype="http://schema.org/UserComments" id="p{{ post.id }}">
+{% if post.uid!=2 and (post.relation!='ignore' or opts.filter=='nohide') %}
 {% if get_opt('avatars','user') %}<div class="comment_avatar">
 {{ macros.avatar(post.uid,post.avatar) }}
 </div>{% endif %}
@@ -20,5 +21,11 @@
 {% include 'stdforum/postact.tpl' %}
 </div>
 <div class="comment_text" itemprop="commentText">{{ post.text|raw }}</div>
-</div></div>
+</div>
+{% elseif post.relation=='ignore' %}
+<div class="postsys">Сообщение пользователя {{ macros.user(post.author,post.uid) }} скрыто, так как он внесен вами в список игнорируемых. </div>
+{% else %}
+<div class="postsys">{{ post.text|raw }} </div>
+{% endif %}
+</div>
 {% endfor %}
