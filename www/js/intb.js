@@ -66,22 +66,19 @@ function IntB_main(opts) {
   });
 
   // действия по разворачиванию частей сообщений: цитат, блоков кода и спойлеров
-  $('blockquote').each(function (k,v) {
-    if (v.scrollHeight>v.clientHeight) {
-      $('<a href="#" class="foldlink">Развернуть</a>').insertBefore(v).click(function (e) {
-        e.preventDefault();
-        $(this).parent().find('blockquote').toggleClass('unfolded');
-      });
+  $('blockquote, code').each(function (k,v) {
+    function setFolding() {
+      if (v.scrollHeight > v.clientHeight && !$('> .foldlink', v.parentNode).length) {
+        $('<a href="#" class="foldlink">Развернуть</a>').insertBefore(v).click(function (e) {
+	        e.preventDefault();
+	        $(v).toggleClass('unfolded');
+        });
+      }
     }
+    setFolding();
+    $('img', v).on('load', setFolding);
   });
-  $('code').each(function (k,v) {
-    if (v.scrollHeight > v.clientHeight) {
-      $('<a href="#" class="foldlink">Развернуть</a>').insertBefore(v).click(function (e) {
-        e.preventDefault();
-        $(this).parent().find('code').toggleClass('unfolded');
-      });
-    }
-  });
+
   $('.ptext .cutlink').click(function (e){
      e.preventDefault();
      $(e.target).next().show();
@@ -221,16 +218,20 @@ function IntB_main(opts) {
   if (opts.wysiwyg && opts.wysiwyg!='0' && bbcode_nodes.length) {
     head.load([scepath+'minified/themes/default.min.css',scepath+'minified/jquery.sceditor.min.js',
       opts.basedir+'js/sceditor/minified/formats/bbcode.js',scepath+'languages/ru.js'],function() {
+      var exclude = 'print,date,time,ltr,rtl,table,indent,cut,copy,paste,pastetext,horizontalrule,outdent'+(typeof(opts.emoticons)==="undefined" ? ",emoticon" : "");
+      if (/Android|webOS|Phone|iPad|iPod|Tablet|BlackBerry|Mobile|Opera Mini/i.test(navigator.userAgent)) {
+        exclude+=",left,center,right,justify,subscript,superscript,font,size,color,removeformat";
+      }
       bbcode_nodes.sceditor({
         format: 'bbcode',
         locale: "ru",
         style: opts.basedir+"js/sceditor/minified/jquery.sceditor.default.min.css",
-        toolbarExclude: 'print,date,time,ltr,rtl,table,indent,cut,copy,paste,pastetext,horizontalrule,outdent'+(typeof(opts.emoticons)==="undefined" ? ",emoticon" : ""),
+        toolbarExclude: exclude,
         emoticonsEnabled : typeof(opts.emoticons)!=="undefined",
         emoticonsRoot : opts.emoticonsRoot,
         emoticons : opts.emoticons,
         autoExpand : true,
-        resizeEnabled : true,
+        resizeEnabled : true
       });
       if (opts.wysiwyg==1) bbcode_nodes.sceditor('instance').sourceMode(true);
       bbcode_nodes.sceditor('instance').keyDown(function(e) {        
@@ -314,7 +315,7 @@ function IntB_main(opts) {
   var lightbox_nodes = $(".post a[href$='.jpg'], .post a[href$='.png'], .post a[href$='.gif'], .attach_preview a.lightbox");
   if (lightbox_nodes.length) {
     head.load([opts.basedir+'js/colorbox/colorbox.css',opts.basedir+'js/colorbox/jquery.colorbox-min.js',opts.basedir+'js/colorbox/i18n/jquery.colorbox-ru.js'], function() {
-     lightbox_nodes.attr('rel','attach').colorbox({'rel':'attach'});
+     lightbox_nodes.attr('rel','attach').colorbox({'rel':'attach', 'maxWidth': '100%', 'maxHeight': '100%' });
     });
   }
   $('.pu .username').click(function (e) {
