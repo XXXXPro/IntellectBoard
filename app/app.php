@@ -367,8 +367,8 @@ class Application {
           list($uid, $key) = explode('-', $_COOKIE[$session_name.'_long']);
           $userdata = $this->load_user($uid, 1);
           $rightkey = $this->gen_long_key($userdata, $session_name); // генерируем правильный длинный ключ для данного пользователя
-          if ($_COOKIE[$session_name.'_long'] == $rightkey && !empty($userata))  // вторая проверка нужна на случай удаления пользователя за время его отсутствия на форуме
-            $this->set_user($userdata, 14); // если ключ правильный, выставляем данные о пользователе и создаем его сессию, а так же обновляем cookie еще на 14 дней
+          if ($_COOKIE[$session_name.'_long']===$rightkey && !empty($userdata)) // вторая проверка нужна на случай удаления пользователя за время его отсутствия на форуме
+            $this->set_user($userdata, 90); // если ключ правильный, выставляем данные о пользователе и создаем его сессию, а так же обновляем cookie еще на 14 дней
 // хотя в принципе длинного ключа достаточно для аутентификации, но взятие данных из сессии позволит выполнять аутентификацию быстрее, поэтому мы ее и создаем
           else
             $this->load_guest(); // если ключи не совпали, пользователь будет гостем
@@ -1024,7 +1024,7 @@ class Application {
     if ($long) {
       $key = $this->gen_long_key($userdata);
       $period = $this->time + $long * 24 * 60 * 60;
-      setcookie(CONFIG_session.'_long', $key, $period, $this->url('/'), false, !empty($_SERVER['HTTPS']), true);
+      setcookie(CONFIG_session.'_long', $key, $period, $this->url('/'), false, $this->is_https(), true);
     }
 //      unset($userdata['password']);
     $_SESSION['IntB_auth'] = 1; // признак того, что сессия корректно инициализирована

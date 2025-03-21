@@ -120,7 +120,7 @@ class Library_userlib extends Library {
 
   /** Выход с форума **/
   function do_logout() {
-    if (isset($_COOKIE[CONFIG_session.'_long'])) setcookie(CONFIG_session.'_long','',1,Library::$app->url('/'),false,isset($_SERVER['HTTPS']),true);
+    if (isset($_COOKIE[CONFIG_session.'_long'])) setcookie(CONFIG_session.'_long','',1,Library::$app->url('/'),false,Library::$app->is_https(),true);
     Library::$app->set_user(Library::$app->load_guest());
     if ($ext_lib_name = Library::$app->get_opt('user_external_lib')) { // если задана библиотека внешней авторизации в настройках
       $ext_lib = Library::$app->load_lib($ext_lib_name,false); // загружаем ее
