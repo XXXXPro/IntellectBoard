@@ -266,16 +266,82 @@ class Library_bbcode extends Library {
     else return '<div class="nolevel">У вас недостаточный уровень для просмотра этого сообщения.</div>';
   }
 
-  /** Обработка ссылок, вставленных без [url] или <a href> **/
+  function beautify_link($matches) {
+    $url_parts = parse_url($matches[3]);
+
+    if (!empty($url_parts['scheme']) && !in_array(strtolower($url_parts['scheme']),array('http','https','ftp','tg','magnet'))) return '<!--noindex--><span class="bad_link">*** Некорректный протокол: подозрительная или повреждённая ссылка ***</span><!--/noindex-->';
+    $scheme = empty($url_parts['scheme']) ? '' : $url_parts['scheme'];
+    if (mb_strlen(trim($matches[5]))<2) return '<!--noindex--><span class="bad_link">*** Попытка поискового спама: ссылка из одного символа ***</span><!--/noindex-->';
+    
+    if ($matches[3]!==$matches[5]) return $matches[0]; // if link description not match URL, making no changes
+
+      // processing URL parts
+    $host = (!empty($url_parts['host'])) ? mb_strtoupper(mb_substr($url_parts['host'],0,1)).mb_substr($url_parts['host'],1) : '';
+    $path = (empty($url_parts['path']) || $url_parts['path']==='/') ? '' : $path = urldecode($url_parts['path']);
+    $query = (!empty($url_parts['query'])) ? $url_parts['query'] : '';	
+    $fragment = (!empty($url_parts['fragment'])) ? '#'.urldecode($url_parts['fragment']) : '';    
+    
+    if (strtolower(substr($host,-14))==='.wikipedia.org' && mb_substr($path,0,6)==='/wiki/') $new_link = 'Wikipedia: '.str_replace('_',' ',mb_substr($path,6));
+    elseif (strtolower(substr($host,-10))==='google.com' && $path==='/search'  && substr($query,0,2)==='q=') {
+      $pos = strpos($query,'&');
+      if ($pos!==false) $query=substr($query,0,$pos);
+        $new_link = "Google: ".urldecode(substr($query,2));
+    }
+    elseif ((strtolower(substr($host,-5))==='ya.ru' || strtolower(substr($host,-9))==='yandex.ru') && $path==='/search/'  && substr($query,0,5)==='text=') {
+      $pos = strpos($query,'&');
+      if ($pos!==false) $query=substr($query,0,$pos);
+        $new_link = "Yandex: ".urldecode(substr($query,5));
+    }
+    elseif (strtolower(substr($host,-4))==='t.me' || $scheme=='tg') $new_link = 'Telegram: '.mb_substr($url_parts['path'],1);
+    elseif (strtolower(substr($host,-11))==='youtube.com' || strtolower(substr($host,-8))==='youtu.be') {
+      $new_link = 'YouTube: ';		
+      if ($path==='/watchv') {
+        $pos = strpos($query,'&');
+        if ($pos!==false) $new_link.=substr($query,0,$pos);
+        else $new_link.=$query;
+      }
+      elseif ($path==='/watch') {
+        if (preg_match('|v=([\w\-]+)|',$query,$match)) $new_link.=$match[1];
+        else $new_link = $matches[5]; // if v 
+      }
+      else $new_link.=mb_substr($path,1);
+      if (preg_match('|t=(\d+)|',$query,$match)) { // if time offset specified
+        $time = intval($match[1]);
+        $min = floor($time/60);
+        $sec = $time % 60;
+        $new_link.=" ($min:$sec)";
+      }
+    }
+    else {
+      if ($query && strpos($path,'search')===false && strpos($path,'watch')===false && !preg_match('/search=|text=|query=|filter=/i',$query)) $query='?...';
+      elseif (strlen($query)>32) $query=substr($query,0,32).'…';
+      
+      $host = idn_to_utf8($host);
+      if (empty($path)) $host=mb_strtoupper(mb_substr($host,0,1)).mb_substr($host,1);		
+      if (mb_strtolower($host)==='vk.com' || mb_strtolower($host)==='m.vk.com') $host='VK.com';
+      
+      if (mb_strlen($path)>48) $path = mb_substr($path,0,6).'…'.mb_substr($path,-6);
+      if (mb_strlen($fragment)>32) $path = mb_substr($path,0,32).'…';
+      
+      $new_link = $host.$path.$query.$fragment;
+    }
+
+    return str_replace('>'.$matches[3].'<','>'.$new_link.'<',$matches[0]);
+  }
+
+  /** Обработка ссылок, вставленных без [url] или <a href>. 
+   * Сюда же добавлен вызов beautify_link для каждой найденной ссылки с целью улучшения читаемости **/
   function process_links($text) {
     if (empty(self::$link_search) || empty(self::$link_replace)) {
-      $domains = 'aero|biz|com|edu|gov|info|int|mobi|name|net|org|pro|tel|travel|online|guru|club|ru|su|moscow|eu|ua|com\\.ua|kz|kg|by|uz|ge|az|am|co\\.il'; // список доменов верхнего уровня, которые распознаем
+      $domains = 'aero|biz|com|edu|gov|info|int|mobi|name|net|org|pro|tel|travel|online|guru|club|ru|su|moscow|eu|ua|com\\.ua|kz|kg|by|uz|ge|az|be|am|co\\.il'; // список доменов верхнего уровня, которые распознаем
       self::$link_search[]='/(^|\s)((www\.)?[\w.\-]+\.('.$domains.')(:[1-9][0-9]*)?([\/?][^\s"]*?)?)([,\.!?]?([\s"\']|$))/is'; self::$link_replace[]='$1<a href="http://$2">$2</a>$7';
       self::$link_search[]='/(^|\s)((https?:\/\/)?[\w.\-]+\.('.$domains.')(:[1-9][0-9]*)?([\/?][^\s"]*?)?)([,\.!?]?([\s"\']|$))/is'; self::$link_replace[]='$1<a href="$2">$2</a>$7';
       self::$link_search[]='/(^|\s)([а-яА-Я0-9\.\-]+\.(рф|РФ|москва|МОСКВА|бел|БЕЛ)(:[1-9][0-9]*)?([\/?][^\s"]*?)?)([,\.!?]?([\s"\']|$))/isu'; self::$link_replace[]='$1<a href="http://$2">$2</a>$6';
       self::$link_search[]='/(^|\s)(https?:\/\/[а-яА-Я0-9\.\-]+\.(рф|РФ|москва|МОСКВА|бел|БЕЛ)(:[1-9][0-9]*)?([\/?][^\s"]*?)?)([,\.!?]?([\s"\']|$))/isu'; self::$link_replace[]='$1<a href="$2">$2</a>$6';      
     }
     $text = preg_replace(self::$link_search,self::$link_replace,$text); // и все замены делаем одним regexpом
+
+    $text = preg_replace_callback('|<a\s+([^>]*?)href=(["\']?)(\S+)\2([^>]*)>(.*?)</a\s*>|isu',array($this,'beautify_link'),$text);
     return $text;
   }
 
