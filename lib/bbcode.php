@@ -32,13 +32,17 @@ class Library_bbcode extends Library {
   **/
   function parse_msg(&$params,$text=false) {
     if (!$text) $text = $params['text'];
-    $randstr = hash('sha256',Library::$app->time.rand()); // случайная строка
+    $randstr = hash('sha256',$this->app()->time.rand()); // случайная строка
     if (!empty($params['bcode'])) { // если включены теги, сначала обрабатываем тег [php], так как highlight_string не может обрабатывать код, прошедший через htmlspecialchars
        $php_count = preg_match_all('|\[php\](.*?)\[/php\]|s',$text,$php_match);
       for ($i=0; $i<$php_count; $i++) $text=str_replace($php_match[0][$i],'++php+'.$randstr.'+'.$i.'++',$text); // заменяем все [code] на спецпоследовательности
     }
 
     if (empty($params['html'])) $text = htmlspecialchars($text); // если использование HTML запрещено, экранируем все символы
+    else {
+      $cleaner = new Library_cleaner;
+      $text = $cleaner->clean($text,Library_cleaner::TAGS_ALL);  // по умолчанию разрешаем все теги, включенные в список cleanerа
+    }
     if (!empty($params['bcode'])) $text=str_ireplace(array('[code]','[/code]'),array('<code>','</code>'),$text); // если включено использование тегов bcode, производим предварительное преобразование тега code в HTML
     // выявляем те последовательности, которые не должны изменяться в процессе обработки (теги <code> и [nocode])
     if (!empty($params['html']) || !empty($params['bcode'])) {
@@ -64,18 +68,19 @@ class Library_bbcode extends Library {
     if (!empty($params['smiles'])) $text = $this->process_smiles($text);
     // if (!empty($params['typograf']))
     $text = $this->process_typograf($text);
-    $text = $this->check_bad_links($text);
+
     $links_mode = empty($params['links_mode']) ? 'allow' : $params['links_mode']; // по умолчанию ссылки разрешены
+    $text = $this->clean_html($text,$links_mode); // очистка HTML от запрещённых тегов    
     $text = $this->strip_links($text,$links_mode); // удаление ссылок в случае необходимости
 
     if (!empty($params['attach'])) {
-      $preview_x = Library::$app->get_opt('posts_preview_x') or 240;
-      $preview_y = Library::$app->get_opt('posts_preview_y') or 180;
+      $preview_x = $this->app()->get_opt('posts_preview_x') or 240;
+      $preview_y = $this->app()->get_opt('posts_preview_y') or 180;
       for ($i=0, $count=count($params['attach']); $i<$count; $i++) {
-          $attach_link = '<a href="'.Library::$app->url("f/up/1/".$params['attach'][$i]['oid'].'-'.$params['attach'][$i]['fkey'].'/'.htmlspecialchars($params['attach'][$i]['filename'])).'" class="attach">';
+          $attach_link = '<a href="'.$this->app()->url("f/up/1/".$params['attach'][$i]['oid'].'-'.$params['attach'][$i]['fkey'].'/'.htmlspecialchars($params['attach'][$i]['filename'])).'" class="attach">';
           if ($params['attach'][$i]['format']==="image") {
             $attach_full = $attach_link.'<img src="'.
-            Library::$app->url('f/up/1/pr/'.$preview_x.'x'.$preview_y.'/'.$params['attach'][$i]['oid'].'-'.$params['attach'][$i]['fkey'].'.'.$params['attach'][$i]['extension']).'" alt="{{ attach.filename }}" /></a>';
+            $this->app()->url('f/up/1/pr/'.$preview_x.'x'.$preview_y.'/'.$params['attach'][$i]['oid'].'-'.$params['attach'][$i]['fkey'].'.'.$params['attach'][$i]['extension']).'" alt="{{ attach.filename }}" /></a>';
           }
           else { 
             $attach_full = $attach_link.htmlspecialchars($params['attach'][$i]['filename']).' ('.ceil($params['attach'][$i]['size']/1024.0).' Кб)</a>';
@@ -87,34 +92,8 @@ class Library_bbcode extends Library {
       }
     }
 
-    if (!empty($params['bcode'])) {
-      // обработка blocklink
-      preg_match_all('|\[blocklink=(https?://[^>"\'\]\s]+)\]|i', $text, $matches);
-      if (!empty($params['blocklinks'])) $links = json_decode($params['blocklinks'], true);
-      else $links = array();  
-
-      foreach ($matches[1] as $oldurl) {
-        if (!empty($links[$oldurl])) $linkdata= $links[$oldurl];
-        else $linkdata=array();
-        if (!empty($linkdata['url'])) $url=$linkdata['url'];
-        else $url = $oldurl;
-        $domain = parse_url($url,PHP_URL_HOST);
-        if (!empty($linkdata['title'])) {
-          $linkblock = '<a class="blocklink" href="'.htmlspecialchars($url).'"><b>'.htmlspecialchars($linkdata['title']).'</b>';
-          $linkblock.= '<span class="linkdesc">';
-          if (!empty($linkdata['image'])) $linkblock.= '<img src="'.$linkdata['image'].'" alt="'.htmlspecialchars($linkdata['title']).'" class="linkimg" />';
-          if (!empty($linkdata['desc'])) $linkblock .= htmlspecialchars($linkdata['desc']);
-          $linkblock.='</span>';
-          $linkblock.= '<span class="linkdomain">'.htmlspecialchars($domain).'</span>';
-          $linkblock.= '</a>';
-        }
-        else {
-          $linkblock = '<a class="blocklink" href="'.htmlspecialchars($url).'"><b>'.htmlspecialchars($url).'</b><span class="linkdomain">'. htmlspecialchars($domain).'</span></a>';
-        }
-        $text = str_ireplace('[blocklink='.$oldurl.']',$linkblock,$text);
-      }
-    }
-
+    $text = $this->process_videos($text);
+    if (!empty($params['bcode'])) $text = $this->process_blocklinks($text);
 
     // обратная замена спецпоследовательностей (производится в обратном порядке)
     if (!empty($php_count)) for ($i=0; $i<$php_count; $i++) $text=str_replace('++php+'.$randstr.'+'.$i.'++',highlight_string($php_match[1][$i],true),$text); // заменяем все [code] на спецпоследовательности
@@ -125,11 +104,12 @@ class Library_bbcode extends Library {
 
    /** Упрощенная обработка BBCode для подписей: вызываются только preocess_bcode и process_smiles **/
    function parse_sig($text,$mode='none') {
-     $text = htmlspecialchars($text);
+    $text = htmlspecialchars($text);
     $text = $this->process_bcode($text,true,true); // в параметрах передается, какие теги BBCode должны сработать
     $text = $this->process_smiles($text);
     // TODO: проверка на наличие прав размещать ссылки вообще
-    $text = $this->check_bad_links($text);
+    $text = $this->clean_html($text,$mode);
+    
     $text = $this->strip_links($text,$mode); // удаление ссылок в случае необходимости
     $text = nl2br($text);
     return $text;
@@ -197,10 +177,6 @@ class Library_bbcode extends Library {
     if (empty(self::$ext_search) || empty(self::$ext_replace)) {
       self::$ext_search[]='|\[audio\](https?://[\d\w\.:/\?][^\]"\']+)\[/audio\]|'; self::$ext_replace[]='<audio src="$1" controls>Ваш броузер не поддерживает воспроизведение аудио. Попробуйте <a href="$1">скачать файл</a>.</audio>';
       self::$ext_search[]='|\[audio=(https?://[\d\w\.:/\?][^\]"\']+)\]|'; self::$ext_replace[]='<audio src="$1" controls>Ваш броузер не поддерживает воспроизведение аудио. Попробуйте <a href="$1">скачать файл</a>.</audio>';
-      self::$ext_search[]='|\[video\](https?://[\d\w\.:/\?][^\]"\']+)\[/video\]|is'; self::$ext_replace[]='<video src="$1" controls>Ваш броузер не поддерживает воспроизведение видео. Попробуйте <a href="$1">скачать файл</a>.</video>';
-      self::$ext_search[]='|\[video=(https?://[\d\w\.:/\?][^\]"\']+)\]|is'; self::$ext_replace[]='<video src="$1" controls>Ваш броузер не поддерживает воспроизведение видео. Попробуйте <a href="$1">скачать файл</a>.</video>';      
-      self::$ext_search[]='~\[youtube\](https?://(youtu\.be|youtube\.com|www\.youtube\.com)/(watch\?v=)?)?([A-Za-z0-9_&=\-]+)\[/youtube\]~is'; self::$ext_replace[]='<iframe width="560" height="315" src="https://www.youtube.com/embed/$4" frameborder="0" allowfullscreen></iframe>';
-      self::$ext_search[]='~\[youtube=https?://(youtu\.be|youtube\.com|www\.youtube\.com)/(watch\?v=)?([A-Za\-z0-9_&=\-]+)\]~is'; self::$ext_replace[]='<iframe width="560" height="315" src="https://www.youtube.com/embed/$3" frameborder="0" allowfullscreen></iframe>';
 
       self::$ext_search[]='|\[left\](.*?)\[/left\]|s'; self::$ext_replace[]='<div style="text-align: left">$1</div>';
       self::$ext_search[]='|\[right\](.*?)\[/right\]|s'; self::$ext_replace[]='<div style="text-align: right">$1</div>';
@@ -262,7 +238,7 @@ class Library_bbcode extends Library {
   /** Проверка уровня доступа пользователя для просмотра скрытого текста **/
   function level_check($matches) {
     $level=intval($matches[1]);
-    if ($level>=Library::$app->userdata['level']) return $matches[2];
+    if ($level>=$this->app()->userdata['level']) return $matches[2];
     else return '<div class="nolevel">У вас недостаточный уровень для просмотра этого сообщения.</div>';
   }
 
@@ -345,6 +321,36 @@ class Library_bbcode extends Library {
     return $text;
   }
 
+  /** Обработка тега blocklink, показывающего ссылку с preview на основе данных OpenGraph */
+  function process_blocklinks($text) {
+    // обработка blocklink
+    preg_match_all('|\[blocklink=(https?://[^>"\'\]\s]+)\]|i', $text, $matches);
+    if (!empty($params['blocklinks'])) $links = json_decode($params['blocklinks'], true);
+    else $links = array();  
+
+    foreach ($matches[1] as $oldurl) {
+      if (!empty($links[$oldurl])) $linkdata= $links[$oldurl];
+      else $linkdata=array();
+      if (!empty($linkdata['url'])) $url=$linkdata['url'];
+      else $url = $oldurl;
+      $domain = parse_url($url,PHP_URL_HOST);
+      if (!empty($linkdata['title'])) {
+        $linkblock = '<a class="blocklink" href="'.htmlspecialchars($url).'"><b>'.htmlspecialchars($linkdata['title']).'</b>';
+        $linkblock.= '<span class="linkdesc">';
+        if (!empty($linkdata['image'])) $linkblock.= '<img src="'.$linkdata['image'].'" alt="'.htmlspecialchars($linkdata['title']).'" class="linkimg" />';
+        if (!empty($linkdata['desc'])) $linkblock .= htmlspecialchars($linkdata['desc']);
+        $linkblock.='</span>';
+        $linkblock.= '<span class="linkdomain">'.htmlspecialchars($domain).'</span>';
+        $linkblock.= '</a>';
+      }
+      else {
+        $linkblock = '<a class="blocklink" href="'.htmlspecialchars($url).'"><b>'.htmlspecialchars($url).'</b><span class="linkdomain">'. htmlspecialchars($domain).'</span></a>';
+      }
+      $text = str_ireplace('[blocklink='.$oldurl.']',$linkblock,$text);
+    }
+    return $text;
+  }
+
   /** Типографирование текста **/
   function process_typograf($text) {
     $text = str_replace(
@@ -363,10 +369,10 @@ class Library_bbcode extends Library {
     $to = array();
     for ($i=0, $count=count($smiles); $i<$count; $i++) {
       $from[]=$smiles[$i]['code']; // обработка символов < и >, так как в $text они приходят уже заэкранированными
-      $to[]='<img class="smile" src="'.Library::$app->url('sm/'.$smiles[$i]['file']).'" alt="'.htmlspecialchars($smiles[$i]['descr']).'" />';
+      $to[]='<img class="smile" src="'.$this->app()->url('sm/'.$smiles[$i]['file']).'" alt="'.htmlspecialchars($smiles[$i]['descr']).'" />';
       if (strpos($smiles[$i]['code'],'>')!==false || strpos($smiles[$i]['code'],'<')!==false) { // если в коде смайлика есть символы < или >, нужна доп. обработка, так как они при выключенном HTML придут уже закодированными
         $from[]=str_replace('>','&gt;',str_replace('<','&lt;',$smiles[$i]['code'])); // обработка символов < и >, так как в $text они приходят уже заэкранированными
-        $to[]='<img class="smile" src="'.Library::$app->url('sm/'.$smiles[$i]['file']).'" alt="'.htmlspecialchars($smiles[$i]['descr']).'" />';
+        $to[]='<img class="smile" src="'.$this->app()->url('sm/'.$smiles[$i]['file']).'" alt="'.htmlspecialchars($smiles[$i]['descr']).'" />';
       }
     }
     if ($count) $text = str_replace($from,$to,$text);
@@ -376,11 +382,11 @@ class Library_bbcode extends Library {
   /** Загружает данные об имеющихся смайликах.  **/
   function load_smiles() {
     if (empty(self::$smiles)) {
-      self::$smiles = Library::$app->get_cached('Smiles');
+      self::$smiles = $this->app()->get_cached('Smiles');
       if (self::$smiles===NULL) { // если в кеше смайликов нет или кеш не работает, получаем их из базы
         $sql = 'SELECT code,file,descr,mode FROM '.DB_prefix.'smile ORDER BY sortfield';
-        self::$smiles = Library::$app->db->select_all($sql);
-        Library::$app->set_cached('Smiles',self::$smiles);
+        self::$smiles = $this->app()->db->select_all($sql);
+        $this->app()->set_cached('Smiles',self::$smiles);
       }
     }
     return self::$smiles;
@@ -397,13 +403,81 @@ class Library_bbcode extends Library {
     return $result;
   }
 
+  function process_videos($text) {
+      $text = preg_replace_callback('|\[video\](https?://[\d\w\.:/\?][^\]"\']+)\[/video\]|is',array($this,'process_video_link'),$text);
+      $text = preg_replace_callback('|\[video=(https?://[\d\w\.:/\?][^\]"\']+)\]|is',array($this,'process_video_link'),$text);
+      $text = preg_replace_callback('|\[youtube\](https?://[\d\w\.:/\?][^\]"\']+)\[/youtube\]|is',array($this,'process_video_link'),$text);
+      $text = preg_replace_callback('|\[youtube=(https?://[\d\w\.:/\?][^\]"\']+)\]|is',array($this,'process_video_link'),$text);
+      return $text;
+  }
+
+  function process_video_link($matches) {
+    if (strpos($matches[1],':')===false && strpos($matches[1],'.')===false && strpos($matches[1],'/')===false) $matches[1]='https://youtube.com/watch?v='.$matches[1]; // случай [youtube]-тега, состоящего только из идентификатора
+    $parts = parse_url($matches[1]);
+    // в целях безопасности проверяем ссылки на то, что они начинаются с http/https
+    if (!empty($parts['scheme']) && !in_array($parts['scheme'],array('https','https'))) return 'INSECURE LINK REMOVED: '.htmlspecialchars($matches[1]).'! ';
+    $host = $parts['host'];
+    if ($host==='youtube.com' || $host==='www.youtube.com' || $host==='m.youtube.com') {
+        $id = substr($parts['query'],2);
+        $result = '<iframe width="560" height="315" src="https://www.youtube.com/embed/'.htmlspecialchars($id).'" loading="lazy" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+    }
+    elseif ($host==='youtu.be') {
+      $path = substr($parts['path'],1);
+      if (!empty($parts['query'])) $path.='?'.$parts['query'];
+        $result = '<iframe width="560" height="315" src="https://www.youtube.com/embed/'.htmlspecialchars($path).'" loading="lazy" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+    }
+    elseif ($host==='rutube.ru') { // RuTube
+      $path = str_replace('/video/','/play/embed/',$parts['path']);
+      if (!empty($parts['query'])) $path.='?'.$parts['query'];
+      $result = '<iframe width="720" height="405" src="https://rutube.ru'.htmlspecialchars($path).'" loading="lazy" frameBorder="0" allow="clipboard-write;" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
+    }
+    elseif ($host==='vkvideo.ru' || $host==='m.vkvideo.ru') { // VK video
+      list($oid,$id)=explode('_',str_replace('/video','',$parts['path']));
+      $result = '<iframe src="https://vkvideo.ru/video_ext.php?oid='.intval($oid).'&id='.intval($id).'&hd=2" width="853" height="480" loading="lazy" allow="encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>';
+    }
+    elseif ($host==='www.tiktok.com' || $host==='tiktok.com') { // TikTok
+      $tmp = explode('/',$parts['path']);
+      $result = '<blockquote class="tiktok-embed" cite="'.htmlspecialchars($parts['scheme'].'://'.$parts['host'].$parts['path']).'" data-video-id="'.htmlspecialchars($tmp[2]).'" style="max-width: 605px;min-width: 325px;" ></blockquote> <script async src="https://www.tiktok.com/embed.js"></script>';
+    }
+    elseif ($host==='runtime.video.cloud.yandex.net') {
+      $path = $parts['path'];
+      if (!empty($parts['query'])) $path.='?'.$parts['query'];
+      $result = '<iframe
+    frameborder="0"
+    scrolling="no"
+    allowfullscreen
+    loading="lazy"
+    allow="fullscreen; encrypted-media; accelerometer; gyroscope; picture-in-picture; clipboard-write; web-share; screen-wake-lock"
+    src="https://runtime.video.cloud.yandex.net'.htmlspecialchars($path).'"
+></iframe>';
+    }
+/*    elseif ($host==='dzen.ru') { // Dzen
+      // https://dzen.ru/video/watch/680672e24eacb911f0248efb
+
+      // oFka07bAIAAA
+      $path = str_replace('/video/','/play/embed/',$parts['path']);
+      if (!empty($parts['query'])) $path.='?'.$parts['query'];
+      $result = '<iframe width="480" height="270" src="https://dzen.ru/embed/oFka07bAIAAA?from_block=partner&from=zen&mute=0&autoplay=0&tv=0" allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture; encrypted-media" data-jSXmzd0lB="embed-iframe" frameborder="0" scrolling="no" allowfullscreen></iframe>';
+    } */
+   elseif ($host==='vimeo.com') { 
+      $path = substr($parts['path'],1).'?';
+      if (!empty($parts['query'])) $path.=$parts['query'].'&amp;';
+      $result = '<div style="padding:75% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/'.htmlspecialchars($path).'badge=0&amp;autopause=1&amp;player_id=0&amp;app_id=58479" loading="lazy" frameborder="0" allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="MOV_0100"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>';
+   }
+
+    else $result = '<video src="'.$matches[1].'" controls>Ваш броузер не поддерживает воспроизведение видео. Попробуйте <a href="'.$matches[1].'">скачать файл</a>.</video>';
+    return $result;
+  }
+
   /** Удаление картинок и ссылок с небезопасными адресами (вида javascript: или vbscript: ) в целях защиты от XSS-атак
   **/
-  function check_bad_links($text) {
-    $text = preg_replace('|<a[^>]+href=["\']?(\w+script:.*?)["\']?[^>]+>(.*?)</a>|i','<span class="bad_link">Небезопасная ссылка удалена!</span>',$text);
+  function clean_html($text,$links_mode) {
+/*    $text = preg_replace('|<a[^>]+href=["\']?(\w+script:.*?)["\']?[^>]+>(.*?)</a>|i','<span class="bad_link">Небезопасная ссылка удалена!</span>',$text);
     $text = preg_replace('|<img[^>]+src=["\']?(\w+script:.*?)["\']?[^>]+>|i','<span class="bad_link">Картинка с небезопасным адресом удалена!</span>',$text);
     $text = preg_replace('|<audio[^>]+src=["\']?(\w+script:.*?)["\']?[^>]+>(.*?)</audio>|i','<span class="bad_link">Небезопасный аудио-объект удален!</span>',$text);
-    $text = preg_replace('|<video[^>]+src=["\']?(\w+script:.*?)["\']?[^>]+>(.*?)</video>|i','<span class="bad_link">Небезопасный видео-объект удален!</span>',$text);
+    $text = preg_replace('|<video[^>]+src=["\']?(\w+script:.*?)["\']?[^>]+>(.*?)</video>|i','<span class="bad_link">Небезопасный видео-объект удален!</span>',$text); */
+    $cleaner = new Library_cleaner;
+    $text = $cleaner->clean($text,Library_cleaner::TAGS_ALL);  // по умолчанию разрешаем все теги, включенные в список cleanerа
     return $text;
   }
 
@@ -429,7 +503,7 @@ class Library_bbcode extends Library {
 
   /** Производит замену слов, которые администрация сайта считает недопустимыми, на их более цензурные версии **/
   function bad_words($text) {
-    $badwords = explode("\n",Library::$app->get_text(0,5)); // список недопустимых слов хранится с типом №5 в таблице текстов
+    $badwords = explode("\n",$this->app()->get_text(0,5)); // список недопустимых слов хранится с типом №5 в таблице текстов
     $text=' '.$text.' ';
     $oldw = array(); $neww = array();
     for ($i=0, $count=count($badwords); $i<$count; $i++) {
@@ -504,8 +578,7 @@ class Library_bbcode extends Library {
       else $all_done = false;
     }
     if (!empty($result)) {
-      /** @var Library_misc */
-      $misc_lib = Library::$app->load_lib('misc',false);
+      $misc_lib = class_exists('Library_misc') ? new Library_misc : false;
       if ($misc_lib) {
         $all_done = $misc_lib->save_text(json_encode($result),$params['post_id'],19); // 19 -- код данных для ссылок blocklink
       }
