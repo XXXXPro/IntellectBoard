@@ -36,7 +36,9 @@ class Application_Crontab extends Application {
         $this->db->unlock_tables(DB_prefix.'crontab');
 
         for ($i=0,$count=count($jobs);$i<$count;$i++) {
-          if ($module=$this->load_lib($jobs[$i]['library'],false)) {
+          $classname = 'Library_'.$jobs[$i]['library'];
+          if (class_exists($classname)) {
+            $module=new $classname;
             if (method_exists($module,'cron_'.$jobs[$i]['proc'])) call_user_func(array($module,'cron_'.$jobs[$i]['proc']),$jobs[$i]['params']);
             else $this->log_entry('crontab',2,'modules/'.$jobs[$i]['library'].'.php','Не найдена процедура cron_'.$jobs[$i]['proc']);
           }
@@ -65,7 +67,9 @@ class Application_Crontab extends Application {
           $result = -1;          
           if (microtime(true) - $start_time < $max_time*1000000 - 5000000) { // если есть достаточный запас времени для выполнения
             try {
-              if ($module=$this->load_lib($tasks[$i]['library'],false)) {
+              $classname = 'Library_'.$jobs[$i]['library'];
+              if (class_exists($classname)) {
+                $module=new $classname;
                 if (method_exists($module,'task_'.$tasks[$i]['proc'])) {
                   $params = unserialize($tasks[$i]['params']);
                   $result = call_user_func(array($module,'task_'.$tasks[$i]['proc']),$params);

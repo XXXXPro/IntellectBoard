@@ -84,7 +84,7 @@ class Application_Admin extends Application {
     if ($uid<= AUTH_SYSTEM_USERS)  $this->output_403('Для доступа в Центр Администрирования необходимо сначала войти на форум обычным образом!',true);
     if ($this->is_post()) {
       $reg_timeout=$this->get_opt('userlib_login_timeout');
-      $antibot=$this->load_lib('antibot',false);
+      $antibot=class_exists('Library_antibot') ? new Library_antibot : false;
       $result=true;
       if ($reg_timeout && $antibot) { // проверяем, что предыдущая регистрация с этого IP была не менее указанного времени назад, причем делаем это только в том случае, если не было ошибок при валидации пользователя
         if (!$antibot->timeout_check('userlib_login', $reg_timeout)) {
@@ -131,8 +131,7 @@ class Application_Admin extends Application {
   * Необходимо производить при изменении прав доступа, чтобы права вступали в силу сразу, без необходимости перелогиниваться **/
   function reset_session_cache() {
     // Код сброса кеша вынесен в библиотеку warning, т.к. он также требуется и при вынесении предупреждений пользователям
-    $warnlib = $this->load_lib('warning',true);
-    /* @var $warnlib Library_warning */
+    $warnlib = new Library_warning();
     $warnlib->reset_session_cache();
   }
 

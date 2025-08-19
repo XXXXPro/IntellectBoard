@@ -47,7 +47,7 @@ class Library_indieweb extends Library {
 
       $req_info = curl_getinfo($ch);
       if ($req_info['http_code']!=200) { // если код ответа ошибочный, логгируем и дальше ничего не обрабатываем
-        Library::$app->log_entry('indieweb', E_USER_ERROR, __FILE__, print_r($req_info, true));
+        $this->app()->log_entry('indieweb', E_USER_ERROR, __FILE__, print_r($req_info, true));
         return false;
       }
 

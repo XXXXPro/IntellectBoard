@@ -34,7 +34,7 @@
     $this->out->authkey=$this->gen_auth_key();
   }
 
-  function  get_action_name() {
+  function  get_action_name():string {
     if ($this->action=='view') $result='Просматривает страницу &laquo;%s&raquo;';
     else $result=parent::get_action_name();
     return $result;

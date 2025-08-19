@@ -13,7 +13,7 @@ class Library_instantcms_notify extends Library_notify implements iNotifier {
     $data['subject_url']='forum/'.$forum['hurl'].'/'.$topic['hurl'].'/';
 //    $data['reply_url']=$data['subject_url'].'#replyform';
     $data['date_pub']=gmdate('Y-m-d H:i:s',$post['postdate']+3*60*60);
-    Library::$app->db->insert('cms_activity',$data);
+    $this->app()->db->insert('cms_activity',$data);
   }
 
   function new_post($post,$topic,$forum,$parsed) {
@@ -27,8 +27,8 @@ class Library_instantcms_notify extends Library_notify implements iNotifier {
 //    $data['reply_url']=$data['subject_url'].'#replyform';
     $data['date_pub']=gmdate('Y-m-d H:i:s',$post['postdate']+3*60*60);
     $sql = 'DELETE FROM cms_activity WHERE (type_id=30 OR type_id=31) AND subject_id='.intval($topic['id']);
-    Library::$app->db->query($sql);
-    Library::$app->db->insert('cms_activity',$data);
+    $this->app()->db->query($sql);
+    $this->app()->db->insert('cms_activity',$data);
   }
 
 }

@@ -11,8 +11,8 @@
 class Library_sitemap extends Library {
   function cron_generate() {
     /** @var Library_forums **/
-    $forumlib = Library::$app->load_lib('forums',true);
-    Library::$app->set_user(Library::$app->load_guest());
+    $forumlib = $this->app()->load_lib('forums',true);
+    $this->app()->set_user($this->app()->load_guest());
     $fh = fopen(BASEDIR.'/tmp/sitemap.tmp','w');
     fputs($fh,"<url><loc>##DOMAIN##</loc><lastmod>".date('Y-m-d')."</lastmod><priority>1.0</priority><changefreq>always</changefreq></url>\n");
     fputs($fh,"<url><loc>##DOMAIN##online/</loc><lastmod>".date('Y-m-d')."</lastmod><priority>0.2</priority><changefreq>always</changefreq></url>\n");
@@ -26,14 +26,14 @@ class Library_sitemap extends Library {
     }
     
     $forums = $forumlib->list_forums(array('all'=>true,'typeinfo'=>true));
-    $tperpage = Library::$app->get_opt('topics_per_page','user'); // берем из настроек пользователя
-    if (!$tperpage) $tperpage = Library::$app->get_opt('topics_per_page');  // берем из настроек сайта в целом
+    $tperpage = $this->app()->get_opt('topics_per_page','user'); // берем из настроек пользователя
+    if (!$tperpage) $tperpage = $this->app()->get_opt('topics_per_page');  // берем из настроек сайта в целом
     if (!$tperpage) $tperpage = 10; // если ниоткуда не получилось взять кол-во тем на странице, берем жестко закодированное значение во избежание деления на ноль
     $fdata = array();
     $fvalues = array();
     $skip_forums = array();
     foreach ($forums as $forum) {
-      if (Library::$app->check_access('view',$forum['id'])) {        
+      if ($this->app()->check_access('view',$forum['id'])) {        
         if (empty($forum['hurl'])) $forum['hurl']=$forum['id'];
         $fdata[$forum['id']]=$forum['hurl'];
         $fvalue = 0.6;
@@ -52,9 +52,9 @@ class Library_sitemap extends Library {
     }
    
     /** @var Library_topic **/
-    $topiclib = Library::$app->load_lib('topic',false);
-    $pperpage = Library::$app->get_opt('posts_per_page','user'); // берем из настроек пользователя
-    if (!$pperpage) $pperpage = Library::$app->get_opt('posts_per_page');  // берем из настроек сайта в целом
+    $topiclib = $this->app()->load_lib('topic',false);
+    $pperpage = $this->app()->get_opt('posts_per_page','user'); // берем из настроек пользователя
+    if (!$pperpage) $pperpage = $this->app()->get_opt('posts_per_page');  // берем из настроек сайта в целом
     if (!$pperpage) $pperpage = 10; // если ниоткуда не получилось взять кол-во тем на странице, берем жестко закодированное значение во избежание деления на ноль    
     if ($topiclib) {
       $forum_ids = array_diff(array_keys($fdata),$skip_forums);
@@ -86,7 +86,7 @@ class Library_sitemap extends Library {
   }
   
   function changefreq($date) {
-    $curtime = Library::$app->time;
+    $curtime = $this->app()->time;
     if ($curtime-$date>2*30*24*60*60) return 'monthly';
     if ($curtime-$date>2*7*24*60*60) return 'weekly';
     return 'daily';

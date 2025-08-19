@@ -3,7 +3,7 @@
  *  @package IntBPro
  *  @author 4X_Pro <me@4xpro.ru>
  *  @version 3.05
- *  @copyright 2007,2009-2011,2013-2015,2018,2020-2023 4X_Pro, INTBPRO.RU
+ *  @copyright 2007,2009-2011,2013-2015,2018,2020-2025 4X_Pro, INTBPRO.RU
  *  @url https://intbpro.ru
  *  Модуль вывода списка тем в обычном форуме
  *  ================================ */
@@ -373,7 +373,7 @@ class stdforum extends Application_Forum {
   }
 
   function view_topic_moderator($tid) {
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $this->out->premod_count = $tlib->count_posts(array('tid'=>$tid,'premod'=>true));
     if ($this->out->premod_count) $this->lastmod=$this->time;
   }
@@ -449,7 +449,7 @@ class stdforum extends Application_Forum {
         $userlib = $this->load_lib('userlib',false);
         if (!$userlib) {
           $this->message('Ошибка подключения библиотеки userlib!',2);
-          $_SESSION['forum'.$fid]['author_name']=false;
+          $_SESSION['topic'.$tid]['author_name']=false;
         }
         else {
           $uid=$userlib->get_uid_by_name($_SESSION['topic'.$tid]['author_name']);

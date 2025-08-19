@@ -21,45 +21,45 @@
     **/
     function move_posts($pids,$old_topic,$new_topic,$opts=array()) {
        $sql = 'UPDATE '.DB_prefix.'post SET tid='.intval($new_topic).' '.
-       'WHERE '.Library::$app->db->array_to_sql($pids,'id').' AND tid='.intval($old_topic);
-       $result=Library::$app->db->query($sql);
-     $result = $result && Library::$app->db->affected_rows();       
+       'WHERE '.$this->app()->db->array_to_sql($pids,'id').' AND tid='.intval($old_topic);
+       $result=$this->app()->db->query($sql);
+     $result = $result && $this->app()->db->affected_rows();       
        
        if ($result) {
           if (empty($opts['nosync']) || empty($opts['nolog']) || empty($opts['nomsg'])) { // если синхронизация тем не отключена
-             if (!empty(Library::$app->topic) && Library::$app->topic['id']==$old_topic) { // если тема совпадает с той, которая загружена как текущая, берем данные оттуда, чтобы не делать лишний запрос
-                $old_data = Library::$app->topic;                 
+             if (!empty($this->app()->topic) && $this->app()->topic['id']==$old_topic) { // если тема совпадает с той, которая загружена как текущая, берем данные оттуда, чтобы не делать лишний запрос
+                $old_data = $this->app()->topic;                 
              }
              else {          
               $sql = 'SELECT fid, t.title, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl '.
               'FROM '.DB_prefix.'topic t, '.DB_prefix.'forum f '.
               'WHERE t.id='.intval($old_topic).' AND f.id=t.fid';
-              $old_data = Library::$app->db->select_row($sql);
+              $old_data = $this->app()->db->select_row($sql);
             }
          $sql = 'SELECT fid, t.title, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl '.
          'FROM '.DB_prefix.'topic t, '.DB_prefix.'forum f '.
          'WHERE t.id='.intval($new_topic).' AND f.id=t.fid';
-           $new_data = Library::$app->db->select_row($sql);
+           $new_data = $this->app()->db->select_row($sql);
            
            if (empty($opts['nomsg'])) { // если не отключена вставка сообщений о переносе
-              $tsave=Library::$app->load_lib('tsave',false);
+              $tsave=$this->app()->load_lib('tsave',false);
               $sql = 'SELECT MIN(postdate) FROM '.DB_prefix.'post '.
-              'WHERE '.Library::$app->db->array_to_sql($pids,'id').' AND tid='.intval($new_topic).' AND status=\'0\'';
-              $mintime = Library::$app->db->select_int($sql);
+              'WHERE '.$this->app()->db->array_to_sql($pids,'id').' AND tid='.intval($new_topic).' AND status=\'0\'';
+              $mintime = $this->app()->db->select_int($sql);
               if ($mintime) {
              $pdata_old = array('tid'=>$old_topic,
                'postdate'=>$mintime-1,
                'uid'=>2,
                'author'=>'System',
                'html'=>1,
-               'text'=>'Некоторые сообщения перенесены в тему &laquo;<a href="'.Library::$app->url($new_data['full_hurl']).'">'.htmlspecialchars($new_data['title']).'</a>&raquo;');
+               'text'=>'Некоторые сообщения перенесены в тему &laquo;<a href="'.$this->app()->url($new_data['full_hurl']).'">'.htmlspecialchars($new_data['title']).'</a>&raquo;');
              if ($tsave) $tsave->save_post($pdata_old,true);
              $pdata_new = array('tid'=>$new_topic,
                'postdate'=>$mintime-1,
                'uid'=>2,
                'author'=>'System',
                'html'=>1,
-               'text'=>'К данной теме присоединены сообщения из темы &laquo;<a href="'.Library::$app->url($old_data['full_hurl']).'">'.htmlspecialchars($old_data['title']).'</a>&raquo;');           
+               'text'=>'К данной теме присоединены сообщения из темы &laquo;<a href="'.$this->app()->url($old_data['full_hurl']).'">'.htmlspecialchars($old_data['title']).'</a>&raquo;');           
              if ($tsave) $tsave->save_post($pdata_new,true);
            }
            }
@@ -97,24 +97,24 @@
        
        if (empty($opts['nolog'])) {
           $pkeys = array_keys($pids);
-         $sql = 'SELECT id,"'.Library::$app->db->slashes($set_name).'" FROM '.DB_prefix.'post '.
-         'WHERE '.Library::$app->db->array_to_sql($pkeys,'id').' AND tid='.intval($tid);
-         $undo = Library::$app->db->select_simple_hash($sql);
+         $sql = 'SELECT id,"'.$this->app()->db->slashes($set_name).'" FROM '.DB_prefix.'post '.
+         'WHERE '.$this->app()->db->array_to_sql($pkeys,'id').' AND tid='.intval($tid);
+         $undo = $this->app()->db->select_simple_hash($sql);
        }
        
        $result = false;
        foreach ($vkeys as $val=>$ids) {
-         $sql = 'UPDATE '.DB_prefix.'post SET "'.Library::$app->db->slashes($set_name).'"=\''.Library::$app->db->slashes($val).'\' '.
-         'WHERE '.Library::$app->db->array_to_sql($ids,'id').' AND tid='.intval($tid);
-         $result = (Library::$app->db->query($sql) && Library::$app->db->affected_rows()) || $result;
+         $sql = 'UPDATE '.DB_prefix.'post SET "'.$this->app()->db->slashes($set_name).'"=\''.$this->app()->db->slashes($val).'\' '.
+         'WHERE '.$this->app()->db->array_to_sql($ids,'id').' AND tid='.intval($tid);
+         $result = ($this->app()->db->query($sql) && $this->app()->db->affected_rows()) || $result;
      }
      
      if (empty($opts['nosync'])) { // если в настройках не указан отказ от пересинхронизации
        $this->topic_resync($tid);
-       if (!empty(Library::$app->topic['id']) && $tid==Library::$app->topic['id']) $fid=Library::$app->topic['fid']; // если запрос выполнен для текущей темы, то берем ее раздел из объекта
+       if (!empty($this->app()->topic['id']) && $tid==$this->app()->topic['id']) $fid=$this->app()->topic['fid']; // если запрос выполнен для текущей темы, то берем ее раздел из объекта
        else {
           $sql = 'SELECT fid FROM '.DB_prefix.'topic WHERE id='.intval($tid);
-          $fid = Library::$app->db->select_int($sql);
+          $fid = $this->app()->db->select_int($sql);
        }
        $this->forum_resync($fid);
      }
@@ -143,11 +143,11 @@
        if ($result && empty($opts['nousersync'])) {
          // обновляем время последней модификации сообщения при его удалении/восстановлении 
          // это нужно, чтобы не требовалось хранить отдельную дату удаления (дата удаления нужна для "очистки корзины" в АЦ)
-         $sql='UPDATE '.DB_prefix.'text SET tx_lastmod='.intval(Library::$app->time).' WHERE type=16 AND '.Library::$app->db->array_to_sql(array_keys($pids),'id');
-         Library::$app->db->query($sql);
+         $sql='UPDATE '.DB_prefix.'text SET tx_lastmod='.intval($this->app()->time).' WHERE type=16 AND '.$this->app()->db->array_to_sql(array_keys($pids),'id');
+         $this->app()->db->query($sql);
          
           $uids = $this->get_post_owners($tid,array_keys($pids));
-          $userlib = Library::$app->load_lib('userlib',false);
+          $userlib = $this->app()->load_lib('userlib',false);
           if ($userlib) for ($i=0, $count=count($uids);$i<$count;$i++) $userlib->user_resync($uids[$i]);
        }
        return $result;
@@ -163,9 +163,9 @@
     **/
     function move_topics($tids,$old_forum,$new_forum,$opts=false) {
        $sql = 'UPDATE '.DB_prefix.'topic SET fid='.intval($new_forum).' '.
-       'WHERE '.Library::$app->db->array_to_sql($tids,'id').' AND fid='.intval($old_forum);
-       $result=Library::$app->db->query($sql);
-     $result = $result && Library::$app->db->affected_rows();
+       'WHERE '.$this->app()->db->array_to_sql($tids,'id').' AND fid='.intval($old_forum);
+       $result=$this->app()->db->query($sql);
+     $result = $result && $this->app()->db->affected_rows();
        
        if ($result) {           
        if (empty($opts['nosync'])) { // если в настройках не указан отказ от пересинхронизации
@@ -197,16 +197,16 @@
        
        if (empty($opts['nolog'])) {
           $tkeys = array_keys($tids);
-         $sql = 'SELECT id,"'.Library::$app->db->slashes($set_name).'" FROM '.DB_prefix.'topic '.
-         'WHERE '.Library::$app->db->array_to_sql($tkeys,'id').' AND fid='.intval($fid);
-         $undo = Library::$app->db->select_simple_hash($sql);
+         $sql = 'SELECT id,"'.$this->app()->db->slashes($set_name).'" FROM '.DB_prefix.'topic '.
+         'WHERE '.$this->app()->db->array_to_sql($tkeys,'id').' AND fid='.intval($fid);
+         $undo = $this->app()->db->select_simple_hash($sql);
        }
        
        $result = false; // в этой переменной будем отслеживать, были ли сделаны хоть какие-то изменения в БД
        foreach ($vkeys as $val=>$ids) {
-         $sql = 'UPDATE '.DB_prefix.'topic SET "'.Library::$app->db->slashes($set_name).'"=\''.Library::$app->db->slashes($val).'\' '.
-         'WHERE '.Library::$app->db->array_to_sql($ids,'id').' AND fid='.intval($fid);
-         $result = (Library::$app->db->query($sql) && Library::$app->db->affected_rows()) || $result;
+         $sql = 'UPDATE '.DB_prefix.'topic SET "'.$this->app()->db->slashes($set_name).'"=\''.$this->app()->db->slashes($val).'\' '.
+         'WHERE '.$this->app()->db->array_to_sql($ids,'id').' AND fid='.intval($fid);
+         $result = ($this->app()->db->query($sql) && $this->app()->db->affected_rows()) || $result;
      }
      
      if (empty($opts['nosync'])) { // если в настройках не указан отказ от пересинхронизации
@@ -254,7 +254,7 @@
        $result=$this->change_topics_state($tids,$fid,'status',17,$opts);
        if ($result) {
          $uids = $this->get_post_owners($tid);
-         $userlib = Library::$app->load_lib('userlib',false);
+         $userlib = $this->app()->load_lib('userlib',false);
          if ($userlib) for ($i=0, $count=count($uids);$i<$count;$i++) $userlib->user_resync($uids[$i]);
        }
        return $result;
@@ -270,25 +270,25 @@
        'COALESCE(MAX(postdate),0) AS last_post_time, COALESCE(COUNT(*),0) AS post_count, '.
        'COALESCE(SUM(CAST(value=\'-1\' AS INTEGER)),0) AS flood_count, COALESCE(SUM(CAST(value=\'1\' AS INTEGER)),0) AS valued_count '.
        'FROM '.DB_prefix.'post WHERE tid='.intval($tid).'  AND status=\'0\''; // статистику темы считаем только по общедоступным сообщениям, без удаленных или на премодерации
-       $topic_data = Library::$app->db->select_row($sql);
-       $topic_data['lastmod']=Library::$app->time; // при пересинхронизации темы всегда временем последней синхронизации считаем текущее
+       $topic_data = $this->app()->db->select_row($sql);
+       $topic_data['lastmod']=$this->app()->time; // при пересинхронизации темы всегда временем последней синхронизации считаем текущее
        if (intval($topic_data['post_count'])===0) $topic_data['status']=2; // если в теме не осталось ни одного сообщения с нормальным статусом, помечаем ее как удаленную
        else $topic_data['status']=0; // если в теме появились нормальные сообщения, то меняем ее статус на 0
-       return Library::$app->db->update(DB_prefix.'topic',$topic_data,'id='.intval($tid));
+       return $this->app()->db->update(DB_prefix.'topic',$topic_data,'id='.intval($tid));
     }
 
     /** Пересчет показателей (ресинхронизация) раздела: даты последнего сообщения и количества тем и сообщений.
     * При пересчете делается допущение, что все темы раздела уже ресинхронизированы.
     * **/    
     function forum_resync($fid=false) {
-       if (!$fid) $fid=Library::$app->forum['id'];
+       if (!$fid) $fid=$this->app()->forum['id'];
        $sql = 'SELECT MAX(last_post_id) AS last_post_id, COUNT(*) AS topic_count, SUM(post_count) AS post_count '.
        'FROM '.DB_prefix.'topic WHERE fid='.intval($fid).' AND status=\'0\'';
-       $forum_data = Library::$app->db->select_row($sql);
+       $forum_data = $this->app()->db->select_row($sql);
        if (empty($forum_data['last_post_id'])) $forum_data['last_post_id']=0;
        if (empty($forum_data['post_count'])) $forum_data['post_count']=0;
-       $forum_data['lastmod']=Library::$app->time; // при пересинхронизации темы всегда временем последней синхронизации считаем текущее
-       return Library::$app->db->update(DB_prefix.'forum',$forum_data,'id='.intval($fid));       
+       $forum_data['lastmod']=$this->app()->time; // при пересинхронизации темы всегда временем последней синхронизации считаем текущее
+       return $this->app()->db->update(DB_prefix.'forum',$forum_data,'id='.intval($fid));       
     }
     
     /** Сохранение модераторского действия в лог вместе с даннными для его отката. Данные для отката должны содержаться в $data['data'], вид этих данных зависит от выполняемого действия
@@ -305,11 +305,11 @@
     * 33 -- вынесение предупреждения или поощрения (не реализовано)
     **/
     function log_action($data,$override=false) {
-       if (empty($data['fid'])) $data['fid']=(isset(Library::$app->forum) && Library::$app->forum['id']) ? Library::$app->forum['id'] : 0; // если не включено переопределение, то тема создается в текущем разделе
-       if (empty($data['tid'])) $data['tid']=(isset(Library::$app->topic) && Library::$app->topic['id']) ? Library::$app->topic['id'] : 0; // если не включено переопределение, то тема создается в текущем разделе
+       if (empty($data['fid'])) $data['fid']=(isset($this->app()->forum) && $this->app()->forum['id']) ? $this->app()->forum['id'] : 0; // если не включено переопределение, то тема создается в текущем разделе
+       if (empty($data['tid'])) $data['tid']=(isset($this->app()->topic) && $this->app()->topic['id']) ? $this->app()->topic['id'] : 0; // если не включено переопределение, то тема создается в текущем разделе
        if (empty($data['tid'])) $data['pid']=0;
-       if (empty($data['time']) || !$override) $data['time']=Library::$app->time; // по умолчанию берем текущее время
-       if (empty($data['uid']) || !$override) $data['uid']=Library::$app->get_uid(); // и текущего пользователя 
+       if (empty($data['time']) || !$override) $data['time']=$this->app()->time; // по умолчанию берем текущее время
+       if (empty($data['uid']) || !$override) $data['uid']=$this->app()->get_uid(); // и текущего пользователя 
        if (empty($data['data'])) $data['data']='';
        else $data['data']=serialize($data['data']);
        
@@ -317,29 +317,29 @@
           trigger_error('Не определен код модераторского действия, сохранение в базу произведено не будет!',E_USER_WARNING);
           return false;
        }
-       return Library::$app->db->insert(DB_prefix.'log_action',$data);
+       return $this->app()->db->insert(DB_prefix.'log_action',$data);
     }
     
     /** Откат действия, выполненного модератором 
     **/
     function rollback($id) {
        $sql = 'SELECT * FROM '.DB_prefix.'log_action WHERE id='.intval($id);
-       $logdata = Library::$app->db->select_row($sql);
+       $logdata = $this->app()->db->select_row($sql);
        if (!$logdata) return false; // если не удалось достать данные, возвращаем ошибку и ничего не делаем
        if ($logdata['data']) $undo = unserialize($logdata['data']);
        else $undo = false;
-       if (!empty($this->forum) && $this->forum['id']!=$logdata['fid']) Library::$app->output_403('Невозможно отменить действие, совершенное для другого раздела!');
+       if (!empty($this->forum) && $this->forum['id']!=$logdata['fid']) $this->app()->output_403('Невозможно отменить действие, совершенное для другого раздела!');
        $code = intval($logdata['type']); // тип совершенной модератором операции
-       Library::$app->db->begin();
+       $this->app()->db->begin();
        if ($code===1) { // отмена редактирования сообщения или темы
           $text = $undo['text'];
           $tx_lastmod=$undo['tx_lastmod'];
           unset($undo['text']);
           unset($undo['tx_lastmod']);
-          $result=Library::$app->db->update(DB_prefix.'post',$undo,'id='.intval($logdata['pid']).' AND tid='.intval($logdata['tid'])); // откатываем данные сообщения (часть после AND нужна во избежание ситуаций, когда сообщение было сначала отредактировано, а потом перенесено)
+          $result=$this->app()->db->update(DB_prefix.'post',$undo,'id='.intval($logdata['pid']).' AND tid='.intval($logdata['tid'])); // откатываем данные сообщения (часть после AND нужна во избежание ситуаций, когда сообщение было сначала отредактировано, а потом перенесено)
           if ($result) {
-            Library::$app->db->update(DB_prefix.'text',array('data'=>$text,'tx_lastmod'=>$tx_lastmod),'id='.intval($undo['id']).' AND type=16'); // откатываем текст сообщения
-            if (!empty($undo['topic'])) Library::$app->db->update(DB_prefix.'topic',$undo['topic'],'id='.intval($logdata['tid']).' AND fid='.intval($logdata['fid'])); // откатываем данные сообщения (часть после AND нужна во избежание ситуаций, когда сообщение было сначала отредактировано, а потом перенесено) 
+            $this->app()->db->update(DB_prefix.'text',array('data'=>$text,'tx_lastmod'=>$tx_lastmod),'id='.intval($undo['id']).' AND type=16'); // откатываем текст сообщения
+            if (!empty($undo['topic'])) $this->app()->db->update(DB_prefix.'topic',$undo['topic'],'id='.intval($logdata['tid']).' AND fid='.intval($logdata['fid'])); // откатываем данные сообщения (часть после AND нужна во избежание ситуаций, когда сообщение было сначала отредактировано, а потом перенесено) 
             $this->topic_resync($logdata['tid']);
             $this->forum_resync($logdata['fid']);
           }
@@ -350,11 +350,11 @@
        elseif ($code===3) { // отмена переноса сообщений
           if (!empty($undo['old_move_msg'])) { // удаляем сообщения о переносе
              $sql = 'DELETE FROM '.DB_prefix.'post WHERE id='.intval($undo['old_move_msg']);
-             Library::$app->db->query($sql);
+             $this->app()->db->query($sql);
           }
           if (!empty($undo['new_move_msg'])) {
              $sql = 'DELETE FROM '.DB_prefix.'post WHERE id='.intval($undo['new_move_msg']);
-             Library::$app->db->query($sql);
+             $this->app()->db->query($sql);
           }          
           $result=$this->move_posts($undo['pids'],$undo['tid'],$logdata['tid'],array('nomsg'=>true,'nolog'=>true));
        }
@@ -381,10 +381,10 @@
        }
        if ($result){ // если откат операции прошел нормально, то удаляем данные о ней из базы
          $sql = 'DELETE FROM '.DB_prefix.'log_action WHERE id='.intval($id);
-         Library::$app->db->query($sql);
+         $this->app()->db->query($sql);
        }
        // TODO: восстановление пользователя после бана, отмена редактирования темы, отмена изменений прав доступа
-       Library::$app->db->commit();
+       $this->app()->db->commit();
        return $result;
     }
     
@@ -396,7 +396,7 @@
        if (!empty($cond['pid'])) $sql.=' AND pid='.intval($cond['pid']);
        if (!empty($cond['time'])) $sql.=' AND time>='.intval($cond['time']);
        if (!empty($cond['type'])) $sql.=' AND type='.intval($cond['type']); // извлечение записей определенного типа
-     return Library::$app->db->select_int($sql);
+     return $this->app()->db->select_int($sql);
     }
     
     /** Извлечение записей из лога модераторских действий **/
@@ -410,7 +410,7 @@
        if (!empty($cond['time'])) $sql.=' AND time>='.intval($cond['time']);
        if (!empty($cond['type'])) $sql.=' AND type='.intval($cond['type']); // извлечение записей определенного типа
        $sql.= ' ORDER BY time DESC';
-       $result=Library::$app->db->select_all($sql);
+       $result=$this->app()->db->select_all($sql);
        for ($i=0, $count=count($result);$i<$count;$i++) {
            $result[$i]['data']=unserialize($result[$i]['data']);
            $result[$i]['descr']=$this->describe_action($result[$i]);           
@@ -469,9 +469,9 @@
      $sql = 'SELECT DISTINCT uid FROM '.DB_prefix.'post p '.
       'WHERE p.uid>'.intval(AUTH_SYSTEM_USERS).' AND p.tid='.intval($tid);
      if ($pids) {
-        if (is_array($pids)) $sql.=' AND '.Library::$app->db->array_to_sql($pids,'id');
+        if (is_array($pids)) $sql.=' AND '.$this->app()->db->array_to_sql($pids,'id');
         else $sql.=' AND id='.intval($pids);
      }
-     return Library::$app->db->select_all_numbers($sql);      
+     return $this->app()->db->select_all_numbers($sql);      
     }
  }

@@ -16,17 +16,17 @@ class Library_misc extends Library {
  * @param $type integer Тип сохраняемого текста. Возможные значения см. в docs/text **/  
   function save_text($text,$oid,$type) {
     $sql = 'DELETE FROM '.DB_prefix.'text WHERE id='.intval($oid).' AND type='.intval($type);
-    Library::$app->db->query($sql);
-    $data=array('data' => $text, 'id' => $oid, 'type' => $type, 'tx_lastmod' => Library::$app->time);
-    $result=Library::$app->db->insert(DB_prefix.'text',$data);
-    if ($result && $type<3) Library::$app->set_cached('Text'.$type.'_'.$oid, $data); // если данный тип текстов относится к кешируемым, сразу помещаем его в кеш
+    $this->app()->db->query($sql);
+    $data=array('data' => $text, 'id' => $oid, 'type' => $type, 'tx_lastmod' => $this->app()->time);
+    $result=$this->app()->db->insert(DB_prefix.'text',$data);
+    if ($result && $type<3) $this->app()->set_cached('Text'.$type.'_'.$oid, $data); // если данный тип текстов относится к кешируемым, сразу помещаем его в кеш
     return $result;        
   }
   
   function delete_text($oid,$type) {
     $sql = 'DELETE FROM '.DB_prefix.'text WHERE id='.intval($oid).' AND type='.intval($type);
-    if ($type<3) Library::$app->clear_cached('Text'.$type.'_'.$oid); // если данный тип текстов относится к кешируемым, удаляем его из кеша
-    return Library::$app->db->query($sql);
+    if ($type<3) $this->app()->clear_cached('Text'.$type.'_'.$oid); // если данный тип текстов относится к кешируемым, удаляем его из кеша
+    return $this->app()->db->query($sql);
   }  
   
   /** Сохранение настроек в файл. Сохраняются все настройки, заданные в константах с префиксом CONFIG_ 
@@ -51,7 +51,7 @@ class Library_misc extends Library {
       $buffer.="define('".addslashes($item)."','".addslashes($value)."');\n";      
     }
     rename(BASEDIR.'etc/ib_config.php','ib_config.old.php');
-    $buffer.="define('INTB_LAST_CONFIG_TIME',".Library::$app->time.");\n";
+    $buffer.="define('INTB_LAST_CONFIG_TIME',".$this->app()->time.");\n";
     file_put_contents(BASEDIR.'etc/ib_config.php', $buffer);
     if (function_exists('opcache_invalidate')) opcache_invalidate(BASEDIR . 'etc/ib_config.php'); // сбрасываем PHP opcache, чтобы настройки применились сразу, а не с задержкой
   }
@@ -107,7 +107,7 @@ class Library_misc extends Library {
     $data['proc']=$proc;
     $data['params']=serialize($params);
     $data['nextrun']=$nextrun;
-    $result=Library::$app->db->insert(DB_prefix.'task',$data);
+    $result=$this->app()->db->insert(DB_prefix.'task',$data);
     return $result;
   }
 }

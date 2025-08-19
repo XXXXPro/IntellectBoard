@@ -344,13 +344,13 @@ class blog extends stdforum {
   }
   
   /* Переопределяем get_request_type для действия turbo, в котором выводится XML с Турбо-страницей для Яндекса. */
-  function get_request_type() {
+  function get_request_type():int {
     if ($this->action=='turbo') return 4;
     elseif ($this->action=='micropub') return 4;
     else return parent::get_request_type();
   }
 
-  function get_mime() {
+  function get_mime():string {
     if ($this->action=='turbo') return 'application/xml; charset=utf-8';
     else return parent::get_mime();
   }

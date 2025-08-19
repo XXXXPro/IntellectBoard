@@ -10,14 +10,14 @@
 
 class Library_sphinx extends Library {
   function search($text,$fids,$cond,$mode) {
-    $server=Library::$app->get_opt('search_sphinx_server');
+    $server=$this->app()->get_opt('search_sphinx_server');
     if (!$server) $server = '127.0.0.1';
-    $port = Library::$app->get_opt('search_sphinx_port');
+    $port = $this->app()->get_opt('search_sphinx_port');
     if (!$port) $port=9306;
     $sphinx = mysqli_connect($server,"root","","",intval($port));
-    $post_index = Library::$app->get_opt('search_sphinx_post_index');
+    $post_index = $this->app()->get_opt('search_sphinx_post_index');
     if (!$post_index) $post_index = 'idx_intb_post';
-    $topic_index = Library::$app->get_opt('search_sphinx_topic_index');
+    $topic_index = $this->app()->get_opt('search_sphinx_topic_index');
     if (!$topic_index) $topic_index = 'idx_intb_topic';
 
     if ($sphinx===false || (!is_resource($sphinx) && get_class($sphinx)!='mysqli')) trigger_error('Не получилось подключиться к Sphinx! Если вы администратор сайта, проверьте его настройки!',E_USER_ERROR);
@@ -39,9 +39,9 @@ class Library_sphinx extends Library {
   }
   
   function search_topics($text,$fids,$cond) {
-    $server=Library::$app->get_opt('search_sphinx_server');
+    $server=$this->app()->get_opt('search_sphinx_server');
     if (!$server) $server = '127.0.0.1';
-    $port = Library::$app->get_opt('search_sphinx_port');
+    $port = $this->app()->get_opt('search_sphinx_port');
     $sphinx = mysqli_connect($server, "root", "", "", 9306 );
 
     if (!is_resource($sphinx) && get_class($sphinx)!='mysqli') trigger_error('Не получилось подключиться к Sphinx! Проверьте настройки!',E_USER_ERROR);

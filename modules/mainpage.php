@@ -14,8 +14,7 @@ class mainpage extends Application {
   function action_view() {
     $category=isset($_REQUEST['cat']) ? intval($_REQUEST['cat']) : 0; // если задана конкретная категория, будем выводить разделы только из нее, иначе -- считаем категорию равной нулю и выводим все разделы
 
-    $forumlib=$this->load_lib('forums',true);
-    /* @var $forumlib Library_forums */
+    $forumlib=new Library_forums();
     $this->out->cat_list=$forumlib->list_categories($category);
 
     /*
@@ -124,7 +123,7 @@ class mainpage extends Application {
     return $result;
   }
 
-  function get_action_name() {
+  function get_action_name():string {
     if ($this->action == 'view') $result='Просмаривает список разделов на главной странице.';
     else $result=parent::get_action_name();
     return $result;
