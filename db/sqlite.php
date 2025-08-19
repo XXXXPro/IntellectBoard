@@ -14,7 +14,7 @@
 *    @abstract
      **/
 
-class Database_sqlite extends Database implements iDBDriver {
+class Database_sqlite extends Database {
   private $link;
   private $errmsg;
   private $last_query;
@@ -40,15 +40,9 @@ class Database_sqlite extends Database implements iDBDriver {
   }
 
   function version() {
-<<<<<<< HEAD
-    $ver = SQLite3::version();
-    return "SQLite ".$ver['versionString'];
-  }
-=======
     return "SQLite ".SQLite3::version();
   }
   
->>>>>>> 1a1624e (Initial commit for Intb 3.05)
 
 /** Closes a connection to database server, opened with {@see function connect()}
 *  @return boolean
@@ -161,7 +155,7 @@ class Database_sqlite extends Database implements iDBDriver {
 /** Converts INSERT operator into INSERT IGNORE. Database-specific, should be overriden in descendants.
 *  Called from store when $ignore is TRUE.
 *  @return string SQL with INSERT IGNORE
-*  @param string $data
+*  @param array $data
 **/
   function insert_ignore($table,$data) {
     $sqlarray1=array();
@@ -234,23 +228,16 @@ class Database_sqlite extends Database implements iDBDriver {
   function unlock_tables($tables) {
   }
 
-<<<<<<< HEAD
   function full_relevancy($column,$text) {
     $text = str_replace('|',' or ',$text);
     $text = str_replace('&',' and ',$text);
     $text = preg_replace('/[\.,\?!;\-\[\]\(\)]+/','',$text);
     if (trim($column)==='tx.data') return ' (SELECT -bm25('.DB_prefix.'post_fts) FROM '.DB_prefix.'post_fts(\''.$this->slashes($text).'\') WHERE rowid=tx.rowid) ';
     elseif (trim($column)==='t.title,t.descr') return ' (SELECT -bm25('.DB_prefix.'topic_fts) FROM '.DB_prefix.'topic_fts(\''.$this->slashes($text).'\') WHERE rowid=t.id)';
-=======
-  /** Получение количественного показателя релевантности при полнотекстовом поиске **/
-  function full_relevancy($column,$text) {
-    return $column.' MATCH "'.$this->slashes($text).'" ';
->>>>>>> 1a1624e (Initial commit for Intb 3.05)
   }
 
   /** Проверка наличия текста при полнетесктовом поиске **/
   function full_match($column,$text) {
-<<<<<<< HEAD
     $text = str_replace('|',' or ',$text);
     $text = str_replace('&',' and ',$text);
     $text = preg_replace('/[\.,\?!;\-\[\]\(\)]+/','',$text);
@@ -265,27 +252,13 @@ class Database_sqlite extends Database implements iDBDriver {
   function begin() {
     $this->query('BEGIN TRANSACTION');
   }
-=======
-    return $column.' MATCH "'.$this->slashes($text).'" ';
-  }
-
-
-/** Transaction start for RBDMS with transactional support
-* @return boolean TRUE if successful
-**/
-  function begin() {}
->>>>>>> 1a1624e (Initial commit for Intb 3.05)
 
 /** Transaction commit for RBDMS with transactional support
 * @return boolean TRUE if successful
 **/
-<<<<<<< HEAD
   function commit() {
     $this->query('END TRANSACTION');
   }
-=======
-  function commit() {}
->>>>>>> 1a1624e (Initial commit for Intb 3.05)
 
 /** Transaction abort for RBDMS with transactional support
 * @return boolean TRUE if successful
@@ -313,11 +286,7 @@ class Database_sqlite extends Database implements iDBDriver {
   }
 
   function has_fulltext() {
-<<<<<<< HEAD
     return true;
-=======
-    return false;
->>>>>>> 1a1624e (Initial commit for Intb 3.05)
   }
 
   function slashes($text) {

@@ -13,7 +13,7 @@
 *    @package Database
 **/
 
-class Database_postgres extends Database implements iDBDriver {
+class Database_postgres extends Database {
   private $link;
   private $last_result;
 
@@ -63,8 +63,9 @@ class Database_postgres extends Database implements iDBDriver {
 /** Really executes query of any type except SELECT.
 *  @return mixed FALSE if there were errors, number of affected rows -- if successful
 *  @param string $sql SQL query to execute.
+*  @param array $params
 **/
-  function _query($sql,$params=false) {
+  function _query($sql,$params=null) {
     try {
       if (!empty($params)) {
         foreach ($params as $param) $sql = preg_replace('/\?/','\''.$this->slashes($param).'\'',$sql,1);
@@ -93,26 +94,26 @@ class Database_postgres extends Database implements iDBDriver {
     return pg_last_error($this->link);
   }
   
-/*  function explain($sql) {
+  function explain($sql) {
     if (preg_match('/^\s*SELECT/is',$sql)) {
       $sql2 = "EXPLAIN $sql";
-      $res2 = mysqli_query($sql2,$this->link);
+      $res2 = pg_query($this->link,$sql2);
       $buffer='<table style="width: 100%" style="border: #888 1px solid"><tr>';
-      for ($i=0; $i<mysqli_num_fields($res2); $i++) $buffer.='<td><b>'.mysqli_field_name($res2,$i).'</b>';
-      while ($row=mysqli_fetch_row($res2)) {
+//      for ($i=0; $i<mysqli_num_fields($res2); $i++) $buffer.='<td><b>'.mysqli_field_name($res2,$i).'</b>';
+      while ($row=pg_fetch_row($res2)) {
         $buffer.='<tr>';
         foreach ($row as $column) $buffer.='<td>'.$column.'</td>';
         $buffer.='</tr>';
       }
       $buffer.='</table>';
-      mysqli_free_result($res2);
+      pg_free_result($res2);
     }
     else $buffer='';
     return $buffer;
-  }*/
+  }
 
 /** Fetches associative array from query result.
-*    @param resource $res Query result returned by query.
+*    @param resource|PgSql\Result $res Query result returned by query.
 *    @return array Hash of fields from current row.
 **/
   function fetch_array(&$res) {
@@ -120,7 +121,7 @@ class Database_postgres extends Database implements iDBDriver {
   }
 
 /** Fetches array from query result.
-*    @param resource $res Query result returned by query.
+*    @param resource|PgSql\Result $res Query result returned by query.
 *    @return array Array of fields from current row.
 **/
   function fetch_row(&$res) {
@@ -128,7 +129,7 @@ class Database_postgres extends Database implements iDBDriver {
   }
 
 /** Frees the query result.
-*    @param resource $res Query result returned by query.
+*    @param resource|PgSql\Result $res Query result returned by query.
 **/
   function free_res(&$res) {
     return pg_free_result($res);
@@ -144,7 +145,7 @@ class Database_postgres extends Database implements iDBDriver {
 /** Converts INSERT operator into INSERT IGNORE. Database-specific, should be overriden in descendants.
 *  Called from store when $ignore is TRUE.
 *  @return string SQL with INSERT IGNORE
-*  @param string $data 
+*  @param array $data 
 **/
   function insert_ignore($table,$data) {
     $sqlarray1=array();
@@ -243,14 +244,14 @@ class Database_postgres extends Database implements iDBDriver {
 * @return boolean TRUE if successful
 **/
   function commit() {
-//    pg_commit($this->link);
+    pg_query($this->link,"COMMIT");
   }
 
 /** Transaction abort for RBDMS with transactional support
 * @return boolean TRUE if successful
 **/
   function rollback() {
-    pg_rollback($this->link);
+    pg_query($this->link,"ROLLBACK");
   }
 /** Checks whether RDBMS supports stored procedures
 * @return boolean

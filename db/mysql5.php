@@ -14,7 +14,7 @@
 *    @abstract
      **/
 
-class Database_mysql5 extends Database implements iDBDriver {
+class Database_mysql5 extends Database {
   private $link;
 /** Open a connection to a database sever.
 *  @param mixed $filename May be name of include-file or hash array with parameters of connection.
