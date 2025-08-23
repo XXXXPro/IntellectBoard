@@ -70,17 +70,27 @@ class Library_cleaner extends Library {
     $charset = 'UTF-8';
     if (empty($html)) return ''; // чтобы избежать ошибок loadHTML, которая не принимает пустые строки
     $html = \strip_tags($html,'<'.\join('><',\array_keys($tags)).'>'); // at first clean tags except allowed
-    $html = \mb_encode_numericentity($html, [0x80, 0x10FFFF, 0, ~0], $charset);
-    if (!\class_exists('\\DOMDocument')) trigger_error('DOM extension not loaded!',E_USER_ERROR);
-    $dom = new \DOMDocument();
-    $dom->formatOutput = false;
-    $dom->loadHTML($html, LIBXML_NONET|LIBXML_HTML_NOIMPLIED|LIBXML_HTML_NODEFDTD); // LIBXML_NONET — for protection against XXE, LIBXML_HTML_NOIMPLIED|LIBXML_HTML_NODEFDTD — to don't add DOCTYPE and html/body tags
-    $xpath = new \DOMXPath($dom);      
+    if (!\class_exists('\\DOMDocument') && !\class_exists('\\Dom\\HTMLDocument')) trigger_error('DOM extension not loaded!',E_USER_ERROR);
+    if (version_compare(PHP_VERSION,'8.4','>=')) { // in newer PHP DOMDocument replaced to Dom\HTMLDocument
+      $dom = Dom\HTMLDocument::createFromString($html,LIBXML_HTML_NOIMPLIED);
+      $xpath = new Dom\XPath($dom);
+    }
+    else {
+      $html = \mb_encode_numericentity($html, [0x80, 0x10FFFF, 0, ~0], $charset);      
+      $dom = new \DOMDocument('1.0',$charset);
+      $dom->formatOutput = false;
+      $dom->loadHTML($html, LIBXML_NONET|LIBXML_HTML_NOIMPLIED|LIBXML_HTML_NODEFDTD); // LIBXML_NONET — for protection against XXE, LIBXML_HTML_NOIMPLIED|LIBXML_HTML_NODEFDTD — to don't add DOCTYPE and html/body tags
+      $xpath = new \DOMXPath($dom);            
+    }
+
     $nodes = $xpath->query('//@*'); // finding all tags with attributes
     foreach ($nodes as $node) { 
-      if (isset($tags[$node->parentNode->nodeName])) { // if tag in in list, checking attribute
-        $attrs = is_array($tags[$node->parentNode->nodeName]) ? $tags[$node->parentNode->nodeName] : [$tags[$node->parentNode->nodeName]]; // if string specified as value, convert it to array
-        if (!in_array($node->nodeName,$attrs)) $node->parentNode->removeAttribute($node->nodeName); // if attribute is not in allowed list, remove it
+      $attr_name = $node->nodeName;
+      $tag_name = strtolower($node->parentNode->nodeName);
+
+      if (isset($tags[$tag_name])) { // if tag in in list, checking attribute
+        $attrs = is_array($tags[$tag_name]) ? $tags[$tag_name] : [$tags[$tag_name]]; // if string specified as value, convert it to array
+        if (!in_array($attr_name,$attrs)) $node->parentNode->removeAttribute($attr_name); // if attribute is not in allowed list, remove it
       }
     }
     $links = $xpath->query('//@href|//@src');
