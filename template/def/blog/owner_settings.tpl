@@ -6,8 +6,9 @@
 <form action="" method="post" class="ibform">
 <fieldset><legend>Экспорт в LiveJournal</legend>
 <div><label><span>Логин пользователя</span>{{ macros.input('extdata[lj_login]',extdata.lj_login) }}</label></div>
-<div><label><span>PIN-код</span>{{ macros.input('extdata[lj_pin]',extdata.lj_pin) }}</label></div>
-<div><label><small class="center">Для корректной работы экспорта вам необходимо задать PIN-код в <a href="https://www.livejournal.com/manage/emailpost.bml">настройках вашего LiveJournal</a> и внести адрес <strong>{{ get_opt('email_from') }}</strong> в список доверенных для публикации.</small></label></div>
+<div><label><span>MD5-хеш пароля</span>{{ macros.input('extdata[lj_passhash]',extdata.lj_passhash) }}</label></div>
+<div><label><span>или PIN-код для оптравки через EMail</span>{{ macros.input('extdata[lj_pin]',extdata.lj_pin) }}</label></div>
+<div><label><small class="center">Для корректной работы экспорта вам необходимо или указать MD5-хеш вашего пароля от ЖЖ, или задать PIN-код в <a href="https://www.livejournal.com/manage/emailpost.bml">настройках вашего LiveJournal</a> и внести адрес <strong>{{ get_opt('email_from') }}</strong> в список доверенных для публикации.</small></label></div>
 <div><label><span>Ссылка на первоисточник</span>{{ macros.textarea('extdata[lj_text]',extdata.lj_text,2) }}</label></div>
 <div><label><small class="center">Здесь можно указать текст со ссылкой на первоисточник, который будет добавляься в LJ-копию сообщения.
 Ту часть, которая должна стать ссылкой, выделите двойными фигурными скобками, например «Первоисточник: мой блог на сайте {{ "{{"~get_opt('site_title')~"}}" }}.»</small></label></div>

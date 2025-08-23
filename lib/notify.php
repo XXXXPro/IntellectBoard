@@ -149,7 +149,6 @@ class Library_notify extends Library implements iNotifier {
   
   /* Экспорт записи в ЖЖ (пока используется только модулем blog) */
   function notify_lj($parsed,$topic,$ljdata,$tags=false) {
-       if ($tags) $parsed="lj-tags: ".$tags."\n\n".$parsed;
        if (!empty($ljdata['lj_text'])) {
           $ljtext=$ljdata['lj_text'];
           if (strpos($ljtext,'{{')!==false) {
@@ -165,9 +164,31 @@ class Library_notify extends Library implements iNotifier {
         $parsed = str_replace($match[0],'<lj-cut>',$parsed);
         $parsed.='</lj-cut>';
        }
-       $this->app()->mail(array('to'=>$ljdata['lj_login'].'+'.$ljdata['lj_pin'].'@post.livejournal.com','to_name'=>$ljdata['lj_login'],
+       if (!empty($ljdata['lj_passhash']) && function_exists('curl_init')) {
+        if (!empty($_POST['post']['postdate'])) $time=strtotime($_POST['post']['postdate']); 
+        else $time = $this->app()->time;
+        $export_data = array(
+          'mode'=>'postevent','ver'=>'1','security'=>'public','year'=>date('Y',$time),'mon'=>date('m',$time),'day'=>date('d',$time),'hour'=>date('H',$time),'min'=>date('i',$time),
+          'subject'=>$topic['title'],'user'=>$ljdata['lj_login'],'hpassword'=>$ljdata['lj_passhash'],'event'=>$parsed);
+        if (!empty($_POST['tagline'])) $export_data['prop_taglist']=$_POST['tagline']; // tags
+        $req_body = http_build_query($export_data);
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, 'https://www.livejournal.com/interface/flat');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION,true);
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS,$req_body);
+
+        $result = curl_exec($curl);
+        $req_info = curl_getinfo($curl);
+       }
+       else {
+        if ($tags) $parsed="lj-tags: ".$tags."\n\n".$parsed;
+        $this->app()->mail(array('to'=>$ljdata['lj_login'].'+'.$ljdata['lj_pin'].'@post.livejournal.com','to_name'=>$ljdata['lj_login'],
           'subj'=>$topic['title'],
           'template'=>'blog/ljmail.tpl','data'=>array('text'=>$parsed),'html'=>true));   
+       }
   }
 
   function notify_vk($parsed,$topic,$vkdata,$tags=false) {
