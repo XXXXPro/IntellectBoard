@@ -793,6 +793,7 @@ class stdforum extends Application_Forum {
             $this->db->commit(); // завершаем транзакцию (подумать, тут ли это надо делать
             $hurl = !empty($this->topic['hurl']) ? $this->topic['hurl'] : $this->topic['id'];
             if ($post['status']==1) $this->output_msg($this->url($this->forum['hurl'].'/'),'Ваше сообщение поставлено на премодерацию, оно станет доступным после одобрения модератором!','Вернуться в раздел');
+
             if ($this->get_request_type()!==4) $this->newtopic_redirect($hurl,$post['id']); // редирект вынесен в отдельную функцию и выполняется при стандартных типах ответа
             else return false; // если вызов через API, то возвращаем false, чтобы передать функции micropub (или аналогичным), что всё хорошо и нужно выдать статус 201
           }

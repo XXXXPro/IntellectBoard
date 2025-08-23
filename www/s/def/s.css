@@ -184,6 +184,9 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
 #ib_all .attach audio, #ib_all .attach video, #ib_all .attach img { max-width: 280px; vertical-align: middle; display: block;  }
 #ib_all .attach i.fa-file-alt { font-size: 54px;  display: block;  }
 
+#ib_all .video_embed { width: 100%; height: auto; border: 0; background: url('../../i/video-bg.svg'); background-repeat: no-repeat; background-position: center; background-size: contain; aspect-ratio: 16 / 9; }
+#ib_all video { width: 100%; height: auto; }
+
 #quotemenu { position: absolute; z-index: 1011; background: #fff; font-size: 15px; border: #A3CEFF 2px solid; 
   list-style: none; margin: 4px 0; user-select: none; padding: 0}
 #quotemenu li { margin: 4px; padding: 0 6px; line-height: 200%; cursor: pointer;}

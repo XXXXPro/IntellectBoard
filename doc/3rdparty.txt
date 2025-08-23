@@ -11,3 +11,4 @@
 
 * Набор значков Font Awesome. Автор: Fonticons, Inc. Сайт: https://fontawesome.com/ Тип лицензии: SIL OFL 1.1 License (https://github.com/FortAwesome/Font-Awesome)
 * Набор смайликов Nomicons: The Full Monty (авторы Oscar Gruno aka Nominell v. 2.0 и Andy Fedosjeenko aka Nightwolf). Распространяются свободно при указании авторства.
+* Изображение Loading для загрузки iframe с видео: пользователь SHOAIB ANAM USHA с Vecteezy.com (https://www.vecteezy.com/vector-art/37043865-vector-loading-process-screen-and-upgrade-concept)

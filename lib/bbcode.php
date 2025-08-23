@@ -419,37 +419,36 @@ class Library_bbcode extends Library {
     $host = $parts['host'];
     if ($host==='youtube.com' || $host==='www.youtube.com' || $host==='m.youtube.com') {
         $id = substr($parts['query'],2);
-        $result = '<iframe width="560" height="315" src="https://www.youtube.com/embed/'.htmlspecialchars($id).'" loading="lazy" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+        $result = '<iframe class="video_embed" width="560" height="315" src="https://www.youtube.com/embed/'.htmlspecialchars($id).'" loading="lazy" title="YouTube video player" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
     }
     elseif ($host==='youtu.be') {
       $path = substr($parts['path'],1);
       if (!empty($parts['query'])) $path.='?'.$parts['query'];
-        $result = '<iframe width="560" height="315" src="https://www.youtube.com/embed/'.htmlspecialchars($path).'" loading="lazy" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+        $result = '<iframe class="video_embed" width="560" height="315" src="https://www.youtube.com/embed/'.htmlspecialchars($path).'" loading="lazy" title="YouTube video player" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
     }
     elseif ($host==='rutube.ru') { // RuTube
       $path = str_replace('/video/','/play/embed/',$parts['path']);
       if (!empty($parts['query'])) $path.='?'.$parts['query'];
-      $result = '<iframe width="720" height="405" src="https://rutube.ru'.htmlspecialchars($path).'" loading="lazy" frameBorder="0" allow="clipboard-write;" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
+      $result = '<iframe class="video_embed" width="720" height="405" src="https://rutube.ru'.htmlspecialchars($path).'" loading="lazy" allow="clipboard-write;" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
     }
     elseif ($host==='vkvideo.ru' || $host==='m.vkvideo.ru') { // VK video
       list($oid,$id)=explode('_',str_replace('/video','',$parts['path']));
-      $result = '<iframe src="https://vkvideo.ru/video_ext.php?oid='.intval($oid).'&id='.intval($id).'&hd=2" width="853" height="480" loading="lazy" allow="encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>';
+      $result = '<iframe class="video_embed" src="https://vkvideo.ru/video_ext.php?oid='.intval($oid).'&id='.intval($id).'&hd=2" width="853" height="480" loading="lazy" allow="encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" allowfullscreen></iframe>';
     }
     elseif ($host==='www.tiktok.com' || $host==='tiktok.com') { // TikTok
       $tmp = explode('/',$parts['path']);
-      $result = '<blockquote class="tiktok-embed" cite="'.htmlspecialchars($parts['scheme'].'://'.$parts['host'].$parts['path']).'" data-video-id="'.htmlspecialchars($tmp[2]).'" style="max-width: 605px;min-width: 325px;" ></blockquote> <script async src="https://www.tiktok.com/embed.js"></script>';
+      $result = '<blockquote  class="video_embed" cite="'.htmlspecialchars($parts['scheme'].'://'.$parts['host'].$parts['path']).'" data-video-id="'.htmlspecialchars($tmp[2]).'" style="max-width: 605px;min-width: 325px;" ></blockquote> <script async src="https://www.tiktok.com/embed.js"></script>';
     }
-    elseif ($host==='runtime.video.cloud.yandex.net') {
+    elseif ($host==='runtime.video.cloud.yandex.net') { // Video on Yandex cloud
       $path = $parts['path'];
       if (!empty($parts['query'])) $path.='?'.$parts['query'];
-      $result = '<iframe
-    frameborder="0"
-    scrolling="no"
-    allowfullscreen
-    loading="lazy"
-    allow="fullscreen; encrypted-media; accelerometer; gyroscope; picture-in-picture; clipboard-write; web-share; screen-wake-lock"
-    src="https://runtime.video.cloud.yandex.net'.htmlspecialchars($path).'"
-></iframe>';
+      $result = '<iframe class="video_embed" scrolling="no" allowfullscreen loading="lazy" allow="fullscreen; encrypted-media; accelerometer; gyroscope; picture-in-picture; clipboard-write; web-share; screen-wake-lock"
+        src="https://runtime.video.cloud.yandex.net/'.htmlspecialchars($path).'"></iframe>';
+    }
+    elseif ($host==='ok.ru' || $host==='m.ok.ru') { // Odnoklassniki
+      $path = str_replace('/video/','/videoembed/',$parts['path']);
+      if (!empty($parts['query'])) $path.='?'.$parts['query'];
+      $result = '<iframe class="video_embed" width="853" height="480" src="//ok.ru'.$path.'" allowfullscreen></iframe>';
     }
 /*    elseif ($host==='dzen.ru') { // Dzen
       // https://dzen.ru/video/watch/680672e24eacb911f0248efb
