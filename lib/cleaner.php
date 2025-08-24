@@ -51,7 +51,8 @@ class Library_cleaner extends Library {
     'ul'=>[],
     'li'=>[],
     'pre'=>[],
-    'code'=>[]
+    'code'=>[],
+    'blockquote'=>[]
   ];
 
   const TAGS_HEADERS = [
