@@ -227,7 +227,7 @@ class Application {
     $GLOBALS['IntBF_debug'] = '';
     setlocale(LC_ALL, array('ru_RU.UTF-8', 'ru_RU.utf-8', 'Russian_Russia.65001'));
 
-    spl_autoload_register(array($this,'lib_loader')); // загрузчик для классов-библиотек
+    $this->init_lib_loader(); // автозагрузчик для классов Library_*
     set_error_handler(array($this, 'error_handler')); // вешаем собственный обработчик ошибок для фиксации их в логах и выдачи дружественных сообщений
     register_shutdown_function(array($this, 'shutdown')); // обработчик для корректного закрытия соединения с БД
     date_default_timezone_set('UTC'); // выставляем временную зону в UTC, чтобы для вывода даты было достаточно приплюсовать смещение, заданное в настройках пользователя
@@ -284,6 +284,10 @@ class Application {
   /** Парсинг URL и подгрузка данных о разделе или объекте * */
   protected function init_object() {
 //                $this->forum = false;
+  }
+
+  protected function init_lib_loader() {
+    spl_autoload_register(array($this,'lib_loader')); // загрузчик для классов-библиотек
   }
 
   /** Подключение файла конфигурации * */
@@ -425,8 +429,8 @@ class Application {
    */
   protected function init_last_visit() {
     if (!$this->is_guest()) {
-      if (!isset($this->forum))
-        $forum_id = $this->forum ['id'];
+      if (!empty($this->forum))
+        $forum_id = $this->forum['id'];
       else
         $forum_id = 0;
       $curtime = $this->time;
@@ -1005,7 +1009,7 @@ class Application {
                 'WHERE uid='.intval($uid).' AND uc.cid=uct.cid '.
                 'ORDER BY c_sort';
         $result['contacts'] = $this->db->select_all($sql);
-        $taglib = $this->load_lib('tags', false);
+        $taglib = class_exists('Library_tags') ? new Library_tags : false;
         if ($taglib)
           $result['interests'] = $taglib->get_tags($result['basic']['id'], 1);
         else
@@ -1233,6 +1237,12 @@ class Application {
     return $this->userdata['login'];
   }
 
+  /** Получение логина текущего пользователя
+   * @return string Логин пользователя * */
+  function get_userlevel():string {
+    return $this->userdata['level'];
+  }  
+
   /** Ссылка на профиль пользователя
    * @param $uid integer — идентификатор пользователя. Если равен нулю, формируется ссылка для текущего пользователя
    */
@@ -1317,6 +1327,7 @@ class Application {
    * @param string $rel_path Часть пути относительно корня
       */
   function url($rel_path):string {
+    if (!isset($this->sitepath)) return $rel_path;
     if ($rel_path === '/') $rel_path = ''; // чтобы не было двойных // в адресе
     return $this->sitepath.$rel_path; // после дорабтки алгоритма в $this->sitepath URL всегда кончается на /
   }
@@ -1414,11 +1425,11 @@ class Application {
   /** В случае, если требуется отправка почты (почтовый буфер не пуст), подключает модуль mail и передает ему буфер с почтовыми сообщениями для отправки * */
   function process_mail() {
     if (count($this->mail) > 0) {
-      $mailsender = $this->load_lib('mail');
+      $mailsender = new Library_mail;
       if (!$mailsender)
         trigger_error('Не удалось загрузить модуль отправки почты! Рассылка не будет произведена', E_USER_WARNING);
       else {
-        $outlib = $this->load_lib($this->template_lib, true); // отсутствие парсера должно вызывать фатальный шаблон, поэтому ставим true
+        $outlib = new $this->template_lib; 
         if (!($outlib instanceof iParser))
           trigger_error('Библиотека '.$this->template_lib.' не является парсером!', E_USER_WARNING);
         else {
