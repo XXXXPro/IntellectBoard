@@ -93,7 +93,7 @@ class Library_bbcode extends Library {
     }
 
     $text = $this->process_videos($text);
-    if (!empty($params['bcode'])) $text = $this->process_blocklinks($text);
+    if (!empty($params['bcode'])) $text = $this->process_blocklinks($text,$params);
 
     // обратная замена спецпоследовательностей (производится в обратном порядке)
     if (!empty($php_count)) for ($i=0; $i<$php_count; $i++) $text=str_replace('++php+'.$randstr.'+'.$i.'++',highlight_string($php_match[1][$i],true),$text); // заменяем все [code] на спецпоследовательности
@@ -238,7 +238,7 @@ class Library_bbcode extends Library {
   /** Проверка уровня доступа пользователя для просмотра скрытого текста **/
   function level_check($matches) {
     $level=intval($matches[1]);
-    if ($level>=$this->app()->userdata['level']) return $matches[2];
+    if ($level>=$this->app()->get_userlevel()) return $matches[2];
     else return '<div class="nolevel">У вас недостаточный уровень для просмотра этого сообщения.</div>';
   }
 
@@ -322,7 +322,7 @@ class Library_bbcode extends Library {
   }
 
   /** Обработка тега blocklink, показывающего ссылку с preview на основе данных OpenGraph */
-  function process_blocklinks($text) {
+  function process_blocklinks($text,$params) {
     // обработка blocklink
     preg_match_all('|\[blocklink=(https?://[^>"\'\]\s]+)\]|i', $text, $matches);
     if (!empty($params['blocklinks'])) $links = json_decode($params['blocklinks'], true);
@@ -536,14 +536,21 @@ class Library_bbcode extends Library {
 
       if ($errno==0 && $code==200) {
         $result[$url]=array();
-        $dom = new DOMDocument();
-        $dom->formatOutput = false;
         libxml_use_internal_errors(true);
-        $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NONET); // LIBXML_NONET — для защиты от XXE
+        if (version_compare(PHP_VERSION,'8.4','>=')) { // in newer PHP DOMDocument replaced to Dom\HTMLDocument
+          $dom = Dom\HTMLDocument::createFromString($html,Dom\HTML_NO_DEFAULT_NS);
+          $xpath = new Dom\XPath($dom);
+        }
+        else {
+          $dom = new DOMDocument();
+          $dom->formatOutput = false;
+          $xpath = new DOMXPath($dom);
+          $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NONET); // LIBXML_NONET — для защиты от XXE
+        }        
         libxml_use_internal_errors(false);
-        $xpath = new DOMXPath($dom);
         // finding title. First from <meta property="og:title", then from title tag
         $og_title = $xpath->query('//meta[@property="og:title"]');
+        print_r($og_title);
         if (!empty($og_title[0])) $result[$url]['title']= $og_title[0]->getAttribute('content');
         if (empty($result[$url]['title'])) {
           $og_title = $xpath->query('//title');
