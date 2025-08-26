@@ -550,7 +550,6 @@ class Library_bbcode extends Library {
         libxml_use_internal_errors(false);
         // finding title. First from <meta property="og:title", then from title tag
         $og_title = $xpath->query('//meta[@property="og:title"]');
-        print_r($og_title);
         if (!empty($og_title[0])) $result[$url]['title']= $og_title[0]->getAttribute('content');
         if (empty($result[$url]['title'])) {
           $og_title = $xpath->query('//title');
