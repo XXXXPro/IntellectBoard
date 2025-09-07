@@ -67,7 +67,7 @@ class Library_cleaner extends Library {
    * @param array $tags Hash array of allowed tags and attributes. The keys of 
    * 
    */
-  public static function clean(string $html,array $tags=self::TAGS_INLINE,array $schemas=['http','https','ftp','magnet','gemini','gopher']):string {
+  public static function clean(string $html,array $tags=self::TAGS_INLINE,array $schemas=['http','https','ftp','magnet','gemini','gopher','tel','mailto']):string {
     $charset = 'UTF-8';
     if (empty($html)) return ''; // чтобы избежать ошибок loadHTML, которая не принимает пустые строки
     $html = \strip_tags($html,'<'.\join('><',\array_keys($tags)).'>'); // at first clean tags except allowed
@@ -80,7 +80,7 @@ class Library_cleaner extends Library {
       $html = \mb_encode_numericentity($html, [0x80, 0x10FFFF, 0, ~0], $charset);      
       $dom = new \DOMDocument('1.0',$charset);
       $dom->formatOutput = false;
-      $dom->loadHTML($html, LIBXML_NONET|LIBXML_HTML_NOIMPLIED|LIBXML_HTML_NODEFDTD); // LIBXML_NONET — for protection against XXE, LIBXML_HTML_NOIMPLIED|LIBXML_HTML_NODEFDTD — to don't add DOCTYPE and html/body tags
+      $dom->loadHTML($html, LIBXML_NONET|LIBXML_HTML_NODEFDTD); // LIBXML_NONET — for protection against XXE, LIBXML_HTML_NOIMPLIED|LIBXML_HTML_NODEFDTD — to don't add DOCTYPE and html/body tags
       $xpath = new \DOMXPath($dom);            
     }
 
@@ -102,6 +102,11 @@ class Library_cleaner extends Library {
         $link->nodeValue='#'; // removing dangerous link address
       }
     }
-    return $dom->saveHTML();
+    $result = $dom->saveHTML();
+    if (version_compare(PHP_VERSION,'8.4','<')) {
+    	$result = substr($result,12,-15);
+    	$result = \mb_decode_numericentity($result,[0x80, 0x10FFFF, 0, ~0], $charset);
+    }
+    return $result;
   }
 }
