@@ -233,6 +233,10 @@ class users extends Application_Admin {
     'FROM '.DB_prefix.'moderator m,  '.DB_prefix.'user u '.
     'WHERE m.uid=u.id ORDER BY fid';
     $this->out->moderators = $this->db->select_super_hash($sql,'fid');
+    $sql = 'SELECT DISTINCT display_name '.
+    'FROM '.DB_prefix.'moderator m,  '.DB_prefix.'user u '.
+    'WHERE m.uid=u.id ORDER BY fid';
+    $this->out->moder_hints = $this->db->select_all_strings($sql);
     $sql = 'SELECT f.id, f.title FROM '.DB_prefix.'forum f ORDER BY f.sortfield';
     $this->out->forums = array('0'=>'Глобальные права на все разделы')+$this->db->select_simple_hash($sql);
     $sql = 'SELECT g.name, g.level FROM '.DB_prefix.'group g WHERE team=\'1\' ORDER BY level';
@@ -272,8 +276,7 @@ class users extends Application_Admin {
   }
   
   function action_users() {
-    $userlib = $this->load_lib('userlib',true);
-    /* @var $userlib Library_userlib */
+    $userlib = new Library_userlib;
     
     $this->out->letters1 = $userlib->get_letters(false,true); // true означает, что при составлении списка включаются также буквы, на которые начинаются имена неактивных пользователей
     $this->out->start_letter = isset($_GET['letter']) ? $_GET['letter'] : $this->out->letters1[0]; // если первая буква не указана явно, берем перую из тех, что есть в списке
@@ -283,10 +286,11 @@ class users extends Application_Admin {
     
     if (empty($_GET['show']) && empty($_GET['search'])) { // если не указан вывод пользователей по определенному признаку и не делался поиск
       $cond = array('status'=>'all','letter'=>$this->out->start_letter.$this->out->start_letter2,'all_data'=>true);
+      $this->out->search = $this->out->start_letter.$this->out->start_letter2;
     }
     elseif (!empty($_GET['search'])) {
       $this->out->search = $_GET['search'];
-      $cond = array('status'=>'all','search'=>$this->out->start_letter.$this->out->start_letter2);
+      $cond = array('status'=>'all','letter'=>$_GET['search']);
     }
     elseif ($_GET['show']==='banned') {
       $this->out->show='banned';

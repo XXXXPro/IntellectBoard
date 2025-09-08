@@ -298,6 +298,15 @@ class search extends Application {
       }      
     }    
   }
+
+  function action_complete_user() {
+    if (empty($_GET['q'])) return '';
+    $query = $_GET['q'];
+    $sql = 'SELECT display_name AS name, login FROM '.DB_prefix.'user '.
+    'WHERE status=\'0\' AND id>'.AUTH_SYSTEM_USERS.' AND (display_name LIKE \''.$this->db->slashes($query).'%\' OR login LIKE \''.$this->db->slashes($query).'%\')';
+    $users = $this->db->select_all($sql,5);
+    return json_encode($users);
+  }
   
   function check_timeout() {
     $timeout = $this->get_opt('search_timeout');
@@ -322,6 +331,16 @@ class search extends Application {
     if ($this->action=='results') $result[]=array('Результаты поиска');
     else $result[]=array('Поиск по форуму');
     return $result;  
+  }
+
+  function get_mime() {
+    if ($this->action==='complete_user') return 'text/json';
+    else return parent::get_mime();    
+  }
+
+  function get_request_type() {
+    if ($this->action==='complete_user') return 4;
+    else return parent::get_request_type();
   }
   
   function get_action_name() {

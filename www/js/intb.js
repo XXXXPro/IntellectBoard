@@ -385,6 +385,22 @@ function IntB_main(opts) {
     frm.enctype=old_enctype;
   });
 
+  jQuery('input.user_finder').each(function (i,el) {
+    let list_id = el.getAttribute('list');
+    let list_elm = document.getElementById(list_id);
+    if (!list_elm) return;
+    let prev_timer = null;
+    el.addEventListener('input', function (elm) {
+      if (prev_timer!=null) clearTimeout(prev_timer);
+      prev_timer = setTimeout(function() {
+        jQuery.get(opts.basedir+'search/complete_user.htm','q='+el.value,function(users) {
+          var opts = users.map(function (item) { let elm = document.createElement('option'); elm.value=item.name; elm.label=item.login; return elm });
+          list_elm.replaceChildren(...opts);
+        },'json');
+      },800);
+    });
+  });
+
   var sandwich_main = document.getElementById('intb_sandwich_main');
   if (sandwich_main) {
     jQuery('body').click(function (e) {
@@ -436,22 +452,25 @@ function IntB_main(opts) {
     }
   });
 
-  document.getElementById('quotemenu_quote').addEventListener("click", function(e) {
-    self.paste_quoted('[quote=' + self.stored_user + ']' + self.stored_quote + '[/quote]');
-    $('#quotemenu').addClass('invis');
-  });
-  document.getElementById('quotemenu_copy').addEventListener("click", async function (e) {
-    if (navigator.clipboard) navigator.clipboard.writeText(self.stored_quote + "\nИсточник: " +document.location.href);
-    $('#quotemenu').addClass('invis');
-  });
-  document.getElementById('quotemenu_share').addEventListener("click", async function (e) {
-    if (navigator.canShare && navigator.canShare(self.stored_quote)) await navigator.share(self.stored_quote);
-    $('#quotemenu').addClass('invis');
-  });
-  document.getElementById('quotemenu_vk').addEventListener("click", async function (e) {
-    window.open('https://vk.com/share.php?url=' + encodeURIComponent(document.location.href) + '&comment=' + encodeURIComponent(self.stored_quote))
-    $('#quotemenu').addClass('invis');
-  });  
+  var quote_menu_elm = document.getElementById('quotemenu_quote');
+  if (quote_menu_elm) {
+    document.getElementById('quotemenu_quote').addEventListener("click", function(e) {
+      self.paste_quoted('[quote=' + self.stored_user + ']' + self.stored_quote + '[/quote]');
+      $('#quotemenu').addClass('invis');
+    });
+    document.getElementById('quotemenu_copy').addEventListener("click", async function (e) {
+      if (navigator.clipboard) navigator.clipboard.writeText(self.stored_quote + "\nИсточник: " +document.location.href);
+      $('#quotemenu').addClass('invis');
+    });
+    document.getElementById('quotemenu_share').addEventListener("click", async function (e) {
+      if (navigator.canShare && navigator.canShare(self.stored_quote)) await navigator.share(self.stored_quote);
+      $('#quotemenu').addClass('invis');
+    });
+    document.getElementById('quotemenu_vk').addEventListener("click", async function (e) {
+      window.open('https://vk.com/share.php?url=' + encodeURIComponent(document.location.href) + '&comment=' + encodeURIComponent(self.stored_quote))
+      $('#quotemenu').addClass('invis');
+    });
+  }
 
   var mathtex = $('.mathtex');
   var asciimath = $('.asciimath');

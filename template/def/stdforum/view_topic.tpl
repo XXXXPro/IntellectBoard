@@ -20,7 +20,9 @@
 <fieldset><legend>Настройки отображения темы</legend>
 Показывать по {{ macros.input('perpage',opts.perpage,3) }} сообщений  с сортировкой {{ macros.select('sort',opts.sort,{DESC:'по убыванию',ASC:'по возрастанию',rating:'по рейтингу'}) }}.<br/>
 Выводить {{ macros.select('filter',opts.filter,{all:'все сообщения',valued:'только ценные сообщения',noflood:'сообщения, не являющиеся флудом'}) }},
-отправленные <input type="text" name="author_name" value="{{ opts.author_name }}" size="12" maxlength="32" placeholder="имя автора" />.
+отправленные <input type="text" name="author_name" value="{{ opts.author_name }}" size="12" maxlength="32" placeholder="имя автора" list="user_search_list" class="user_finder" />.
+<datalist id="user_search_list">
+</datalist>
 <button type="submit" name="submit">Показать</button>
 <button type="submit" name="clear">Сброс</button>
 </fieldset>

@@ -3,11 +3,11 @@
 <fieldset><legend>Отправка личного сообщения</legend>
 {% if newpost %}<div>
 <div><label><span>Получатели сообщения:</span>
-<input type="text" name="recepients" value="{{ recepients }}" size="40" maxlength="255" list="friends" />
-{% if friends %}<datalist id="friends">
+<input type="text" name="recepients" value="{{ recepients }}" size="40" maxlength="255" list="friends" class="user_finder" />
+<datalist id="friends">
 {% for item in friends %}<option>{{ item.display_name }}</option>{% endfor %}
 </datalist>
-{% endif %}</div>
+</div>
 <div><label><span>Название темы:</span>
 {{ macros.input('thread[title]', thread.title,40,80) }}</label></div>
 </div>{% endif %}

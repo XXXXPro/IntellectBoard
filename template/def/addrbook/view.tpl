@@ -6,7 +6,9 @@
 <div id="addrbook_view">{% import 'macro.tpl' as macros %}
 <h1>Адресная книга</h1>
 <form action="add.htm" method="get"><fieldset><legend>Добавление пользователя</legend>
-<label>Добавить пользователя: <input type="text" name="logins" size="40" placeholder="Имена, разделенные запятыми" />
+<label>Добавить пользователя: <input type="text" name="logins" size="40" placeholder="Имена, разделенные запятыми" list="user_search_list" class="user_finder" />
+<datalist id="user_search_list">
+</datalist>
 <input type="hidden" name="type" value="friend" /><input type="hidden" name="authkey" value="{{ add_key }}" /><input type="submit" value="Добавить" />
 </fieldset></form><ul class="friends">
 {% for item in friends %}
