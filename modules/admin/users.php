@@ -279,9 +279,12 @@ class users extends Application_Admin {
     $userlib = new Library_userlib;
     
     $this->out->letters1 = $userlib->get_letters(false,true); // true означает, что при составлении списка включаются также буквы, на которые начинаются имена неактивных пользователей
-    $this->out->start_letter = isset($_GET['letter']) ? $_GET['letter'] : $this->out->letters1[0]; // если первая буква не указана явно, берем перую из тех, что есть в списке
+    if (!empty($_GET['search'])) $this->out->start_letter = mb_strtolower(mb_substr($_GET['search'],0,1)); // в качестве выбранной буквы берём первую букву строки поиска
+    else $this->out->start_letter = isset($_GET['letter']) ? $_GET['letter'] : $this->out->letters1[0]; // если первая буква не указана явно, берем перую из тех, что есть в списке
+
     $this->out->letters2 = $userlib->get_letters($this->out->start_letter,true);
-    $this->out->start_letter2 = isset($_GET['letter2']) ? $_GET['letter2'] : $this->out->letters2[0]; // если вторая буква не указана явно, берем первую из тех, что есть в списке вторых букв
+    if (!empty($_GET['search']) && mb_strlen($_GET['search'])>1) $this->out->start_letter2 = mb_strtolower(mb_substr($_GET['search'],1,1)); // changing selected second letter to second letter of user name if any
+    else $this->out->start_letter2 = isset($_GET['letter2']) ? $_GET['letter2'] : $this->out->letters2[0]; // если вторая буква не указана явно, берем первую из тех, что есть в списке вторых букв
     if (!empty($_GET['show'])) $this->out->show=$_GET['show'];
     
     if (empty($_GET['show']) && empty($_GET['search'])) { // если не указан вывод пользователей по определенному признаку и не делался поиск
@@ -290,7 +293,7 @@ class users extends Application_Admin {
     }
     elseif (!empty($_GET['search'])) {
       $this->out->search = $_GET['search'];
-      $cond = array('status'=>'all','letter'=>$_GET['search']);
+      $cond = array('status'=>'all','letter'=>$_GET['search']);      
     }
     elseif ($_GET['show']==='banned') {
       $this->out->show='banned';
