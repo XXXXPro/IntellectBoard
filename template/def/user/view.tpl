@@ -35,7 +35,9 @@
 {% for letter in letters %}<li><a href="search/letter-{{ letter }}/">{{ letter }}</a></li>{% endfor %}
 </ul>
 <form action="search_redir.htm" method="get"><fieldset><legend>Поиск по имени</legend>
-<label>Или введите имя пользователя для поиска:</label> <input type="text" name="name" placeholder="Имя" size="20" maxlength="32" required="required" />
+<label>Или введите имя пользователя для поиска:</label> <input type="text" name="name" placeholder="Имя" size="20" maxlength="32" required="required" list="user_search_list" class="user_finder" />
+<datalist id="user_search_list">
+</datalist>
 <button type="submit">Найти</button>
 </fieldset></form>
 </div>

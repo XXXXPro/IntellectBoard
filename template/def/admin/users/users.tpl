@@ -29,8 +29,10 @@
 {% import 'macro.tpl' as macros %}
 <div id="users_user">
 <h1>Участники форума</h1>
-<form action="search/" method="get" id="user_search_form"><fieldset><legend>Поиск по имени</legend>
-<label>Найти пользователя</label> <input type="text" name="name" placeholder="Имя или его часть" size="20" maxlength="32" />
+<form action="" method="get" id="user_search_form"><fieldset><legend>Поиск по имени</legend>
+<label>Найти пользователя</label> <input type="text" name="search" placeholder="Имя или его часть" size="20" maxlength="32" list="user_search_list" class="user_finder" />.
+<datalist id="user_search_list">
+</datalist>
 <button type="submit">Искать</button>
 или показать:
 {% if show!='unconfirmed' %}<a href="?show=unconfirmed">неактивных пользователей</a>{% else %}<b>неактивных пользователей</b>{% endif %}, 
@@ -48,7 +50,7 @@
 {% elseif show=='unconfirmed' %}<h3>Неподтвержденные польователи</h3>
 {% elseif show=='team' %}<h3>Участники команды форума</h3>
 {% elseif show=='last' %}<h3>Последние зарегистрированные</h3>
-{% else %}<h3>Пользователи, чьи имена начинаются на &laquo;{{ start_letter~start_letter2 }}&raquo;</h3>{% endif %}
+{% else %}<h3>Пользователи, чьи имена начинаются на &laquo;{{ search }}&raquo;</h3>{% endif %}
 <ul class="users">
 {% for item in users %}
 <li class="{% if item.status == 2%}banned {% endif %}{% if item.status == 1 %}inactive {% endif %}{% if item.team %}team {% endif %}{% if item.founder %}founder {% endif %}">

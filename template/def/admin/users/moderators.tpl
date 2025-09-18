@@ -35,7 +35,10 @@
 </fieldset></form>
 <br />
 <form action="delete_mod_all.htm" method="post" class="ibform"><fieldset><legend>Снятие всех прав</legend>
-<div><label><span>Снять все модераторские права с пользователя</span><input type="text" name="uname" size="32" value="" placeholder="Введите имя"/></label></div>
+<div><label><span>Снять все модераторские права с пользователя</span><input type="text" name="uname" size="32" value="" placeholder="Введите имя" list="moder_hints" /></label></div>
+<datalist id="moder_hints">
+{% for moder in moder_hints %}<option value="{{ moder }}" />{% endfor %}
+</datalist>
 <div class="submit"><button type="submit">Выполнить</button>{{ macros.hidden('authkey',del_all_key) }}</div>   
 </fieldset></form>
 </div>

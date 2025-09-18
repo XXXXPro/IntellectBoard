@@ -20,7 +20,9 @@
 <input type="date" class="date" name="opts[end_date]" value="{{ opts.end_date }}" size="14" style="margin-right: 24px"/> 
 по {{ macros.input('opts[perpage]',opts.perpage,3) }} записей на страницу <small>(в журналах используется время сервера, как правило это GMT)</small><br />
 <strong>Выбрать записи:</strong> (все критерии выбора объединяются через логическое "И")<br />
-по имени пользователя <input type="text" name="opts[names]" value="{{ opts.names }}" size="32" title="Можно указать несколько имен через запятую" />, 
+по имени пользователя <input type="text" name="opts[names]" value="{{ opts.names }}" size="32" placeholder="Можно указать несколько имен через запятую" list="user_search_list" class="user_finder" />,
+<datalist id="user_search_list">
+</datalist> 
 идентификатору cookie <input type="text" name="opts[cookie]" value="{{ opts.cookie }}" size="12" maxlength="12" />, 
 IP-адресу <input type="text" name="opts[ip]" value="{{ opts.ip }}" size="15" title="Возможен поиск по неполному совпадению" />,<br /> 
 действию <input type="text" name="opts[action]" value="{{ opts.action }}" size="12" />, 

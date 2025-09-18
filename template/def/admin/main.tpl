@@ -29,7 +29,8 @@
 {% if meta_redirect %}<meta http-equiv="refresh" content="1; url={{ meta_redirect }}" />{% endif %}
 <script type="text/javascript">
 IntB_params = {
-   basedir:'{{ url('') }}',{%
+   jquery_cdn : '{{ jquery_cdn }}',
+   basedir : '{{ url('') }}',{%
    if draft_name %}draft: '{{ draft_name }}',{% endif %}{% if smiles %}
    emoticonsRoot : '{{ url('sm/') }}',
    emoticons : { {%
