@@ -1,11 +1,11 @@
 <?php
 define('DB_host','localhost');
-define('DB_name','ib_sprosi');
+define('DB_name','ib_last');
 define('DB_username','root');
 define('DB_password','1');
 define('DB_socket','');
 define('DB_charset','1');
-define('DB_prefix','ib_');
+define('DB_prefix','ibx_');
 define('DB_driver','mysqli');
 define('DB_schema','ib_current');
 define('DB_structure_version','103');

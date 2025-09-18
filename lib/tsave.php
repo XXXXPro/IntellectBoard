@@ -117,7 +117,7 @@ class Library_tsave extends Library {
       $sql = 'UPDATE '.DB_prefix.'user_ext SET rating=rating+'.floatval($data['value']).' WHERE id='.intval($uid_rated);
       $this->app()->db->query($sql);
       if ($value || $flood) { // если сообщение объявлено флудом или же ценным, нужен пересчет темы
-        $premodlib = $this->app()->load_lib('moderate',false);
+        $premodlib = class_exists('Library_moderate') ? new Library_moderate : false;
         if ($premodlib) $premodlib->topic_resync($tid);
       }
       else { // иначе просто обновляем время последней модификации темы на текущее, чтобы при обновлении рейтинги отобразились корректно 

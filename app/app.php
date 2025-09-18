@@ -1429,7 +1429,8 @@ class Application {
       if (!$mailsender)
         trigger_error('Не удалось загрузить модуль отправки почты! Рассылка не будет произведена', E_USER_WARNING);
       else {
-        $outlib = new $this->template_lib; 
+        $libclass = 'Library_'.$this->template_lib;
+        $outlib = new $libclass;
         if (!($outlib instanceof iParser))
           trigger_error('Библиотека '.$this->template_lib.' не является парсером!', E_USER_WARNING);
         else {

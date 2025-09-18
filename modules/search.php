@@ -302,9 +302,46 @@ class search extends Application {
   function action_complete_user() {
     if (empty($_GET['q'])) return '';
     $query = $_GET['q'];
-    $sql = 'SELECT display_name AS name, login FROM '.DB_prefix.'user '.
-    'WHERE status=\'0\' AND id>'.AUTH_SYSTEM_USERS.' AND (display_name LIKE \''.$this->db->slashes($query).'%\' OR login LIKE \''.$this->db->slashes($query).'%\')';
-    $users = $this->db->select_all($sql,5);
+    $pos = strrpos($query,',');
+    $len = strlen($query);
+    if ($pos!==false) {
+      while ($pos+1<$len && $query[$pos+1]===' ') $pos++;      
+      $prefix = substr($query,0,$pos+1);
+      $query = trim(substr($query,$pos+1));
+    }
+    else $prefix = '';
+    if (!empty($query)) {
+      $sql = 'SELECT display_name AS name FROM '.DB_prefix.'user '.
+      'WHERE status=\'0\' AND id>'.AUTH_SYSTEM_USERS.' AND (display_name LIKE \''.$this->db->slashes($query).'%\' OR login LIKE \''.$this->db->slashes($query).'%\')';
+      $users = $this->db->select_all_strings($sql,5);
+      for ($i=0, $count=count($users); $i<$count; $i++) {
+        $users[$i] = $prefix.$users[$i];
+      }
+    }
+    else $users = array();
+    return json_encode($users);
+  }
+
+  function action_complete_tag() {
+    if (empty($_GET['q'])) return '';
+    $query = $_GET['q'];
+    $pos = strrpos($query,',');
+    $len = strlen($query);
+    if ($pos!==false) {
+      while ($pos+1<$len && $query[$pos+1]===' ') $pos++;      
+      $prefix = substr($query,0,$pos+1);
+      $query = trim(substr($query,$pos+1));
+    }
+    else $prefix = '';
+    if (!empty($query)) {
+      $sql = 'SELECT tagname AS name FROM '.DB_prefix.'tagname '.
+      'WHERE type=\'0\' AND tagname LIKE \''.$this->db->slashes($query).'%\' ORDER BY count';
+      $users = $this->db->select_all_strings($sql,5);
+      for ($i=0, $count=count($users); $i<$count; $i++) {
+        $users[$i] = $prefix.$users[$i];
+      }
+    }
+    else $users = array();
     return json_encode($users);
   }
   
@@ -334,12 +371,12 @@ class search extends Application {
   }
 
   function get_mime() {
-    if ($this->action==='complete_user') return 'text/json';
+    if (in_array($this->action,array('complete_user','complete_tag'))) return 'application/json';
     else return parent::get_mime();    
   }
 
   function get_request_type() {
-    if ($this->action==='complete_user') return 4;
+    if (in_array($this->action,array('complete_user','complete_tag'))) return 4;
     else return parent::get_request_type();
   }
   

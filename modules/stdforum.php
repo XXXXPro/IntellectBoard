@@ -604,12 +604,12 @@ class stdforum extends Application_Forum {
     $this->out->perms = $tlib->get_permissions();
     if ($this->bot_id!=0) $this->output_403('Поисковым роботом запрещено использовать форму ответа!');
 
-    if ($this->out->perms['attach']) $atlib = $this->load_lib('attach',true);
+    if ($this->out->perms['attach']) $atlib = new Library_attach;
     $bbcode = $this->load_lib('bbcode');
 
     if ($this->is_post()) {
       if (empty($_POST['authkey']) && !$this->is_guest()) $this->output_403('Отсутствует ключ авторизации, подозрение на CSRF-атаку.');
-      $tslib = $this->load_lib('tsave',true);
+      $tslib = new Library_tsave;
       $post=$tslib->get_post_data($_POST['post'],$this->out->perms);
       if ($anonym) { $post['author']='Guest'; $post['uid']=1; } // если включен режим анонимности, отправляем от имени гостя
       unset($post['id']); // сбрасываем идентификатор сообщения, т.к. это ответ, а не редактирование
@@ -626,7 +626,7 @@ class stdforum extends Application_Forum {
           $tslib->save_post($post,$anonym); // при сохранении должен был проставиться id
 
           // обработка приложенных файлов
-          if (!empty($_FILES['attach']) && $atlib) $atlib->process_files($_FILES['attach'],$post['id'],1); // 1 означает что файл загружается как прикрепленный к сообщению
+          if (!empty($_FILES['attach']) && $atlib) $post['attach']=$atlib->process_files($_FILES['attach'],$post['id'],1); // 1 означает что файл загружается как прикрепленный к сообщению
 //          if (!empty($_POST['preattach']) && $atlib) $atlib->process_preuploads($_POST['preattach'],$post['id'],1);
 
           $lock=false;
@@ -778,17 +778,16 @@ class stdforum extends Application_Forum {
             }
             $lock=false;
             if (!empty($_POST['topic']['locked']) && $this->out->perms['lock']) $lock=true; // если запрошено закрытие темы и есть необходимые права
+            // обработка приложенных файлов
+            if (!empty($_FILES['attach']) && $this->out->perms['attach']) {
+              $atlib = new Library_attach;
+              if ($atlib) $post['attach']=$atlib->process_files($_FILES['attach'],$post['id'],1); // 1 означает что файл загружается как прикрепленный к сообщению
+            }            
             if ($post['status']==0) { // обновляем данные $this->topic, чтобы избежать лишнего SQL-запроса, но только в том случае
               $this->topic['last_post_id']=$post['id'];
               $this->topic['post_count']=1;
               $tslib->increment($post,true,$lock); // увеличиваем счетчик, а также закрываем тему, если $lock=true
               $this->post_postprocess($post,$parsed,true); // в этой процедуре будет различная обработка типа увеличения счетчиков и т.п.
-            }
-            // обработка приложенных файлов
-            if (!empty($_FILES['attach']) && $this->out->perms['attach']) {
-              /** @var Library_attach $atlib */              
-              $atlib = $this->load_lib('attach',true);
-              if ($atlib) $atlib->process_files($_FILES['attach'],$post['id'],1); // 1 означает что файл загружается как прикрепленный к сообщению
             }
             $this->db->commit(); // завершаем транзакцию (подумать, тут ли это надо делать
             $hurl = !empty($this->topic['hurl']) ? $this->topic['hurl'] : $this->topic['id'];
@@ -873,7 +872,7 @@ class stdforum extends Application_Forum {
               }
               if (!empty($_FILES['attach']) && $this->out->perms['attach']) {
                 if ($atlib) {
-                  $atlib->process_files($_FILES['attach'],$post['id'],1,false); // 1 означает что файл загружается как прикрепленный к сообщению, false — не трогаем главные файлы
+                  $post['attach']=$atlib->process_files($_FILES['attach'],$post['id'],1,false); // 1 означает что файл загружается как прикрепленный к сообщению, false — не трогаем главные файлы
                 }
               }
             }
@@ -1379,12 +1378,33 @@ class stdforum extends Application_Forum {
     }
     if ($post['status']==0) $this->update_extdata(); // обновление кешированных данных (используется в унаследованных разделах), если сообщение доступно сразу
 
+    if (!empty($post['attach'])) { // добавляем в HTML-версию ссылки на приложенные файлы
+      $prev_x = $this->get_opt('posts_preview_x') or 240;
+      $prev_y = $this->get_opt('posts_preview_y') or 180;
+      $parsed .= PHP_EOL.'<h5>Прикреплённые файлы:</h5>';
+      foreach ($post['attach'] as $attach) {
+        $parsed .= '<div class="attach">';
+        if ($attach['size']>512*1024) { // если размер файла более 512 Кб, укажем его размер в мегабайтах с округлением вверх
+          $size = ceil($attach['size']/1024/1024).' Мб';
+          $size = ' ('.$size.')';
+        }
+        else $size='';
+        $attach_url = $this->http($this->url('f/up/1/'.$attach['oid'].'-'.$attach['fkey'].'/'.$attach['filename'])); // формируем path здесь, а не в шаблоне
+        if ($attach['format']=='image' && $this->get_opt('pics','user') && $attach['fkey']!='#') {
+          $prev_url = $this->http($this->url('f/up/1/pr/'.$prev_x.'x'.$prev_y.'/'.$attach['oid'].'-'.$attach['fkey'].'.'.$attach['extension']));
+          $parsed .= '<a class="lightbox" href="'.$this->url($attach_url).'">';
+          $parsed .= '<img src="'.$prev_url.'" alt="'.htmlspecialchars($attach['filename']).'" align="middle" height="'.$prev_y.'" width="'.$prev_x.'" />'.$attach['filename'].'</a>'.$size;
+        }
+        else $parsed .= '<a class="lightbox" href="'.$attach_url.'">'.$attach['filename'].'</a>'.$size;
+        $parsed.='</div>'.PHP_EOL;
+      }
+    }
+
     // подключение библиотеки для уведомлеий о новом сообщении
     // (по умолчанию уведомления отправляются на EMail в соответствии с настройками подписки,
     // с помощью библиотеки notify, но возможна ее замена с целью выполнения других действий)
-    $notify_lib_name = $this->get_opt('site_notify_lib');
-    /** @var Library_notify $notify_lib */
-    $notify_lib = $this->load_lib($notify_lib_name,false);
+    $notify_lib_name = 'Library_'.$this->get_opt('site_notify_lib');
+    $notify_lib = class_exists($notify_lib_name) ? new $notify_lib_name : false;
     if ($notify_lib) {
       if ($newtopic)  $notify_lib->new_topic($post,$this->topic,$this->forum,$parsed);
       else $notify_lib->new_post($post,$this->topic,$this->forum,$parsed);
@@ -1393,7 +1413,7 @@ class stdforum extends Application_Forum {
     if ($this->forum['webmention']) { // если включена отправка уведомлений через WebMention
       $links_count = preg_match_all('|<a\s+[^>]*href=["\']?(https?://[^>"\']+)["\'][^>]*>?|',$parsed,$links);
       /** @var Library_misc */
-      $misc_lib = $this->load_lib('misc',false);
+      $misc_lib = class_exists('Library_misc') ? new Library_misc : false;
       if ($misc_lib) {
         for ($i=0; $i<$links_count; $i++) {
           $misc_lib->create_task('indieweb','webmention',array('source'=>$this->http($this->url($this->topic['full_hurl'].'post-'.$post['id'].'.htm')),'target'=>$links[1][$i]));

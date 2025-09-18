@@ -19,7 +19,7 @@ class anon extends stdforum {
 
   function view_forum_misc() {
     $pids = array();
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $this->out->topics = $tlib->get_first_posts($this->out->topics,array('ratings'=>false,'attach'=>true)); // получаем первые сообщения (вопросы) для всех выводимых тем
     $this->out->start_text = $this->get_text($this->forum['id'],2);  // текст с типом 2 -- вводный
     $this->out->mod_no_marks = true; // запрещаем помечать сообщения при просмотре в разделе

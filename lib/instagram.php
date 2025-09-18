@@ -16,11 +16,11 @@
       $max_size = !empty($params[1]) ? $params[1] : 180;
       $quality = !empty($params[2]) ? $params[2] : 90;
       
-      $dl_lib = $this->app()->load_lib('download',false);
+      $dl_lib = class_exists('Library_download') ? new Library_download : false;
       if ($dl_lib) {
         $filename = BASEDIR.'tmp/instagram.json';
         $dl_lib->get($url,$filename);
-        $img_lib = $this->app()->load_lib('image',false);
+        $img_lib = class_exists('Library_image') ? new Library_image : false;
         if (is_readable($filename) && $img_lib) {
           $data = json_decode(file_get_contents($filename),true);
           if (empty($data)) return;
@@ -39,7 +39,7 @@
    function cron_refresh($params) {
      $params = explode(',',$params); 
      $url = "https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=".$params[0];
-     $dl_lib = $this->app()->load_lib('download',false);
+     $dl_lib = class_exists('Library_download') ? new Library_download : false;
      if ($dl_lib) {
        $dl_lib->get($url,BASEDIR.'logs/instagram_refresh.log');
        unlink(BASEDIR.'logs/instagram_refresh.log');

@@ -87,7 +87,7 @@ class addrbook extends Application {
         $ids = array();
         if (!$count) $this->message('Не указан идентификатор пользователя',3);
         else {
-          $userlib = $this->load_lib('userlib',true);
+          $userlib = new Library_userlib;
           for ($i=0; $i<$count; $i++) {
             $tmpid = $userlib->get_uid_by_display_name(trim($logins[$i])); 
             if ($tmpid) $ids[]=intval($tmpid);

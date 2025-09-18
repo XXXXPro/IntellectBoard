@@ -68,7 +68,7 @@ class Library_blocks extends Library {
      }
      $topics = array();
 
-     $flib = $this->app()->load_lib('forums',false);
+     $flib = class_exists('Library_forums') ? new Library_forums : false;
      if (!$flib) return false; // если библиотеку тем загрузить не удалось, выходим, не отображая ничего
      $forum = $flib->get_forum($params[0],true);
      $this->app()->lastmod = max($forum['lastmod'],$this->app()->lastmod);
@@ -128,7 +128,7 @@ class Library_blocks extends Library {
      if (!empty($result['tags'])) $result['max'] = max($result['tags']);
      if ($forum_id==$this->app()->forum['id']) $result['forum']=$this->app()->forum;
      else {
-      $flib = $this->app()->load_lib('forums',false);
+      $flib = class_exists('Library_forums') ? new Library_forums : false;
       if ($flib) {
          $result['forum']=$flib->get_forum($forum_id,false);
       }
@@ -152,8 +152,7 @@ class Library_blocks extends Library {
     $cond['order']='post_count'; // сортируем по количеству постов
     $cond['sort']='DESC'; // причем последние темы выводим сверху
     if (count($params)<3) $cond['forumtype']='stdforum'; // выводим новые темы только из стандартных разделов, если список разделов не задан явно
-    /** @var Library_topic */
-    $tlib = $this->app()->load_lib('topic',false);
+    $tlib = class_exists('Library_topic') ? new Library_topic : false;
     if ($tlib) {
       $topics = $tlib->list_topics($cond);
       if (empty($topics)) return false;
@@ -179,8 +178,7 @@ class Library_blocks extends Library {
     $cond['order']='views'; // сортируем по количеству просмотров
     $cond['sort']='DESC'; // причем последние темы выводим сверху
     if (count($params)<3) $cond['forumtype']='stdforum'; // выводим новые темы только из стандартных разделов, если список разделов не задан явно
-    /** @var Library_topic */
-    $tlib = $this->app()->load_lib('topic',false);
+    $tlib = class_exists('Library_topic') ? new Library_topic : false;
     if ($tlib) {
       $topics = $tlib->list_topics($cond);
       if (empty($topics)) return false;
@@ -205,8 +203,8 @@ class Library_blocks extends Library {
     $cond['order']='first_post_date'; // сортируем по дате создания
     $cond['sort']='DESC'; // причем последние темы выводим сверху
     if (count($params)<3) $cond['forumtype']='stdforum'; // выводим новые темы только из стандартных разделов, если список разделов не задан явно
-    /** @var Library_topic */
-    $tlib = $this->app()->load_lib('topic',false);
+
+    $tlib = class_exists('Library_topic') ? new Library_topic : false;
     if ($tlib) {
       $topics = $tlib->list_topics($cond);
       if (empty($topics)) return false;
