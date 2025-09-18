@@ -523,6 +523,7 @@ class Library_bbcode extends Library {
     $ch = curl_init();
     $result = array();
     $all_done = true;
+echo "Blocklink".PHP_EOL;
     foreach ($params['links'] as $url) {
       curl_setopt($ch, CURLOPT_URL, $url);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -544,8 +545,8 @@ class Library_bbcode extends Library {
         else {
           $dom = new DOMDocument();
           $dom->formatOutput = false;
-          $xpath = new DOMXPath($dom);
           $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NONET); // LIBXML_NONET — для защиты от XXE
+          $xpath = new DOMXPath($dom);
         }        
         libxml_use_internal_errors(false);
         // finding title. First from <meta property="og:title", then from title tag
