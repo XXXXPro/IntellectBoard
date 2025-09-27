@@ -20,7 +20,7 @@ define('CONFIG_nocache','1');
 define('CONFIG_site_title','Наш новый форум');
 define('CONFIG_site_description','Under construction');
 define('CONFIG_site_start','Наш форум');
-define('CONFIG_site_copyright','2023, Все права на содержимое сайта принадлежат его владельцу.');
+define('CONFIG_site_copyright','2025, Все права на содержимое сайта принадлежат его владельцу.');
 define('CONFIG_site_version','1');
 define('CONFIG_site_template','def');
 define('CONFIG_site_secret','qazwsx123');

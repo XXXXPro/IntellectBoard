@@ -13,7 +13,9 @@
 class Library_cleaner extends Library {
   const TAGS_MINIMUM = [
     'a'=>['href','target'],
-    'img'=>['alt','src','height','width']
+    'img'=>['alt','src','height','width'],
+    'details'=>['class'],
+    'summary'=>[]
   ];
 
   const TAGS_MEDIA = [

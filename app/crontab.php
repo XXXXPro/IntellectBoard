@@ -9,6 +9,8 @@
  *  Скрипт выполнения задач по таймеру
  *  ================================ */
 
+define('IntB_Crontab_mode',true); // для проверок, что работаем в Cron-режиме 
+
 
 class Application_Crontab extends Application {
   function init() {
@@ -92,7 +94,6 @@ class Application_Crontab extends Application {
             $sql = 'UPDATE '.DB_prefix.'task SET nextrun=?, errors=errors+1 WHERE id=?';
             $this->db->query($sql,true,array($this->time+60*($tasks[$i]['errors']+1),$tasks[$i]['id']));
           }
-
         }
 
         $this->shutdown();

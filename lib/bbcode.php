@@ -198,8 +198,8 @@ class Library_bbcode extends Library {
 
       self::$ext_search[]='|\[off\](.*?)\[/off\]|s'; self::$ext_replace[]='<div class="offtopic">$1</div>';
       self::$ext_search[]='|\[pre\](.*?)\[/pre\]|s'; self::$ext_replace[]='<pre>$1</pre>';
-      self::$ext_search[]='|\[cut\](.*?)\[/cut\]|s'; self::$ext_replace[]='<a class="cutlink" href="#">Показать скрытый текст &raquo;</a><span class="invis">$1</span>';
-      self::$ext_search[]='|\[cut=([^\]]+)\](.*?)\[/cut\]|s'; self::$ext_replace[]='<a class="cutlink" href="#">$1</a><span class="invis">$2</span>';
+      self::$ext_search[]='|\[cut\](.*?)\[/cut\]|s'; self::$ext_replace[]='<details class="inline"><summary>Показать скрытый текст</summary>$1</details>';
+      self::$ext_search[]='|\[cut=([^\]]+)\](.*?)\[/cut\]|s'; self::$ext_replace[]='<details class="inline"><summary>$1</summary>$2</details>';
       self::$ext_search[]='|\[spoiler\]|s'; self::$ext_replace[]='<details>';
       self::$ext_search[]='|\[/spoiler\]|s'; self::$ext_replace[]='</details>';
       self::$ext_search[]='|\[spoiler=([^\]]+)\]|s'; self::$ext_replace[]='<details><summary>$1</summary>';

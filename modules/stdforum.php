@@ -561,22 +561,20 @@ class stdforum extends Application_Forum {
   }
 
   function action_rate() {
-    $tlib = $this->load_lib('topic',true);
-    /* @var $tlib Library_topic */
+    $tlib = new Library_topic; 
     $tid = $this->topic['id'];
     if (empty($_GET['p'])) $this->output_403('Не указано сообщение для изменения рейтинга!');
     else $pid=intval($_GET['p']);
     if (empty($_GET['d'])) $this->output_403('Не указано направление изменения рейтинга!');
     $direction = $_GET['d'];
-    $post = $tlib->get_posts(array('tid'=>$tid,'id'=>array($pid),'ratings'=>true));
+    $post = $tlib->get_posts(array('tid'=>$tid,'id'=>array($pid),'ratings'=>true,'notext'=>true));
     if (empty($post) || empty($post[0])) $this->output_404('Не найдено сообщение для изменения рейтинга!',3);
     elseif ($direction!='pro' && $direction!='contra') $this->message('Ошибочно указано значение для изменения рейтинга!',3);
     else {
       $errmsg = $this->check_rateable($post[0]);
       if (!empty($errmsg)) $this->message($errmsg,3);
       else {
-        $tslib = $this->load_lib('tsave',true);
-        /* @var $tslib Library_tsave */
+        $tslib = new Library_tsave;
         $data['id']=$pid;
         $data['tid']=$post[0]['tid'];
         $data['value']=$direction=='contra' ? -1 : 1;
@@ -587,9 +585,16 @@ class stdforum extends Application_Forum {
         $this->message('Ваш голос засчитан!',1);
       }
     }
-    if ($this->get_request_type()!=1) { // если запрос сделан не через AJAX, редиректим пользователя обратно к отрейтингованому сообщению
+    if ($this->get_request_type()==0) { // если запрос сделан обычным образом (не через AJAX), редиректим пользователя обратно к отрейтингованому сообщению
       $referer = $this->referer();
       $this->post_redirect($post[0]['id']);
+    }
+    elseif ($this->get_request_type()==1) { // если через AJAX — отдаём HTML-код с новым значением рейтинга
+      $this->out->post = $data;
+      $this->out->post['rating_value'] = $this->out->post['value']; // значение рейтинга, данного текущим пользователем
+      $this->out->post['rating'] = $post[0]['rating']+$data['value']; // новое значение рейтинга
+      $this->out->post['norate'] = 'Вы уже голосовали за это сообщение!';
+      return 'stdforum/rating.tpl';
     }
     else { // а если через AJAX, выдаем JSON с новым рейтингом и запретом на повторное изменение
       $result['value']=$post[0]['rating']+$data['value'];
@@ -597,6 +602,34 @@ class stdforum extends Application_Forum {
       $result['result']='done';
       $this->output_json($result);
     }
+  }
+
+  function action_unrate() {
+    $tlib = new Library_topic; 
+    $tid = $this->topic['id'];
+    $uid = $this->get_uid();
+    if ($uid<=AUTH_SYSTEM_USERS) $this->output_403('Гости не могут отменять рейтинги!');
+    
+    if (empty($_GET['p'])) $this->output_403('Не указано сообщение для изменения рейтинга!');
+    else $pid=intval($_GET['p']);
+
+    $post = $tlib->get_posts(array('tid'=>$tid,'id'=>array($pid),'ratings'=>true,'notext'=>true));
+    if (empty($post) || empty($post[0])) $this->output_404('Не найдено сообщение для изменения рейтинга!',3);
+    $this->out->post = $post[0];
+    
+    $tsave = new Library_tsave;
+    if ($tsave->undo_rating($post[0],$uid)) {
+      $this->out->post['norate']=false;
+      $this->out->post['rating']=$this->out->post['rating']-$post[0]['rating_value']; // вычитаем влияние рейтинга пользователя на пост
+    }
+    else {
+      $this->out->post['norate']='Ошибка отмены рейтинга поста';
+    }    
+    if ($this->get_request_type()==0) { // если запрос сделан обычным образом (не через AJAX), редиректим пользователя обратно к отрейтингованому сообщению
+      $this->post_redirect($post[0]['id']);
+    }    
+
+    return 'stdforum/rating.tpl';
   }
 
   function action_reply($anonym=false) { // если $anonym==true, сообщение отправляется от имени гостя // TODO: подумать, возможно, есть более адекватный способ это сделать
@@ -1440,6 +1473,59 @@ class stdforum extends Application_Forum {
         }
       }
     }
+  }
+
+   /** Определяет позицию, где должен заканчиваться teaser сообщения так, чтобы разрезание было максимально корректным. 
+   * Обработка выполняется следующим образом: вырезается содержимое тегов <pre> и <table>, HTML-комментарии.
+   * Приоритеты такие:
+   * разрезание по началу абзаца
+   * разрезание по переводу строки
+   * разрезание по началу некоторых тегов (img, audio, video, code, pre, hr, iframe, object)
+   * Если при попытках такого разрезания результат оказывается короче $min_length, делается попытка разрезать по точке, восклицательному или вопросительному знакам. 
+   * В случае невозможности и этого — по знакам препинания (двоеточие, запятая, точка с запятой, тире).
+   * Если невозможно и это — по пробелу, а в случае его отсутствия — берётся просто $length символов
+   * @param string $parsed HTML-код сообщения (уже обработанный Library_bbcode)
+   * @param integer $length — желаемая длина 
+   * @return string — Teaser статьи без HTML-тегов.
+   */
+  function get_teaser($parsed,$length,$min_length=0) {
+     // предварительная обработка — расстановка переводов строк
+     $parsed = preg_replace('|(<p\W)|is',"\n\n\n$1",$parsed);
+     $parsed = preg_replace('|(<br\W)|is',"\n\n$1",$parsed);
+     $parsed = preg_replace('/(<(img|audio|video|pre|hr|iframe|object|code)\W)/is',"\n$1",$parsed); // место, где вставлены указанные теги, тоже может служить точкой разбиения
+     $parsed = preg_replace('/\s*\n\*s/',"\n",$parsed); // убираем лишние пробелы рядом с переводами строк
+     $parsed = preg_replace('|<table\W.*?</table>|is','',$parsed); // содержимое таблиц удаляется, так как его вывод в teaser всё равно бессмысленен
+     $parsed = preg_replace('|<pre\W.*?</pre>|is','',$parsed); // из тех же соображений удаляем исходный код
+     $parsed = preg_replace('|<code\W.*?</code>|is','',$parsed); //
+     $parsed = preg_replace('|<audio\W.*?</audio>|is','',$parsed); // удаляем теги audio, video и object, так как внутри них может быть fallback-содержимое
+     $parsed = preg_replace('|<video\W.*?</video>|is','',$parsed); // 
+     $parsed = preg_replace('|<object\W.*?</object>|is','',$parsed); // 
+
+     $parsed = trim(strip_tags($parsed)); // TODO: возможно, разрешить теги u,i,b,em,strong?
+     $slen = mb_strlen($parsed);
+
+     if ($slen<=$length) return $parsed; // если строка и так короче желаемой длины, просто ограничимся её очисткой
+     $parsed = mb_substr($parsed,0,$length);
+     
+     $pos = mb_strrpos($parsed,"\n\n\n");
+     if ($pos>=$min_length && $pos!==false) return mb_substr($parsed,0,$pos+1);
+
+     $pos = mb_strrpos($parsed,"\n\n");
+     if ($pos>=$min_length && $pos!==false) return mb_substr($parsed,0,$pos+1);
+
+     $pos = mb_strrpos($parsed,"\n");
+     if ($pos>=$min_length && $pos!==false) return mb_substr($parsed,0,$pos+1);
+
+     $pos = max(mb_strrpos($parsed,"."),mb_strrpos($parsed,"!"),mb_strrpos($parsed,"?"));
+     if ($pos>=$min_length && $pos!==false) return mb_substr($parsed,0,$pos+1);
+
+     $pos = max(mb_strrpos($parsed,":"),mb_strrpos($parsed,","),mb_strrpos($parsed,";"),mb_strrpos($parsed,'—'));
+     if ($pos>=$min_length && $pos!==false) return mb_substr($parsed,0,$pos+1);
+
+     $pos = mb_strrpos($parsed," ");
+     if ($pos>=$min_length && $pos!==false) return mb_substr($parsed,0,$pos+1);
+     
+     return mb_substr($parsed,0,$length); // крайний случай, если не удалось найти ни одного подходящего разделителя
   }
 
   /** Проверка на то, что пользователь может прорейтинговать данное сообщение.

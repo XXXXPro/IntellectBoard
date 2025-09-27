@@ -271,7 +271,7 @@ class Library_topic extends Library {
       'ue.post_count, ue.rating AS user_rating, ue.warnings, ue.reg_date, CAST(u.status=\'2\' OR ue.banned_till>='.intval($this->app()->time).' AS INTEGER) AS banned, ue.banned_till';
     if (!empty($cond['topics'])) $columns.=', t.title AS t_title, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl, f.id AS fid, f.title AS f_title, f.hurl AS f_hurl';
     if (!empty($cond['relation'])) $columns .= ', rl.type AS relation';
-    if (!empty($cond['ratings'])) $columns .= ', CAST(r.value IS NOT NULL AS INTEGER) AS rated';
+    if (!empty($cond['ratings'])) $columns .= ', CAST(r.value IS NOT NULL AS INTEGER) AS rated, r.value AS rating_value';
     if (empty($cond['notext'])) $columns.= ', tx.data AS text, tx.tx_lastmod '; // если не указана выборка "без текста", то получаем и текст сообщения
     if (!empty($cond['blocklinks'])) $columns.= ', blcklink.data AS blocklinks'; // если указана загрузка данных о блочных ссылках
 

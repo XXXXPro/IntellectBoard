@@ -133,6 +133,10 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
 #ib_all .fa-rss-square { color:#f26522; font-size: 200%; margin-top: -8px }
 #ib_all .post.marked { border: #A00 5px solid }
 #ib_all blockquote{border:#dcddde 1px solid;font-size:90%;background:#eaecef;padding:4px;overflow:auto;max-height:7em;margin:5px 20px}
+#ib_all details.inline[open] summary { display: none;}
+#ib_all details.inline summary { text-decoration: underline dotted #3c5cc0; cursor: pointer; }
+#ib_all details.inline summary::marker { content: ""; }
+#ib_all details.inline { display: inline-block }
 #ib_all a.rules { display: block }
 
 #ib_all .postform{border:#dcddde 1px solid;box-sizing:initial;border-radius:3px}

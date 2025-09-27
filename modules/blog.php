@@ -40,6 +40,8 @@ class blog extends stdforum {
     $this->view_forum_misc();
     if (!empty($this->out->moderator)) $this->view_forum_moderator();
     $this->fix_view(); // фиксируем просмотр раздела
+
+    $this->meta('robots','noindex, follow'); // страницы блога с teaserами статей индексировать нет смысла
   }
 
   function action_newtopic($anonym=false) {
@@ -227,11 +229,15 @@ class blog extends stdforum {
       $post['text']=preg_replace('|\[teaserbreak(=[^\]]*?)?\]|','<a name="readmore"></a>',$post['text']);
     }
     else {
+      $nexttext='Читать далее…';      
       $pos=strpos($post['text'],'[teaserbreak');
       if ($pos!==false) {
         if (preg_match('|\[teaserbreak=([^\]]*)\]|',$post['text'],$matches)) $nexttext = str_replace('&quot;','',$matches[1]);
-        else $nexttext='Читать далее…';
-        $post['text']=substr($post['text'],0,$pos).' <a href="'.$topic['t_hurl'].'#readmore">'.$nexttext.'</a>';
+        $post['text']=substr($post['text'],0,$pos).'<br /><a href="'.$topic['t_hurl'].'#readmore">'.$nexttext.'</a>';
+      }
+      elseif ($this->get_opt('longposts','users')!=3) { // автоматическая генерация teaser, если в настройках не выставлено, что и в блоге 
+        $teaser = $this->get_teaser($post['text'],1024,256);
+        if ($teaser!==$post['text']) $post['text']=$teaser.'<br /><a href="'.$topic['t_hurl'].'#readmore">'.$nexttext.'</a>';
       }
     }
     $post['text'] = preg_replace('|</li>\s*<br />|is','</li>',$post['text']);

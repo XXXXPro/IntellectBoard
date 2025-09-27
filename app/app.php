@@ -350,8 +350,9 @@ class Application {
           }
           if (isset($_SESSION['IntB_auth'])) { // если нет необходимости обновить данные пользователя, а можно взять их из сессии
             if (!$this->check_cache_expired()) {
-              if (!$this->get_opt('check_user_agent') || $_SESSION['IntB_user_agent'] === preg_replace('|\d+|', '', $_SERVER['HTTP_USER_AGENT'])) // если проверка User Agent выключена или же он совпадает с тем, что был при создании сессии
+              if (!$this->get_opt('check_user_agent') || $_SESSION['IntB_user_agent'] === preg_replace('|\d+|', '', $_SERVER['HTTP_USER_AGENT'])) { // если проверка User Agent выключена или же он совпадает с тем, что был при создании сессии
                 $this->userdata = $_SESSION['IntB_user']; // если сессия была инициализирована правильно (т.е. не произошло ее истечения или повреждения)
+              } 
               else {
                 $this->load_guest();
                 _dbg('Ошибка безопасности: не прошла проверка по User Agent!');
@@ -1040,8 +1041,9 @@ class Application {
    * Именно с этого момента все действия рассматриваются как действия этого
    * пользователя с соответствующими правами доступа * */
   function set_user($userdata, $long = 0) {
-    $this->session(); // создаем сессию, если это необходимо
-    if ($long) {
+    if ($long!=-1) $this->session(); // создаем сессию, если это необходимо
+    else $_SESSION=array(); // иначе создаём в качестве сессии пустой массив
+    if ($long>0) {
       $key = $this->gen_long_key($userdata);
       $period = $this->time + $long * 24 * 60 * 60;
       setcookie(CONFIG_session.'_long', $key, $period, $this->url('/'), false, $this->is_https(), true);
@@ -1049,7 +1051,7 @@ class Application {
 //      unset($userdata['password']);
     $_SESSION['IntB_auth'] = 1; // признак того, что сессия корректно инициализирована
     $_SESSION['IntB_user'] = $userdata; // устанавливаем данные о пользователе
-    $_SESSION['IntB_user_agent'] = preg_replace('|\d+|', '', $_SERVER['HTTP_USER_AGENT']);
+    if ($_SERVER['HTTP_USER_AGENT']!=='Crontab script') $_SESSION['IntB_user_agent'] = preg_replace('|\d+|', '', $_SERVER['HTTP_USER_AGENT']); // проверка на Crontab script нужна, чтобы не было разлогинивания пользователя
     $this->userdata = $userdata;
     $this->lastmod = $this->time;
   }
@@ -1520,7 +1522,7 @@ class Application {
     if ($id) $tag['id'] = $id;
     $this->out->link[] = $tag;
   }
-  
+ 
   /** Добавление тега SCRIPT в буфер meta * */
   /*        function script($src, $defer=false) {
     $tag['type'] = 'script';

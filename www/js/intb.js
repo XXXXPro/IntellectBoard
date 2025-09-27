@@ -82,18 +82,18 @@ function IntB_main(opts) {
       });
     }
   });
-  $('.ptext .cutlink').click(function (e){
+  $('.posts').on('click','.ptext .cutlink',function (e) {
      e.preventDefault();
      $(e.target).next().show();
      $(e.target).hide();
   });
-  $('.ptext .spoiler').click(function (e){
+  $('.posts').on('click','.ptext .spoiler',function (e) {
      e.preventDefault();
      $(e.target).next().toggleClass('invis');
   });
 
   // пометка сообщений для последующего переноса или удаления без перезагрузки страницы
-  $('.postact .postmark').click(function(e){
+  $('.posts').on('click','.postact .postmark', function(e){
      var targ=e.target.tagName=="A" ? e.target : e.target.parentNode;
      jQuery.ajax(targ.href+'&ajax=1',{ complete: function(data,status,xhr) {
         if (data.responseJSON) {
@@ -133,25 +133,27 @@ function IntB_main(opts) {
   });
 
   // AJAX-рейтинг без обновления страницы
-  $('.prating a').click(function (e) {
+  $('.posts').on('click','.prating a',function (e) {
      var tg = e.target;
      if (e.target.tagName!='A') tg=e.target.parentNode;
      if (!$(tg).hasClass('norate')) {
-       jQuery.ajax(tg.href+'&ajax=1',{ complete: function(data,status,xhr) {
-         if (data.responseJSON) {
-           if (data.responseJSON.result=='done') {
-             $(tg).closest('.prating').find('.prvalue').text(data.responseJSON.value);
-             $(tg).closest('.prating').find('a').attr('href','#');
-           }
-           $(tg).closest('.prating').find('a').attr('title',data.responseJSON.message);
-           $(tg).closest('.prating').find('a').addClass('norate');
-         }
-       }});
+       jQuery.ajax(tg.href+'&ajax=1',{ 
+        dataType: 'html',
+        success: function(data,status,xhr) {
+          console.log(data);
+          console.log(jQuery.tg)
+          var elm = jQuery(e.target).closest('.prating');
+          jQuery(elm).html(data);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.error('Error loading:', textStatus, errorThrown);
+        }
+       });
      }
      return false;
   });
   // удаление объекта со страницы, если есть класс confirm, то с подтверждением
-  $('.ajax').click(function (e) {
+  $('#ib_all').on('click','.ajax', function (e) {
     var target=e.target
     if (e.target.tagName!='A') target=$(target).parents('a')[0];
     var flag = true;
@@ -181,7 +183,7 @@ function IntB_main(opts) {
     }
   );
 
-  self.load_more = function (e) {
+  $('.posts').on('click','.load_more',function (e) {
     var url =e.target.href;
     if (url.indexOf('#')>0) url=url.replace('#','&ajax=1#');
     else url=url+'&ajax=1';
@@ -189,11 +191,9 @@ function IntB_main(opts) {
       $(e.target).hide();
       jQuery(e.target).after(data.responseText);
       history.pushState(null, null, url.replace('&ajax=1',''));
-      $('.load_more').click(self.load_more);      
     }});
     return false;
-  };
-  $('.load_more').click(self.load_more);
+  });
 
   //обработка различных классов, требующих подгрузки специальных скриптов
   // визуальный редактор для HTML

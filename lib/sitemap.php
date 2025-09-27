@@ -12,7 +12,7 @@ class Library_sitemap extends Library {
   function cron_generate() {
     /** @var Library_forums **/
     $forumlib = $this->app()->load_lib('forums',true);
-    $this->app()->set_user($this->app()->load_guest());
+    $this->app()->set_user($this->app()->load_guest(),-1);  // -1 означает не создавать долгосрочную сессию, а ограничиться только текущим запросом Нужно, чтобы не выкидывало пользователя, если планировщик запускается без crontab, через показ пустой картинки
     $fh = fopen(BASEDIR.'/tmp/sitemap.tmp','w');
     fputs($fh,"<url><loc>##DOMAIN##</loc><lastmod>".date('Y-m-d')."</lastmod><priority>1.0</priority><changefreq>always</changefreq></url>\n");
     fputs($fh,"<url><loc>##DOMAIN##online/</loc><lastmod>".date('Y-m-d')."</lastmod><priority>0.2</priority><changefreq>always</changefreq></url>\n");

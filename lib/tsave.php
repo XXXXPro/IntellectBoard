@@ -128,6 +128,19 @@ class Library_tsave extends Library {
     return $result; 
   }
 
+  function undo_rating($post,$rated_by) {
+    $sql = 'DELETE FROM '.DB_prefix.'rating WHERE id='.intval($post['id']).' AND uid='.intval($rated_by);
+    $this->app()->db->query($sql);
+    if ($this->app()->db->affected_rows()>0) { // если что-то удалили, корректируем статистику
+      $sql = 'UPDATE '.DB_prefix.'post SET rating=rating-'.intval($post['rating_value']).' WHERE id='.intval($post['id']);
+      $this->app()->db->query($sql);
+      $sql = 'UPDATE '.DB_prefix.'user_ext SET rating=rating-'.intval($post['rating_value']).' WHERE id='.intval($post['uid']);
+      $this->app()->db->query($sql);
+      return true;
+    }
+    else return false;
+  }
+
   /** Сохранение опроса и вариантов для него. Варианты с пустым текстом удаляются **/
   function save_poll($tid,$poll,$votes) {
     $data['question']=$poll['question'];
