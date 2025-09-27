@@ -140,10 +140,8 @@ function IntB_main(opts) {
        jQuery.ajax(tg.href+'&ajax=1',{ 
         dataType: 'html',
         success: function(data,status,xhr) {
-          console.log(data);
-          console.log(jQuery.tg)
           var elm = jQuery(e.target).closest('.prating');
-          jQuery(elm).html(data);
+          jQuery(elm).replaceWith(data);
         },
         error: function(jqXHR, textStatus, errorThrown) {
           console.error('Error loading:', textStatus, errorThrown);
