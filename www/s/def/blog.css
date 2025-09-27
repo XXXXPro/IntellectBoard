@@ -46,6 +46,7 @@
 #ib_all .comment_avatar { min-width: 140px; order:1; height:100%; padding-right: 20px; text-align:right }
 #ib_all .comment_body { order: 2; width: 100% }
 #ib_all .comment_top { width: 100%; border-bottom: #f6f8fa 1px solid; margin-bottom: 6px; padding-bottom: 6px;display: flex}
+#ib_all .comment_top .prating { padding-right: 10px; font-size: 100% }
 #ib_all .comment_avatar img { max-width: 120px }
 #ib_all #blog_forum_view .rss, #ib_all #blog_tags .rss {display:block; float:right; font-size:280%}
 #ib_all #uLogin { display:inline-block; line-height: 110%}
