@@ -200,7 +200,7 @@ abstract class Database {
     return $result;
   }
 
-/** Execute SELECT query for fetching integer value.
+/** Execute SELECT query for fetching single integer value.
 *  @return integer
 *  @param string $sql SQL query to execute.
 **/
@@ -213,8 +213,8 @@ abstract class Database {
     return intval($result);
  }
 
-/** Execute SELECT query for fetching integer value.
-*  @return array
+/** Execute SELECT query for fetching string value.
+*  @return string
 *  @param string $sql SQL query to execute.
 **/
   function select_str($sql,$params=false) {
