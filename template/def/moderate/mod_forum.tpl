@@ -44,8 +44,19 @@
 {% endfor %}
 </tbody></table>
 <div class="pages right" style="clear: both">{{ macros.pages(pages[0],"?page=") }}</div>
-{% if forumlist %}Выбранные для переноса темы отправить в раздел {{ macros.select('moveforum',0,forumlist) }}
-{% else %}Нет доступных разделов для переноса выбранных тем{% endif %}
+Выбранные для переноса темы отправить в раздел 
+<select name="moveforum">
+{% for key,value in forumlist %}
+<optgroup label="{{ value.title }}">
+{% for forum in value.forums %}
+<option value="{{ forum.id }}" {% if (key|trim==realvalue|trim) %}selected="selected"{% endif %}>
+{{ forum.title }}
+</option>
+{% endfor %}
+</optgroup>
+{% endfor %}
+</select>
+
 <input type="submit" value="Выполнить!" /><br />
 <small>Примечание: у вас должны быть права на создание тем в том разделе, куда вы хотите перенести выбранное!</small>
 <input type="hidden" name="authkey" value="{{ authkey }}" />

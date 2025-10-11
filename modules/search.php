@@ -96,7 +96,6 @@ class search extends Application {
            'WHERE '.$this->db->full_match('t.title,t.descr',$data['query']).' AND t.status=\'0\''.
            'AND '.$this->db->array_to_sql($forum_ids,'f.id');      
       }
-      echo "SQL ".$sql;
       $this->db->query($sql);
       $this->redirect($this->http($this->url('search/'.$data['id'].'/')));   
     }    
@@ -344,6 +343,23 @@ class search extends Application {
     else $users = array();
     return json_encode($users);
   }
+
+  function action_complete_topic() {
+    if (empty($_GET['q'])) return '';
+    $query = $_GET['q'];
+    if (!empty($query)) {
+      $forum_ids = $this->get_forum_list('read'); // поиск возможен только в тех разделах, в которых у пользователя есть права на чтения
+      $sql = 'SELECT t.id, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl, t.title, '.$this->db->full_relevancy('t.title,t.descr',$data['query']).' AS relevancy '.
+          'FROM '.DB_prefix.'topic t '.
+          'LEFT JOIN '.DB_prefix.'forum f ON (f.id=t.fid) '.
+          'WHERE ('.$this->db->full_match('t.title,t.descr',$query.'*').' OR t.hurl LIKE \''.$this->db->slashes($query).'%\') AND t.status=\'0\''.
+          'AND '.$this->db->array_to_sql($forum_ids,'f.id').' '.
+          'ORDER BY relevancy DESC';
+      $topics = $this->db->select_all($sql,5);
+    }
+    else $topics = array();
+    return json_encode($topics);
+  }
   
   function check_timeout() {
     $timeout = $this->get_opt('search_timeout');
@@ -371,12 +387,12 @@ class search extends Application {
   }
 
   function get_mime() {
-    if (in_array($this->action,array('complete_user','complete_tag'))) return 'application/json';
+    if (in_array($this->action,array('complete_user','complete_tag','complete_topic'))) return 'application/json';
     else return parent::get_mime();    
   }
 
   function get_request_type() {
-    if (in_array($this->action,array('complete_user','complete_tag'))) return 4;
+    if (in_array($this->action,array('complete_user','complete_tag','complete_topic'))) return 4;
     else return parent::get_request_type();
   }
   

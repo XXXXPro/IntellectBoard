@@ -26,14 +26,14 @@ class moderate extends stdforum {
     if (isset($_REQUEST['page'])) $_REQUEST['page']=str_replace('.htm','',$_REQUEST['page']); // "костыль" для корректной работы разбиения на страницы
     if ($this->is_post()) $this->mod_forum();
     $fid = $this->forum['id'];
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic; 
 
     list($cond,$need_count,$perpage,$tperpage)=$this->view_forum_build_cond($fid); // формируем массив $cond с параметрами для выборки темы
     $cond['subscr']=false;
     $cond['new_time']=false;
     $cond['timelimit']=false;
     $cond['poll']=false;
-    
+
     $this->out->pages=$this->view_forum_pagedata($perpage, $cond, $need_count);
     $cond['start']=$this->out->pages[0]['start'];
     $cond['perpage']=$perpage;
@@ -45,21 +45,36 @@ class moderate extends stdforum {
       $cond['sticky']=false;
     }
 
-
-
     $this->out->topics=array_merge($this->out->sticky,$tlib->list_topics($cond));
 
-    $this->out->forumlist = $this->get_forum_list('topic',1);
-    unset($this->out->forumlist[$fid]); // удаляем из списка текущий форум, чтобы не переносить темы в самого себя
+    $libforum = new Library_forums;
+    $sql = 'SELECT id, title FROM '.DB_prefix.'category ORDER BY sortfield';
+    $categories = $this->db->select_all($sql);
+
+    $this->out->forumlist = array();    
+    foreach ($categories as $category) {
+      $this->out->forumlist[$category['id']]=array('title'=>$category['title'],'forums'=>array());
+    }
+    
+    $forums = $libforum->list_forums(array('typeinfo'=>true));
+    foreach ($forums as $forum) {
+      if ($forum['module']!=='link' && $forum['module']!=='statpage' && $forum['module']!=='homepage') { // нельзя делать перенос в разделы тех типов, где тем нет в принципе
+        if ($this->check_access('view',$forum['id']) && $this->check_access('topic',$forum['id'])) { // переносить темы можно только в те разделы, которые видны данному пользователю и где есть права на создание тем
+          if ($forum['id']!=$fid) { // пропускаем текущий форум, чтобы не переносить темы в самого себя
+            $this->out->forumlist[$forum['category_id']]['forums'][]=$forum;
+          }
+        }
+      }
+    }
   }
 
   /** Выполнение действий по модерации раздела (открытие/закрытие, приклеивание, перенос тем)
   * Вынесено в отдельную процедуру исключительно ради удобства редактирования
   **/
   function mod_forum() {
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $fid = $this->forum['id'];
-    $modlib = $this->load_lib('moderate',true);
+    $modlib = new Library_moderate;
 
     $name = 'sticky';
     $data = array();
@@ -129,10 +144,10 @@ class moderate extends stdforum {
    * Номера выбранных сообщений хранятся в сесии в ключе moderate_<номер_темы>
    **/
   function action_move_posts() {
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     if (empty($this->topic)) $this->output_403('Не указан идентификатор  темы!');
     $fid = $this->forum['id'];
-    $modlib = $this->load_lib('moderate',true);
+    $modlib = new Library_moderate;
     $tid = $this->topic['id'];
 
     $this->session();
@@ -155,8 +170,7 @@ class moderate extends stdforum {
         if ($this->forum['selfmod']>0) $new_t_data['owner']=$this->topic['owner']; // если кураторство включено, отделяемая тема получает того же куратора, что и текущая
         $errors = $this->topic_pre_check($new_t_data, $perms);
         if (empty($errors)) {
-          /** @var Library_tsave $tsave */
-          $tsave = $this->load_lib('tsave',true);
+          $tsave = new Library_tsave;
           if ($tsave->save_topic($new_t_data,true)) { // если тему удалось создать
             $modlib->move_posts($pids,$this->topic['id'],$new_t_data['id']);
             if (empty($new_t_data['hurl'])) $new_t_data['hurl']=$new_t_data['id'];
@@ -230,7 +244,7 @@ class moderate extends stdforum {
   /** Премодерация сообщений **/
   function action_premod() {
     $fid = $this->forum['id'];
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
 
     $cond['fid']=$fid; // выбираем все сообщения раздела, стоящие на премодерации, с получением информации о темах, в которых они расположены, и приложенных файлах
     if (!empty($this->out->topic)) $cond['tid']=$this->topic; // если указана конкретная тема, выводим сообщения только из нее.
@@ -241,7 +255,7 @@ class moderate extends stdforum {
     $cond['order']='t.last_post_time DESC, postdate DESC';
 
     $data = $tlib->get_posts($cond);
-    $bcode= $this->load_lib('bbcode',false);
+    $bcode= class_exists('Library_bbcode') ? new Library_bbcode : false;
     if ($bcode) {
       for ($i=0, $count=count($data); $i<$count; $i++) {
         $data[$i]['text']=$bcode->parse_msg($data[$i]);
@@ -257,22 +271,22 @@ class moderate extends stdforum {
   function action_accept() {
     if (empty($_REQUEST['id'])) $this->output403('Не указан номер сообщения для обработки!');
     $pid = intval($_REQUEST['id']);
-    $tlib = $this->load_lib('topic',true);
-    $modlib = $this->load_lib('moderate',true);
+    $tlib = new Library_topic;
+    $modlib = new Library_moderate;
     /* @var $modlib Library_moderate */
     $tid = $this->check_topic_by_pid($pid);
     $posts = $tlib->get_posts(array('tid'=>$tid,'id'=>$pid,'all'=>1));
     $opts['nousersync']=($posts[0]['status']==1); // если выводим сообщение с премодерации, то встроенными в библиотеку средствами пересчет сообщений делать не надо, делаем
     $modlib->status_posts(array($pid=>0),$tid,$opts);
     if ($posts && $posts[0]['status']==1) { // если сообщение находилось на премодерации, то нужно увеличить счетчик пользователя и
-      $notify_lib = $this->load_lib('notify',false);
+      $notify_lib = class_exists('Library_notify') ? new Library_notify : false; 
       if ($notify_lib) {
-        $bbcode = $this->load_lib('bbcode',false);
+        $bbcode = class_exists('Library_bbcode') ? new Library_bbcode : false;
         if ($bbcode) $parsed=$bbcode->parse_msg($posts[0]);
         $notify_lib->new_post($posts[0],$this->topic,$this->forum,$parsed);
       }
       if ($this->forum['is_stats']) { // если раздел является статистически значимым, увеличиваем счетчик
-        $userlib = $this->load_lib('userlib',false);
+        $userlib = class_exists('Library_userlib') ? new Library_userlib : false; 
         if ($userlib) {
           $userlib->increment_user($posts[0]['uid']);
         }
@@ -295,7 +309,7 @@ class moderate extends stdforum {
   }
 
   function action_view_log() {
-    $modlib = $this->load_lib('moderate',true);
+    $modlib = new Library_moderate;
 
     $time = $this->time;
     $show = isset($_REQUEST['show']) ? $_REQUEST['show'] : false;
@@ -327,7 +341,7 @@ class moderate extends stdforum {
   function action_rollback() {
     if (empty($_REQUEST['id'])) $this->output_403('Не указан идентификатор сообщения!');
     $id = intval($_REQUEST['id']);
-    $modlib = $this->load_lib('moderate',true);
+    $modlib = new Library_moderate;
     $result=$modlib->rollback($id);
     if ($this->get_request_type()!=1) {
       if ($result) $this->message('Откат модераторского действия выполнен!',1);
@@ -341,7 +355,7 @@ class moderate extends stdforum {
 
   function action_trashbox() {
     $fid = $this->forum['id'];
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
 
     $cond['fid']=$fid; // выбираем все сообщения раздела, стоящие на премодерации, с получением информации о темах, в которых они расположены, и приложенных файлах
     if (!empty($this->out->topic)) $cond['tid']=$this->topic['id']; // если указана конкретная тема, выводим сообщения только из нее.
@@ -352,7 +366,7 @@ class moderate extends stdforum {
     $cond['order']='t.last_post_time DESC, postdate DESC';
 
     $data = $tlib->get_posts($cond);
-    $bcode= $this->load_lib('bbcode',false);
+    $bcode= class_exists('Library_bbcode') ? new Library_bbcode : false;
     if ($bcode) {
       for ($i=0, $count=count($data); $i<$count; $i++) {
         $data[$i]['text']=$bcode->parse_msg($data[$i]);
@@ -368,8 +382,7 @@ class moderate extends stdforum {
     if (empty($_REQUEST['id'])) $this->output_403('Не указан номер сообщения для удаления!');
     $pid = intval($_REQUEST['id']);
     $tid = $this->check_topic_by_pid($pid);
-    /** @var Library_moderate $modlib */
-    $modlib = $this->load_lib('moderate',true);
+    $modlib = new Library_moderate;
     $modlib->status_posts(array($pid=>2),$tid);
     if ($this->get_request_type()!=1) {
       $this->redirect($this->http($this->url($this->forum['hurl'].'/update_extdata.htm')));
@@ -380,7 +393,7 @@ class moderate extends stdforum {
   function action_delete_topic() {
     $fid = $this->forum['id'];
     $tid = $this->topic['id'];
-    $modlib = $this->load_lib('moderate',true);
+    $modlib = new Library_moderate;
     $modlib->status_topics(array($tid=>2),$fid);
     $this->redirect($this->http($this->url($this->forum['hurl'].'/update_extdata.htm')));
   }
@@ -388,7 +401,7 @@ class moderate extends stdforum {
   function action_edit_rules() {
     if (!$this->get_opt('moder_edit_rules') && !$this->is_admin()) $this->output_403('Редактировать правила раздела могут только администраторы!');
     if ($this->is_post()) {
-      $misclib = $this->load_lib('misc',true);
+      $misclib = new Library_misc;
       $misclib->save_text($_POST['text'],$this->forum['id'],0);
       $this->out->static_text = $_POST['text'];
     }
@@ -430,7 +443,7 @@ class moderate extends stdforum {
   function action_edit_foreword() {
     if (!$this->get_opt('moder_edit_foreword') && !$this->is_admin()) $this->output_403('Редактировать вводное слово раздела могут только администраторы!');
     if ($this->is_post()) {
-      $misclib = $this->load_lib('misc',true);
+      $misclib = new Library_misc;
       $text = $_POST['text'];
       if (trim(strip_tags($text))==='') $text='';
       $misclib->save_text($text,$this->forum['id'],2);
