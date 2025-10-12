@@ -11,7 +11,7 @@
 
 class bookmark extends Application {
   function get_data($cond) {
-    $tlib = $this->load_lib('topic',true); // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
+    $tlib = new Library_topic; // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
     /* @var $tlib Library_topic */
     $cond['fid'] = $this->get_forum_list('read');
     $cond['forums']=true;
@@ -152,7 +152,7 @@ class bookmark extends Application {
   function action_unread() {
     if ($this->is_guest()) $this->output_403('Гостям не разрешается использовать подписку!',true);
     $cond['newposts']=true;
-    $tlib = $this->load_lib('topic',true); // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
+    $tlib = new Library_topic; // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
     $cond['fid'] = $this->get_forum_list('read');
     $cond['forums']=true;
     $cond['last']=true;
@@ -188,7 +188,7 @@ function action_updated_rss() {
     $this->out->intb->link=$this->http($this->url('newtopics/'));
     $this->out->intb->descr=$this->get_opt('site_title');
 
-    $tlib = $this->load_lib('topic',true); // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
+    $tlib = new Library_topic; // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
 
     // Формируем условие выборки: в RSS выдаем все сообщения, не являющиеся флудом
     // из разделов, на которые у пользователя есть права чтения
@@ -208,7 +208,7 @@ function action_updated_rss() {
 
     $data = $tlib->get_posts($cond);
 //    if (empty($data)) $this->output_304();
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
     $count=count($data);
     for ($i=0; $i<$count; $i++) {
       $data[$i]['text']=$bbcode->parse_msg($data[$i]);

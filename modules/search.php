@@ -144,7 +144,7 @@ class search extends Application {
       }
      
       /** @var Library_sphinx $sphinx_lib */
-      $sphinx_lib = $this->load_lib('sphinx',true);
+      $sphinx_lib = new Library_sphinx;
        
       $oids = $sphinx_lib->search($_REQUEST['search']['query'],$forum_ids,$cond,$data['search_type']);
 
@@ -246,7 +246,7 @@ class search extends Application {
     $this->out->forum_list = $this->get_forum_list('read',1);
     $this->out->extdata = (!empty($search['extdata']) ? unserialize($search['extdata']) : false);
         
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $cond['search']=$search['id'];
     $cond['order']='relevancy';
     $cond['sort']='DESC';
@@ -261,7 +261,7 @@ class search extends Application {
       $cond['topics']=true;
       
       $posts = $tlib->get_posts($cond);
-       $bbcode = $this->load_lib('bbcode');
+       $bbcode = new Library_bbcode;
       $this->out->posts=array();
       foreach ($posts as $post) {
         $post['text']=$bbcode->parse_msg($post);
@@ -349,7 +349,7 @@ class search extends Application {
     $query = $_GET['q'];
     if (!empty($query)) {
       $forum_ids = $this->get_forum_list('read'); // поиск возможен только в тех разделах, в которых у пользователя есть права на чтения
-      $sql = 'SELECT t.id, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl, t.title, '.$this->db->full_relevancy('t.title,t.descr',$data['query']).' AS relevancy '.
+      $sql = 'SELECT t.id, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl, t.title, '.$this->db->full_relevancy('t.title,t.descr',$query).' AS relevancy '.
           'FROM '.DB_prefix.'topic t '.
           'LEFT JOIN '.DB_prefix.'forum f ON (f.id=t.fid) '.
           'WHERE ('.$this->db->full_match('t.title,t.descr',$query.'*').' OR t.hurl LIKE \''.$this->db->slashes($query).'%\') AND t.status=\'0\''.
@@ -364,7 +364,7 @@ class search extends Application {
   function check_timeout() {
     $timeout = $this->get_opt('search_timeout');
     if (empty($timeout)) $timeout=2;
-    $antibot = $this->load_lib('antibot',false);
+    $antibot = class_exists('Library_antibot') ? new Library_antibot :  false;;
     if ($antibot) {
       if (!$antibot->timeout_check('search',$timeout)) {
         $this->output_403($this->incline($timeout,'Поиск разрешен не чаще чем раз в %d секунду!','Поиск разрешен не чаще чем раз в %d секунды!','Поиск разрешен не чаще чем раз в %d секунд!'));

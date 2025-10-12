@@ -32,8 +32,7 @@ class anon extends stdforum {
     $this->out->editpost['topic']['title']='Тема '.$this->long_date($this->time);
 
     if ($this->is_guest() && $this->get_opt('captcha')) {
-      $antibot = $this->load_lib('antibot');
-      /* @var $antibot Library_antibot */
+      $antibot = new Library_antibot; 
       if ($antibot) $antibot->captcha_generate();
     }
 

@@ -11,7 +11,7 @@
 class Library_sitemap extends Library {
   function cron_generate() {
     /** @var Library_forums **/
-    $forumlib = $this->app()->load_lib('forums',true);
+    $forumlib = new Library_forums;
     $this->app()->set_user($this->app()->load_guest(),-1);  // -1 означает не создавать долгосрочную сессию, а ограничиться только текущим запросом Нужно, чтобы не выкидывало пользователя, если планировщик запускается без crontab, через показ пустой картинки
     $fh = fopen(BASEDIR.'/tmp/sitemap.tmp','w');
     fputs($fh,"<url><loc>##DOMAIN##</loc><lastmod>".date('Y-m-d')."</lastmod><priority>1.0</priority><changefreq>always</changefreq></url>\n");
@@ -52,7 +52,7 @@ class Library_sitemap extends Library {
     }
    
     /** @var Library_topic **/
-    $topiclib = $this->app()->load_lib('topic',false);
+    $topiclib = class_exists('Library_topic') ? new Library_topic : false;
     $pperpage = $this->app()->get_opt('posts_per_page','user'); // берем из настроек пользователя
     if (!$pperpage) $pperpage = $this->app()->get_opt('posts_per_page');  // берем из настроек сайта в целом
     if (!$pperpage) $pperpage = 10; // если ниоткуда не получилось взять кол-во тем на странице, берем жестко закодированное значение во избежание деления на ноль    

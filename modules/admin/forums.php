@@ -12,7 +12,7 @@
 class forums extends Application_Admin {
   /** Просмотр списка форумов **/
   function action_view() {
-    $forumlib = $this->load_lib('forums',true);    
+    $forumlib = new Library_forums;    
     /* @var $forumlib Library_forums */
     $this->out->categories=$forumlib->list_categories(false,true);
         
@@ -83,7 +83,7 @@ class forums extends Application_Admin {
       else $this->out->category = $_POST['category'];      
     }
     else {
-      $forumlib = $this->load_lib('forums',true);    
+      $forumlib = new Library_forums;    
       /* @var $forumlib Library_forums */
       $cat=$forumlib->list_categories($_REQUEST['id'],true);
       $this->out->category=$cat[$_REQUEST['id']];
@@ -127,12 +127,12 @@ class forums extends Application_Admin {
     }
     else {
       if (!$this->valid_file($_REQUEST['type'])) trigger_error('Некорректный тип раздела!',E_USER_ERROR);
-      $forumlib = $this->load_lib('forums',true);
+      $forumlib = new Library_forums;
       /* @var $forumlib Library_forums */
       $sql='SELECT id, title FROM ' . DB_prefix . 'category ORDER BY sortfield';
       $this->out->categories = $this->db->select_simple_hash($sql);
       
-      $templatelib = $this->load_lib('template');
+      $templatelib = new Library_template;
       /* @var $templatelib Library_template */
       if ($templatelib) $this->out->templates = array(''=>'Стиль сайта по умолчанию')+$templatelib->get_list($this->is_admin()); // если пользователь -- админ, он может выбрать любой шаблон, иначе -- только незаблокированные
       $this->out->parent_forums = $this->parent_forums();
@@ -176,12 +176,12 @@ class forums extends Application_Admin {
       $this->redirect($this->http(str_replace('edit_forum.htm','view.htm',$_SERVER['REQUEST_URI'])));
     }
     
-    $forumlib = $this->load_lib('forums',true);
+    $forumlib = new Library_forums;
     /* @var $forumlib Library_forums */
     $sql='SELECT id, title FROM ' . DB_prefix . 'category ORDER BY sortfield';
     $this->out->categories = $this->db->select_simple_hash($sql);
     
-    $templatelib = $this->load_lib('template');
+    $templatelib = new Library_template;
     /* @var $templatelib Library_template */
     if ($templatelib) $this->out->templates = array(''=>'Стиль сайта по умолчанию')+$templatelib->get_list($this->is_admin()); // если пользователь -- админ, он может выбрать любой шаблон, иначе -- только незаблокированные
     
@@ -220,7 +220,7 @@ class forums extends Application_Admin {
   
   function action_delete_forum() {
     if (!$this->is_admin(true)) $this->output_403('Только пользователь с правами Основателя может удалять разделы!');
-    $forumlib = $this->load_lib('forums',true);
+    $forumlib = new Library_forums;
     /* @var $forumlib Library_forums */
     $id = $_REQUEST['id'];
     if (empty($_REQUEST['id'])) {
@@ -231,7 +231,7 @@ class forums extends Application_Admin {
     if (empty($this->out->forumdata)) $this->output_404('Раздела с таким номером не существует!');    
     if ($this->is_post()) {
       if ($this->out->forumdata['hurl']===$_POST['forum_hurl']) { // если корректно введен HURL для подтверждения
-        $dellib = $this->load_lib('delete',true);
+        $dellib = new Library_delete;
         /* @var $dellib Library_delete */
         $dellib->delete_forums($id);
         $this->message('Раздел удален!',1);
@@ -265,7 +265,7 @@ class forums extends Application_Admin {
       }
       else $this->message('Не выбрано изменение ни одной опции',2);
     }
-      $forumlib = $this->load_lib('forums',true);
+      $forumlib = new Library_forums;
       /* @var $forumlib Library_forums */
       $this->out->categories=$forumlib->list_categories(false,true);
       
@@ -277,7 +277,7 @@ class forums extends Application_Admin {
         $this->out->categories[$curforum['category_id']]['forums'][]=$curforum; // добавляем в список форумов данной категории для вывода
       }
 
-      $templatelib = $this->load_lib('template');
+      $templatelib = new Library_template;
       /* @var $templatelib Library_template */
       if ($templatelib) $this->out->templates = array('-1'=>'Оставить без изменений',''=>'Стиль сайта по умолчанию')+$templatelib->get_list($this->is_admin()); // если пользователь -- админ, он может выбрать любой шаблон, иначе -- только незаблокированные
   }
@@ -344,7 +344,7 @@ class forums extends Application_Admin {
   }
   
   function action_routes() {
-    $forumlib = $this->load_lib('forums',true);
+    $forumlib = new Library_forums;
     /* @var $forumlib Library_forums */
     $this->out->routes = $forumlib->build_routes();
   }

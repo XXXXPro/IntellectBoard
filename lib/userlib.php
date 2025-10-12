@@ -69,7 +69,7 @@ class Library_userlib extends Library {
   /** Осуществление входа на форум по логину/паролю, а не по сессии или ключу **/
   function do_login($login,$password,$long=false) {
     $reg_timeout=$this->app()->get_opt('userlib_login_timeout');
-    $antibot = $this->app()->load_lib('antibot',false);
+    $antibot = class_exists('Library_antibot') ? new Library_antibot : false;;
     if ($reg_timeout && $antibot) { // проверяем, что предыдущая регистрация с этого IP была не менее указанного времени назад, причем делаем это только в том случае, если не было ошибок при валидации пользователя
       if (!$antibot->timeout_check('userlib_login', $reg_timeout)) {
         $this->app()->message('Предыдущая попытка входа была менее чем '.$reg_timeout.' секунд назад',3);
@@ -80,7 +80,7 @@ class Library_userlib extends Library {
     $user_id=false;
 
     if ($ext_lib_name = $this->app()->get_opt('user_external_lib')) { // если задана библиотека внешней авторизации в настройках
-      $ext_lib = $this->app()->load_lib($ext_lib_name,false); // загружаем ее
+      $ext_lib = class_exists($ext_lib_name) ? new $ext_lib_name : false; // загружаем ее
       if ($ext_lib) {
         $user_id = $ext_lib->get_user_by_login($login,$password);
       }
@@ -115,7 +115,7 @@ class Library_userlib extends Library {
     if ($udata['id']<=AUTH_SYSTEM_USERS) trigger_error('Некорректный идентификатор пользователя при социальной авторизации',E_USER_ERROR);
     $this->app()->set_user($udata);
     $_SESSION['starttime']=$this->app()->time;
-    if ($this->app()->get_opt('userlib_logs')>3) $this->app()->log_entry ('user', 8, 'userlib.php', 'Пользователь '.$udata['login'].' вошел на форум через социальную сеть '.$userdata['contact_type'].'.');
+    if ($this->app()->get_opt('userlib_logs')>3) $this->app()->log_entry ('user', 8, 'userlib.php', 'Пользователь '.$udata['login'].' вошел на форум через социальную сеть '.$udata['contact_type'].'.');
   }
 
   /** Выход с форума **/
@@ -123,7 +123,7 @@ class Library_userlib extends Library {
     if (isset($_COOKIE[CONFIG_session.'_long'])) setcookie(CONFIG_session.'_long','',1,$this->app()->url('/'),false,$this->app()->is_https(),true);
     $this->app()->set_user($this->app()->load_guest());
     if ($ext_lib_name = $this->app()->get_opt('user_external_lib')) { // если задана библиотека внешней авторизации в настройках
-      $ext_lib = $this->app()->load_lib($ext_lib_name,false); // загружаем ее
+      $ext_lib = class_exists($ext_lib_name) ? new $ext_lib_name : false; // загружаем ее
       if ($ext_lib) $ext_lib->on_logout();
     }
     $_SESSION['starttime']=$this->app()->time;
@@ -135,7 +135,7 @@ class Library_userlib extends Library {
    * @param array $data Хеш с данными о пользователе. Должен содержать два подмассива: basic (базовая информация, которая пойдет в модуль auth) и settings -- информация о настройках профиля
    * @return array Массив ошибок при валидации пользователя (или пустой при успешной регистрации)
    */
-  function register_user(&$data,$settings,$contacts=false,$social=false,$novalidate=false) {
+  function register_user(&$data,$settings,$contacts=array(),$social=false,$novalidate=false) {
     if (isset($data['id'])) unset($data['id']); // сбрасываем идентификатор, если он вдруг установлен
     if (!isset($data['password'])) $data['password']=substr(sha1(rand()),rand(7,9)); //если пароль не установлен, генерируем случайный
     $activate_mode=$this->app()->get_opt('userlib_activation');
@@ -147,7 +147,7 @@ class Library_userlib extends Library {
     $errors = $this->validate_user($data,$social);
 
     $reg_timeout=$this->app()->get_opt('userlib_register_timeout');
-    $antibot = $this->app()->load_lib('antibot',false);
+    $antibot = class_exists('Library_antibot') ? new Library_antibot : false;;
     if ($reg_timeout && $antibot && empty($errors)) { // проверяем, что предыдущая регистрация с этого IP была не менее указанного времени назад, причем делаем это только в том случае, если не было ошибок при валидации пользователя
       if (!$antibot->timeout_check('userlib_regiser', $reg_timeout)) $errors[]=array('text'=>'Предыдущая регистрация с данного адреса была менее чем '.$reg_timeout.' секунд назад','level'=>3);
     }
@@ -218,11 +218,11 @@ class Library_userlib extends Library {
             'to_name'=>$data['login'],'template'=>'user/mail_register.tpl','data'=>$mdata,'html'=>1,'list-id'=>'Register <register.'.$_SERVER['HTTP_HOST'].'>'));
         }
         if ($this->app()->get_opt('userlib_newuser_mail')) {
-          $notify_lib = $this->app()->load_lib('notify',false);
+          $notify_lib = class_exists('Library_notify') ? new Library_notify : false;
           if ($notify_lib) $notify_lib->new_user($data,$activate_mode);
         }
         if ($ext_lib_name = $this->app()->get_opt('user_external_lib')) { // если задана библиотека внешней авторизации в настройках
-          $ext_lib = $this->app()->load_lib($ext_lib_name,false); // загружаем ее
+          $ext_lib = class_exists($ext_lib_name) ? new $ext_lib_name : false; // загружаем ее
           if ($ext_lib) $ext_lib->on_register($data,$settings);
         }
       }
@@ -309,7 +309,7 @@ class Library_userlib extends Library {
       }
 
       if ($up_avatar || $up_photo) { // если загрузили аватар или фото, нужно уменьшить их до нужного размера и положить в каталог
-        $image = $this->app()->load_lib('image',false);
+        $image = class_exists('Library_image') ? new Library_image : false;
         if (!$image) $this->app()->message('Не удалось загрузить библиотеку обработки изображений',2);
         else {
           if ($up_avatar) {
@@ -368,7 +368,7 @@ class Library_userlib extends Library {
       }
 
       if ($interests!==false) {
-        $taglib = $this->app()->load_lib('tags',false);
+        $taglib = class_exists('Library_tags') ? new Library_tags : false;;
         if ($taglib) {
           $taglib->set_tags($interests,$data['id'],1); // сохраняем набор тегов
         }
@@ -384,8 +384,8 @@ class Library_userlib extends Library {
 
         if (is_array($settings)) {
           if ($this->app()->get_opt('userlib_allow_template') && isset($settings['template'])) {
-            $templatelib = $this->app()->load_lib('template');
-            if (!$templatelib || !$templatelib->is_valid($settings['template'])) unset($settings['template']); // если не удалось подгрузить библиотеку template или имя выбранного шаблона неверно, сбрасывем его и оставляем без изменений
+            $templatelib = new Library_template;
+            if (!$templatelib->is_valid($settings['template'])) unset($settings['template']); // если не удалось подгрузить библиотеку template или имя выбранного шаблона неверно, сбрасывем его и оставляем без изменений
           }
           $settings=$this->filter_settings($settings);
           $this->app()->db->update(DB_prefix.'user_settings',$settings,$condition);
@@ -414,7 +414,7 @@ class Library_userlib extends Library {
         }
 
         if ($ext_lib_name = $this->app()->get_opt('user_external_lib')) { // если задана библиотека внешней авторизации в настройках
-          $ext_lib = $this->app()->load_lib($ext_lib_name,false); // загружаем ее
+          $ext_lib = class_exists($ext_lib_name) ? new $ext_lib_name : false; // загружаем ее
           if ($ext_lib) $ext_lib->on_profile_update($data,$settings);
         }
 
@@ -474,7 +474,7 @@ class Library_userlib extends Library {
   /** Проверка правильности логина и отображаемого имени пользователя
    * @param array $data Данные пользователя для регистрации
    * @param boolead $social Режим прверки для социальных сетей: пропускается проверка допустимости отображаемого имени, оно берется из соцсети как есть
-   * @return multitype:multitype:string number  multitype:number string
+   * @return array
    *
    * Используемые глобальные настройки:
    *  user_name_mode -- допустимые символы в имени пользователя

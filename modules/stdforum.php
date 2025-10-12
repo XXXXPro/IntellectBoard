@@ -49,7 +49,7 @@ class stdforum extends Application_Forum {
     $this->out->roles = $this->build_moderators_list();
     $this->out->moderator = $this->check_access('moderate');
 
-    $tlib = $this->load_lib('topic',true); // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
+    $tlib = new Library_topic; // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
     $this->out->perms=$tlib->get_permissions();
     $this->out->allow_share = true;
 
@@ -62,14 +62,14 @@ class stdforum extends Application_Forum {
 
   /** Дополнительные действия, если форум просматривает модератор **/
   function view_forum_moderator() {
-    $tlib = $this->load_lib('topic',true); // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
+    $tlib = new Library_topic; // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
     $this->out->premod_count = $tlib->count_posts(array('fid'=>$this->forum['id'],'premod'=>true));
     if ($this->out->premod_count) $this->lastmod=$this->time;
   }
 
   /** Получение и первичная обработка информации о темах **/
   function view_forum_get_topics($cond,$tperpage) {
-    $tlib = $this->load_lib('topic',true); // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
+    $tlib = new Library_topic; // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
     /* @var $tlib Library_topic */
     $result=$tlib->list_topics($cond);
      for ($i=0, $count=count($result); $i<$count; $i++) { // генерируем страницы
@@ -88,7 +88,7 @@ class stdforum extends Application_Forum {
 
   /** Формировние данных о количестве страниц, а также установка граничных условий в $cond **/
   function view_forum_pagedata($perpage,$cond,$need_count) {
-    $tlib = $this->load_lib('topic',true); // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
+    $tlib = new Library_topic; // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
     $pagedata['perpage'] = $perpage;
     $pagedata['page'] = isset($_REQUEST['page']) ? $_REQUEST['page'] : '1';
     $sticky_count = (empty($this->out->sticky)) ? 0 : count($this->out->sticky);
@@ -208,7 +208,7 @@ class stdforum extends Application_Forum {
       foreach ($fields as $curfield) $_SESSION['forum'.$fid][$curfield]=$_GET[$curfield];
       if ($_SESSION['forum'.$fid]['perpage']<1 || $_SESSION['forum'.$fid]['perpage']>255) unset($_SESSION['forum'.$fid]['perpage']); // если задано некорректное значение числа тем на страницу, оно сбрасывается
       if ($_SESSION['forum'.$fid]['author_name']) {
-        $userlib = $this->load_lib('userlib',false);
+        $userlib = class_exists('Library_userlib') ? new Library_userlib : false;
         if (!$userlib) {
           $this->message('Ошибка подключения библиотеки userlib!',2);
           $_SESSION['forum'.$fid]['author_name']='';
@@ -232,7 +232,7 @@ class stdforum extends Application_Forum {
     $tid = $this->topic['id'];
     // Закомментировано,т.к. аналогичная проверка должна проводиться в init_object
     // if ($this->topic['status']!=0) $this->error404('Запрошенной темы не существует или она была удалена или перемещена');
-    $tlib = $this->load_lib('topic',true); // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
+    $tlib = new Library_topic; // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
 
     list($cond,$need_count,$perpage) = $this->view_topic_build_cond($tid);
     $this->out->pages = $this->view_topic_pagedata($perpage, $cond, $need_count);
@@ -249,7 +249,7 @@ class stdforum extends Application_Forum {
 
   function view_topic_get_posts($cond) {
     /** @var Library_topic **/
-    $tlib = $this->load_lib('topic',true); // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
+    $tlib = new Library_topic; // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
     $result = $tlib->get_posts($cond);
     if ($this->forum['sticky_post']==0) $need_sticky=0; // sticky-сообщения отключены
     elseif ($this->forum['sticky_post']==3) $need_sticky=1; // sticky-сообщения принудительно включены
@@ -269,7 +269,7 @@ class stdforum extends Application_Forum {
       $this->out->has_sticky = 1;
     }
 
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
     /* @var $bbcode Library_bbcode */
     $tid = $this->topic['id'];
     $marked_messages = isset($_SESSION['moderate_'.$tid]) ? $_SESSION['moderate_'.$tid] : array(); // в данном ключе сессии хранится список сообщений, помеченных модератором для обработки
@@ -315,7 +315,7 @@ class stdforum extends Application_Forum {
 
     if (!$need_count) $pagedata['total']=$this->topic['post_count']; // TODO: обработка sticky-сообщения
     else {
-      $tlib = $this->load_lib('topic',true); // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
+      $tlib = new Library_topic; // отсутствие форумной библиотеки означает невозможность нормальной работы форума, поэтому будем рассматривать эту ситуацию как фатальную ошибку
       $pagedata['total']=$tlib->count_posts($cond);
     }
     $pagedata=$this->get_pages($pagedata,false,true);
@@ -325,7 +325,7 @@ class stdforum extends Application_Forum {
   }
 
   function view_topic_poll($tid) {
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $result = $tlib->get_poll($tid);
     if (!empty($result) && !$this->is_guest() && empty($result['pvid']) &&
     $this->check_access('vote') && empty($result['closed'])) $result['allow_vote']=true; // проверка, можно ли пользователю голосовать, если нет, будут показаы результаты голосования
@@ -340,7 +340,7 @@ class stdforum extends Application_Forum {
     $this->out->bookmark_key=$this->gen_auth_key(false,'change_mode');
     if ($this->forum['tags']) {
       /** @var Library_tags **/
-      $taglib = $this->load_lib('tags',false);
+      $taglib = class_exists('Library_tags') ? new Library_tags : false;
       if ($taglib) {
         $this->out->tags = $taglib->get_tags($this->topic['id']);
       }
@@ -352,7 +352,7 @@ class stdforum extends Application_Forum {
 
   function view_topic_newpost() {
     /** @var Library_topic $tlib */
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $editpost['post'] = $tlib->set_new_post($this->out->perms);
     $editpost['action']='reply.htm';
     $editpost['newtopic']=false;
@@ -361,11 +361,11 @@ class stdforum extends Application_Forum {
     $this->out->draft_name = 'topic'.$this->topic['id']; // имя черновика для автосохранения на стороне клиента
     $this->out->authkey = $this->gen_auth_key(false,'reply');
 
-    $bbcode = $this->load_lib('bbcode',false);
+    $bbcode = class_exists('Library_bbcode') ? new Library_bbcode : false;;
     if ($bbcode) $this->out->smiles = $bbcode->load_smiles_hash();
 
     if ($this->is_guest() && $this->get_opt('captcha')) { // для гостя необходим ввод CAPTCHA
-      $antibot = $this->load_lib('antibot',false);
+      $antibot = class_exists('Library_antibot') ? new Library_antibot :  false;;
       if ($antibot) $antibot->captcha_generate();
     }
     if ($this->get_opt('subscribe','user')=='All') $editpost['subscribe']=1;
@@ -446,7 +446,7 @@ class stdforum extends Application_Forum {
       foreach ($fields as $curfield) $_SESSION['topic'.$tid][$curfield]=$_GET[$curfield];
       if ($_SESSION['topic'.$tid]['perpage']<1 || $_SESSION['topic'.$tid]['perpage']>255) unset($_SESSION['topic'.$tid]['perpage']); // если задано некорректное значение числа сообщений на страницу, оно сбрасывается
       if ($_SESSION['topic'.$tid]['author_name']) {
-        $userlib = $this->load_lib('userlib',false);
+        $userlib = class_exists('Library_userlib') ? new Library_userlib : false;
         if (!$userlib) {
           $this->message('Ошибка подключения библиотеки userlib!',2);
           $_SESSION['topic'.$tid]['author_name']=false;
@@ -500,7 +500,7 @@ class stdforum extends Application_Forum {
     $marktime = $this->db->select_int($sql);
     $lasttime = max($lasttime,$marktime); // если время отметки раздела как прочтенного больше
 
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $cond['tid']=$this->topic['id'];
     $cond['after_time']=$lasttime;
     $cond['notext']=true; // чтобы не тащить из базы текст
@@ -523,7 +523,7 @@ class stdforum extends Application_Forum {
 
     list($need_count,$perpage,$sort)=$this->view_topic_params($tid);
     $total = $this->topic['post_count']; // общее количество сообщений
-    $tlib=$this->load_lib('topic',true); // ошибка загрузки библиотеки является критичной, без нее перехода не получится
+    $tlib=new Library_topic; // ошибка загрузки библиотеки является критичной, без нее перехода не получится
     if ($sort==='DESC') { // если вывод сообщений в обратном порядке
       $cond['after_pid']=$pid;  // то считаем количество сообщений, оставшихся до конца темы (то есть с id > $pid)
       if ($pid==$this->topic['last_post_id']) $count=1; // эти проверки позволят избежать лишнего запроса к базе в действиях last и new
@@ -543,7 +543,7 @@ class stdforum extends Application_Forum {
   }
 
   function action_vote() {
-    $tlib = $this->load_lib('topic');
+    $tlib = new Library_topic;
     $tid = $this->topic['id'];
     $poll = $tlib->get_poll($tid);
     if (empty($_GET['vote'])) $this->output_403('Не указан вариант для голосования!');
@@ -552,7 +552,7 @@ class stdforum extends Application_Forum {
     if ($poll['pvid']) $this->message('Вы уже голосовали в данном опросе!',3);
     elseif (!$this->check_access('vote')) $this->message('У вас недостаточно прав для голосования в этой теме',3);
     else {
-      $tslib = $this->load_lib('tsave');
+      $tslib = new Library_tsave;
       $vdata['pvid']=intval($_GET['vote']);
       $tslib->save_vote($vdata);
       $this->message('Ваш голос засчитан!',1);
@@ -633,12 +633,12 @@ class stdforum extends Application_Forum {
   }
 
   function action_reply($anonym=false) { // если $anonym==true, сообщение отправляется от имени гостя // TODO: подумать, возможно, есть более адекватный способ это сделать
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $this->out->perms = $tlib->get_permissions();
     if ($this->bot_id!=0) $this->output_403('Поисковым роботом запрещено использовать форму ответа!');
 
     if ($this->out->perms['attach']) $atlib = new Library_attach;
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
 
     if ($this->is_post()) {
       if (empty($_POST['authkey']) && !$this->is_guest()) $this->output_403('Отсутствует ключ авторизации, подозрение на CSRF-атаку.');
@@ -693,7 +693,7 @@ class stdforum extends Application_Forum {
     $this->out->smiles = $bbcode->load_smiles_hash();
 
     if ($this->is_guest() && $this->get_opt('captcha')) { // для гостя необходим ввод CAPTCHA
-      $antibot = $this->load_lib('antibot',false);
+      $antibot = class_exists('Library_antibot') ? new Library_antibot :  false;;
       if ($antibot) $antibot->captcha_generate();
     }
 
@@ -705,15 +705,15 @@ class stdforum extends Application_Forum {
   function action_preview() {
     if (!$this->is_post()) $this->output_403('Предпросмотр доступен только через POST-метод!');
     if ($this->bot_id!=0) $this->output_403('Поисковым роботом запрещено использовать предпросмотр!');
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $this->out->perms = $tlib->get_permissions();
 
     if (empty($this->topic)) {
       $this->out->topic=$_POST['topic'];
     }
 
-    $bbcode = $this->load_lib('bbcode');
-    $tslib = $this->load_lib('tsave',true);
+    $bbcode = new Library_bbcode;
+    $tslib = new Library_tsave;
     $userdata=$this->load_user($this->get_uid(),2);
     if (empty($_POST['post']['author'])) $_POST['post']['author']=$userdata['basic']['display_name'];
     $post=$tslib->get_post_data($_POST['post'],$this->out->perms);
@@ -767,14 +767,14 @@ class stdforum extends Application_Forum {
 
   function action_newtopic($anonym=false) { // $anonym true -- для отправки сообщений от имени гостя, используется при вызове из классов-наследников
     /* @var Library_topic */
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $this->out->perms = $tlib->get_permissions();
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
     if ($this->bot_id!=0) $this->output_403('Поисковым роботам запрещено использовать форму ответа!');
     if ($this->is_post()) {
       if (empty($_POST['authkey']) && !$this->is_guest()) $this->output_403('Отсутствует ключ авторизации, подозрение на CSRF-атаку.');
       /* @var Library_tsave */
-      $tslib = $this->load_lib('tsave',true);
+      $tslib = new Library_tsave;
       $topic = $tslib->get_topic_data($_POST['topic'],$this->out->perms);
       unset($topic['id']); // сбрасываем идентификатор темы, так как создаем новую
 
@@ -800,7 +800,7 @@ class stdforum extends Application_Forum {
             $this->topic['full_hurl']=$this->forum['hurl'].'/'.(!empty($topic['hurl']) ? $topic['hurl'] : $topic['id']).'/';
             if ($this->out->perms['tags'] && !empty($_POST['tagline'])) {
               /** @var Library_tags **/
-              $taglib = $this->load_lib('tags',false);
+              $taglib = class_exists('Library_tags') ? new Library_tags : false;
               if ($taglib) {
                 $taglib->set_tags($_POST['tagline'],$this->topic['id'],0); // 0 -- идентификатор тега для темы
               }
@@ -845,7 +845,7 @@ class stdforum extends Application_Forum {
     if ($this->get_opt('subscribe','user')=='All' || $this->get_opt('subscribe','user')=='My') $this->out->editpost['subscribe']='1';
 
     if ($this->is_guest() && $this->get_opt('captcha')) { // для гостя необходим ввод CAPTCHA // TODO: подумать, может быть, сделать это задваемым
-      $antibot = $this->load_lib('antibot',false);
+      $antibot = class_exists('Library_antibot') ? new Library_antibot :  false;;
       if ($antibot) $antibot->captcha_generate();
     }
     $this->out->form_params = $this->set_form_fields($this->out->perms,'newtopic',true);
@@ -857,27 +857,27 @@ class stdforum extends Application_Forum {
     if ($this->is_guest()) $this->output_403('Гостям запрещено редактировать сообщения!');
     if (empty($_REQUEST['id'])) $this->output_404('Не указан номер сообщения!');
     $pid = intval($_REQUEST['id']);
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $this->out->perms = $tlib->get_permissions();
     if (!$this->is_moderator()) $this->out->perms['poll']=false; // не модератор не может редактировать/создавать голосование
     $oldposts = $tlib->get_posts(array('tid'=>$this->topic['id'],'id'=>array($pid),'all'=>true,'attach'=>true));
     if (empty($oldposts)) $this->output_404('Сообщение с таким номером не найдено!');
     $oldpost = $oldposts[0];
     if (!$this->check_editable($oldpost)) $this->output_403('Вы не можете редактировать это сообщение.');
-    $modlib = $this->load_lib('moderate',false);
+    $modlib = class_exists('Library_moderate') ? new Library_moderate : false;
     // проверка прав на вынесение предупреждения. Делается через check_access, а не через
     // is_moderator, чтобы исключить возможность вынесения предупреждения создателями
     // темы при включенной самомодерации
     $this->out->allow_warning = $this->check_access('moderate') && $oldpost['uid']!=$this->get_uid();
     if ($this->is_post()) {
       if (empty($_POST['authkey']) && !$this->is_guest()) $this->output_403('Отсутствует ключ авторизации, подозрение на CSRF-атаку.');
-      $tslib = $this->load_lib('tsave',true);
+      $tslib = new Library_tsave;
       $post=$tslib->get_post_data($_POST['post'],$this->out->perms);
       $post['id']=$pid;
       $post['uid']=$oldpost['uid'];
       $post['author']=$oldpost['author'];
       $post['editcount']=$oldpost['editcount'];
-      $bbcode = $this->load_lib('bbcode');
+      $bbcode = new Library_bbcode;
       $parsed = $bbcode->parse_msg($post);
 
       $errors = $this->post_pre_check($post,$this->out->perms,$parsed,$post['status'],false); // false означает, что для сообщения не надо проверять таймаут, поскольку мы его редактируем
@@ -898,7 +898,7 @@ class stdforum extends Application_Forum {
           $tslib->save_post($post); // при сохранении должен был проставиться id
           if (!empty($_FILES['attach']) || !empty($_POST['detach'])) {
             /** @var Library_attach $atlib */
-            $atlib = $this->load_lib('attach',false);
+            $atlib = class_exists('Library_attach') ? new Library_attach : false;
             if ($atlib) {
               if (!empty($_POST['detach'])) {
                 $atlib->delete_uploads($_POST['detach'],$post['id'],1);
@@ -919,7 +919,7 @@ class stdforum extends Application_Forum {
             $tslib->save_topic($_POST['topic'],false);
             if ($this->out->perms['tags']) {
               /** @var Library_tags **/
-              $taglib = $this->load_lib('tags',false);
+              $taglib = class_exists('Library_tags') ? new Library_tags : false;
               if ($taglib) {
                 $taglib->set_tags($_POST['tagline'],$this->topic['id'],0); // 0 -- идентификатор тега для темы
               }
@@ -944,13 +944,13 @@ class stdforum extends Application_Forum {
           }
 
           if ($this->out->allow_warning && $_POST['warn_user']) { // если запрошено вынесение предупреждения пользователя
-            $warnlib = $this->load_lib('warning',false);
+            $warnlib = class_exists('Library_warning') ? new Library_warning : false;
             /* @var $warnlib Library_warning */
             if ($warnlib) {
               $_POST['warn']['pid']=$oldpost['id'];
               if ($warnlib->make_warning($oldpost['uid'], $_POST['warn'])) {
                 $this->message('Автору сообщения вынесено предупреждение!',2);
-                $pmlib = $this->load_lib('privmsg',false);
+                $pmlib = class_exists('Library_privmsg') ? new Library_privmsg : false;
                 /* @var $pmlib Library_privmsg */
                 if ($pmlib) {
                   $pmdata['thread']['title']='Вам вынесено предупреждение за нарушение правил форума';
@@ -959,7 +959,7 @@ class stdforum extends Application_Forum {
                   list($pm_thread,$pm_id)=$pmlib->save_message($pmdata);
                   $pmdata['thread']['id']=$pm_thread;
                   $pmdata['post']['id']=$pm_id;
-                  $notify_lib = $this->load_lib('notify',false);
+                  $notify_lib = class_exists('Library_notify') ? new Library_notify : false;
                   if ($notify_lib) {
                     $userdata = $this->load_user($this->get_uid(),0);
                     $notify_lib->new_pm($pmdata['thread'],$pmdata['post'],$pmdata['post']['text'],$this->get_username(),$userdata['email']);
@@ -980,7 +980,7 @@ class stdforum extends Application_Forum {
       $this->out->editpost['post']=$oldpost;
       if ($this->out->perms['tags'] && $this->topic['first_post_id']==$oldpost['id']) { // если теги разрешены и редактируем первое сообщение темы
         /** @var Library_tags **/
-        $taglib =  $this->load_lib('tags',false);
+        $taglib =  class_exists('Library_tags') ? new Library_tags : false;
         if ($taglib) {
           $this->out->editpost['tagline']=$taglib->get_tags_string($this->topic['id'],0);
         }
@@ -1005,7 +1005,7 @@ class stdforum extends Application_Forum {
   }
 
   function action_rss() {
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $cond['topics']=true;
     $cond['noflood']=true;
     $cond['sort']='DESC';
@@ -1019,7 +1019,7 @@ class stdforum extends Application_Forum {
     $cond['offset']=0;
     $cond['perpage']=$limit; //
 
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
     /* @var $bbcode Library_bbcode */
 
     if (empty($this->topic)) { // если запрошен RSS для форума
@@ -1086,7 +1086,7 @@ class stdforum extends Application_Forum {
       /** @var Library_topic */
       if (!preg_match('|<a[^>]*\Whref=[\'"]?'.$_POST['target'].'[\'"][^>]*>|i',$html)) $this->output_400('Link not found','No link'); // проверка, что в HTML-коде страницы есть ссылка
       
-      $tlib = $this->load_lib('topic',true);
+      $tlib = new Library_topic;
       $post = $tlib->set_new_post(array());
       $post['uid']=2; // Webmentions появляются от имени пользователя System
       $post['author']='Webmention'; // но при этом в качестве автора указывается WebMention, чтобы проще было обнаружить такие записи
@@ -1095,7 +1095,7 @@ class stdforum extends Application_Forum {
       $post['tid']=$this->topic['id'];
       $post['status']=$this->forum['webmention']==2 ? '1' : '0'; // если режим 2, то отправляем сообщение на премодерацию
       /** @var Library_tsave */
-      $tslib = $this->load_lib('tsave',true);
+      $tslib = new Library_tsave;
       if ($tslib->save_post($post,true)) {
         $tslib->increment($post,false,false); // увеличиваем счетчик сообщений в теме
         header('HTTP/1.0 201 Created');
@@ -1110,7 +1110,7 @@ class stdforum extends Application_Forum {
   
   function action_tags() {
     if ($this->forum['tags']==0) $this->output_404('В данном разделе теги не применяются!');
-    $blocklib = $this->load_lib('blocks',true);
+    $blocklib = new Library_blocks;
     list($trash,$tags) = $blocklib->block_tag_list(",,1"); // выбрать все теги текущего раздела с сортировкой по алфавиту, а не количеству
     $this->out->tags = $tags;
     return 'stdforum/tags.tpl';
@@ -1161,7 +1161,7 @@ class stdforum extends Application_Forum {
         $_POST['post']['text']=$_POST['content'];
         if (!empty($_POST['_instagram_link'])) { // Ссылки на Instagram работают только пару дней, поэтому копируем к себе
           /** @var Library_download */
-          $dllib = $this->load_lib('download');
+          $dllib = new Library_download;
           if ($dllib) {
             $local_file = 'f/instagram/'.basename($_POST['_instagram_link']);
             $pos=strpos($local_file,'?');
@@ -1249,7 +1249,7 @@ class stdforum extends Application_Forum {
         $this->out->received = true;
         $this->message('Токен получен и сохранён',1);
         /** @var Library_forums $forum_lib */
-        $forum_lib = $this->load_lib('forums',true);
+        $forum_lib = new Library_forums;
         $fdata = $forum_lib->get_forum($this->forum['id'],true); // получаем расширенные данные о форуме
         $fdata['extdata']['vk_token']=$result['access_token']; // запоминаем полученный token
         $forum_lib->update_forum($this->forum['id'],$fdata['extdata']); // и сохраняем изменённые данные в базу
@@ -1283,7 +1283,7 @@ class stdforum extends Application_Forum {
   function post_pre_check($post,$perms,$parsed,&$premod,$timeout_check=true) {
     $result = array();
     if (empty($perms['post'])) $result[]=array('text'=>'У вас нет прав отправлять сообщение в эту тему','level'=>3);
-    $antibot = $this->load_lib('antibot');
+    $antibot = new Library_antibot;
     // проверка CAPTCHA для гостей
     if ($this->is_guest() && $antibot && $this->get_opt('captcha')) { // проверка CAPTCHA
       if (!$antibot->captcha_check('true')) $result[]=array('text'=>'Неправильно введен защитный код!','level'=>3);
@@ -1300,7 +1300,7 @@ class stdforum extends Application_Forum {
     if ($maxlen && $len>$maxlen) $result[]=array('text'=>'Длина сообщения больше максимально допустимой!','level'=>3);
 
     // определение количества смайликов
-    $bbcode = $this->load_lib('bbcode',false);
+    $bbcode = class_exists('Library_bbcode') ? new Library_bbcode : false;;
     if ($bbcode) {
       $smile_count = $bbcode->count_smiles($parsed);
       if ($smile_count > $this->forum['max_smiles']) $result[]=array('text'=>sprintf('Количество смайликов в сообщении больше максимально допустимного значения (%d).',$this->forum['max_smiles']),'level'=>3);
@@ -1337,13 +1337,13 @@ class stdforum extends Application_Forum {
     if (!empty($_FILES['attach'])) { // если есть прикрепленные файлы, проверяем их
       if (!$perms['attach']) $result[]=array('text'=>'У вас нет прав на загрузку файлов','level'=>3);
       else { // проверка загружаемых файлов
-        $atlib = $this->load_lib('attach',false);
+        $atlib = class_exists('Library_attach') ? new Library_attach : false;
         if ($atlib) $result=$result+$atlib->check_files($_FILES['attach'],$this->get_opt('max_attach','group')*1024,$this->forum['attach_types'],$this->forum['max_attach']); // умножаем на 1024, т.к. max_attach  в базе хранится в Кб.
       }
     }
     // проверка, что гость не использует имя зарегистрированного пользователя
     if ($this->is_guest()) {
-      $userlib = $this->load_lib('userlib',false);
+      $userlib = class_exists('Library_userlib') ? new Library_userlib : false;
       if ($userlib) {
         $canonical = $userlib->canonize_name($post['author']);
         if ($userlib->get_uid_by_name($canonical,true)>1) $result[]=array('text'=>'На форуме есть зарегистрированный пользователь с таким именем!','level'=>3);
@@ -1367,7 +1367,7 @@ class stdforum extends Application_Forum {
     if (!empty($topic['hurl'])) {
       if (!preg_match('|^[a-zA-Z][A-Za-z\d\-_]*$|',$topic['hurl'])) $result[]=array('text'=>'Некорректно указан URL темы. Он должен начинаться с буквы и содержать только цифры, латинские буквы и символы минус (-) и подчеркивание (_).','level'=>3);
       else {
-        $tlib = $this->load_lib('topic');
+        $tlib = new Library_topic;
         if (!$tlib->check_unique_hurl($topic)) $result[]=array('text'=>'Тема с таким URL уже существует на форуме.','level'=>3);
       }
     }
@@ -1399,7 +1399,7 @@ class stdforum extends Application_Forum {
     }
 
     if ($this->forum['is_stats'] && $post['status']==0) { // если раздел является статистически значимым и сообщение пользователя не ушло на премодерацию
-      $userlib=$this->load_lib('userlib',false);
+      $userlib=class_exists('Library_userlib') ? new Library_userlib : false;
       if ($userlib) { // то подключаем библиотеку пользователя и увеличиваем счетчик ему на единицу
         if (empty($post['uid'])) $post['uid']=$this->get_uid();
         $userlib->increment_user($post['uid']); // в этой же библиотеке будет проверка
@@ -1467,7 +1467,7 @@ class stdforum extends Application_Forum {
       $match_count = preg_match_all('|<a class="blocklink" href="(https?://[^>"\'\]\s]+)">|i', $filtered, $matches);
 
       if ($match_count > 0) {
-        $misc_lib = $this->load_lib('misc', false);
+        $misc_lib = class_exists('Library_misc') ? new Library_misc : false;
         if ($misc_lib) {
           $misc_lib->create_task('bbcode', 'blocklink', array('links' => $matches[1], 'post_id' => $post['id']));
         }

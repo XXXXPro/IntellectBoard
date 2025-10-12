@@ -22,7 +22,7 @@
   function action_edit() {
     if (!$this->is_moderator()) $this->output_403('У вас нет прав для редактирования этого раздела!');
     if ($this->is_post()) {
-      $misclib = $this->load_lib('misc',true);
+      $misclib = new Library_misc;
       $text = $_POST['text'];
       if (trim(strip_tags($text))==='') $text='';
       $misclib->save_text($text,$this->forum['id'],2);

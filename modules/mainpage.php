@@ -90,13 +90,6 @@ class mainpage extends Application {
       if (!$this->out->cat_list[$category]['collapsed']) $this->meta('robots','noindex');
     }
 
-/*    $online_mode=$this->get_opt('online_list'); // режим вывода списка присутствующих: 0 - выключен, 1 -- только на главной, прочие режимы -- будем выводить на главной и на странице категорий
-    if ($online_mode > 0 && ($category == 0 || $online_mode > 1)) {
-      $online_lib=$this->load_lib('online');
-      /** @var $online_lib Library_online ** /
-      if ($online_lib) $this->out->online_users=$online_lib->get_online_users(0,0); // получаем список пользователей онлайн для всего форума
-    } */
-
     $this->out->start_text=$this->get_text(0,2); // текст с типом 2 -- вводный
     $this->out->allow_share=true;
   }

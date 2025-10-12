@@ -33,7 +33,7 @@ class misc extends Application {
   }
 
   function action_smiles() {
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
     if ($bbcode) $this->out->smiles = $bbcode->load_smiles_hash();
   }
   

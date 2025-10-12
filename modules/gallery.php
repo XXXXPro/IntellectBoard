@@ -89,7 +89,7 @@ class gallery extends blog {
     if (empty($_GET['id'])) $this->output_404('Не указан идентификатор сообщения!');
 
     /** @var Library_attach $atlib */
-    $atlib = $this->load_lib('attach',true);
+    $atlib = new Library_attach;
     $atlib->delete_uploads(array($_GET['fkey']),$_GET['id']);
     $atlib->check_main_attach($_GET['id']);    
     if ($this->get_request_type()!=1) {
@@ -101,13 +101,13 @@ class gallery extends blog {
   // Кешируем несколько последних тем, включая фото обложек, для показа на главной 
   function update_extdata() {
     /* @var Library_topic */
-    $tlib = $this->load_lib('topic',false);
+    $tlib = class_exists('Library_topic') ? new Library_topic : false;
     if (!$tlib) return false; // если библиотеку тем загрузить не удалось, выходим, не отображая ничего
 
     $cond['fid']=$this->forum['id'];
     $cond['first']=true;
     $cond['attach']=true; // добавляем условие, чтобы извлекать те приложенные файлы, которые помечены как главные
-    $forumlib = $this->load_lib('forums',false);
+    $forumlib = class_exists('Library_forums') ? new Library_forums : false;;
     if ($forumlib) $forum = $forumlib->get_forum($this->forum['id'],true);
     else $forum=$this->forum;
     
@@ -115,7 +115,7 @@ class gallery extends blog {
     $cond['order']='first_post_date';
     $topics = $tlib->list_topics($cond);
 
-    $flib = $this->load_lib('forums',false);
+    $flib = class_exists('Library_forums') ? new Library_forums : false;;
     if ($flib) $flib->update_forum($this->forum['id'],array('last_topics'=>$topics));
  }  
 }

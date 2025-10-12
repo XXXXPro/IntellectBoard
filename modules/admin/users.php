@@ -262,7 +262,7 @@ class users extends Application_Admin {
   function action_delete_mod_all() {
     if (empty($_POST['uname'])) $this->message('Не указано имя пользователя',3);
     else {
-      $userlib = $this->load_lib('userlib',true);
+      $userlib = new Library_userlib;
       $uid = $userlib->get_uid_by_name($_POST['uname']);
       if ($uid) {
         $sql = 'DELETE FROM '.DB_prefix.'moderator WHERE uid='.intval($uid);
@@ -323,7 +323,7 @@ class users extends Application_Admin {
   }
   
   function action_user_view() {
-    $userlib=$this->load_lib('userlib',true);
+    $userlib=new Library_userlib;
     /* @var $userlib Library_userlib */
     if (!isset($_REQUEST['uid']) || !is_numeric($_REQUEST['uid'])) $this->output_404('Некорректно указан идентификатор пользователя!');
     $uid=intval($_REQUEST['uid']);
@@ -344,14 +344,14 @@ class users extends Application_Admin {
     $this->out->ban_key = $this->gen_auth_key(false,'user_ban');
     $this->out->activate_key = $this->gen_auth_key(false,'user_activate');
     
-    $pmlib = $this->load_lib('privmsg',false);
+    $pmlib = class_exists('Library_privmsg') ? new Library_privmsg : false;
     /* @var $pmlib Library_privmsg */
     if ($pmlib) {
       $this->out->pm_total = $pmlib->count_threads(array('uid'=>$uid));
       $this->out->pm_lastday = $pmlib->count_threads(array('uid'=>$uid,'lasttime'=>$this->time-24*60*60));
     }
     
-    $warnlib = $this->load_lib('warning',false);
+    $warnlib = class_exists('Library_warning') ? new Library_warning : false;
     /* @var $warnlib Library_warning */
     if ($warnlib) {
       $cond['moderator']=true;
@@ -360,7 +360,7 @@ class users extends Application_Admin {
       $this->out->warnings = $warnlib->list_warnings($uid,$cond);
       $this->out->warn_key = $this->gen_auth_key(false,'user_delete_warning');
     }
-    $forumlib = $this->load_lib('forums',false);
+    $forumlib = class_exists('Library_forums') ? new Library_forums : false;;
     /* @var $forumlib Library_forums */
     if ($forumlib) {
       $this->out->personal_forums = $forumlib->list_forums(array('owner'=>$uid));
@@ -371,7 +371,7 @@ class users extends Application_Admin {
   function action_user_delete_warning() {
     if (empty($_REQUEST['authkey'])) $this->output_403('Некорректный ключ аутентификации');
     if (empty($_REQUEST['uid']) || empty($_REQUEST['warn_id'])) $this->output_403('Некорректный идентфиикатор пользователя или предупржедения'); 
-    $warnlib = $this->load_lib('warning',true);
+    $warnlib = new Library_warning;
     /* @var $warnlib Library_warning */
     $warnlib->delete_warnings($_REQUEST['uid'], array($_REQUEST['warn_id']));
     $this->message('Предупреждение удалено!',1);
@@ -379,7 +379,7 @@ class users extends Application_Admin {
   }
   
   function action_user_change_group() {
-    $userlib=$this->load_lib('userlib',true);
+    $userlib=new Library_userlib;
     if (!isset($_REQUEST['uid']) || !is_numeric($_REQUEST['uid'])) $this->output_404('Некорректно указан идентификатор пользователя!');
     $uid=intval($_REQUEST['uid']);
     
@@ -423,7 +423,7 @@ class users extends Application_Admin {
     $this->out->udata = $this->load_user($uid,0);    
     if ($this->is_post()) {
       if ($this->out->udata['display_name']===$_POST['confirm_name']) {
-        $dellib = $this->load_lib('delete',true);
+        $dellib = new Library_delete;
         /** @var Library_delete $dellib */
         $dellib->delete_users(array($uid));
         if ($this->get_opt('userlib_logs')>1) $this->log_entry('user',14,'admin/users.php','Пользователь '.$this->get_userlogin().' удалил пользователя '.$this->out->udata['display_name'].'.');    
@@ -439,7 +439,7 @@ class users extends Application_Admin {
     if (!isset($_REQUEST['uid']) || !is_numeric($_REQUEST['uid'])) $this->output_404('Некорректно указан идентификатор пользователя!');
     $uid=intval($_REQUEST['uid']);
     
-    $userlib=$this->load_lib('userlib',true);
+    $userlib=new Library_userlib;
     $udata=$this->load_user($uid,2);
     if (empty($udata) || empty($udata['basic'])) $this->output_404('Пользователя с таким идентификатором не существует!');
     if (!$this->is_admin(true) && $udata['ext_data']['founder']) $this->output_403('Нельзя изгнать пользователя со статусом "Основатель".');
@@ -471,10 +471,10 @@ class users extends Application_Admin {
   function action_user_edit() {
     if (!isset($_REQUEST['uid']) || !is_numeric($_REQUEST['uid'])) $this->output_404('Некорректно указан идентификатор пользователя!');
     $uid=intval($_REQUEST['uid']);
-    $userlib=$this->load_lib('userlib',true);    
+    $userlib=new Library_userlib;    
     $this->out->allow_template = true; // при редактировании из админки можно редактировать все
 
-    $templatelib = $this->load_lib('template',false);
+    $templatelib = class_exists('Library_template') ? new Library_template : false;
     if ($templatelib) $this->out->user_templates = array(''=>'Стиль сайта по умолчанию')+$templatelib->get_list($this->is_admin()); // если пользователь -- админ, он может выбрать любой шаблон, иначе -- только незаблокированные
 
     if ($this->is_post()) {
@@ -538,7 +538,7 @@ class users extends Application_Admin {
     if (!isset($_REQUEST['uid']) || !is_numeric($_REQUEST['uid'])) $this->output_404('Некорректно указан идентификатор пользователя!');
     $uid=intval($_REQUEST['uid']);    
     if ($this->is_post()) {
-      $misclib = $this->load_lib('misc',true);
+      $misclib = new Library_misc;
       /* @var $misclib Library_misc */
       $misclib->save_text($_POST['text'], $uid, 33); // 33 -- текст с описанием роли пользователя
       $this->message('Описание роли пользователя сохранено!',1);

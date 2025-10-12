@@ -56,10 +56,19 @@ class Application {
   public int $time;
 
   /** Объект для работы с серверным кешем * */
-  private iCache $server_cache;
+  protected iCache $server_cache;
 
   /** Данные для вывода мета-тегов */
   public array $meta = array();
+
+  /** Данные о текущем разделе, если они есть */
+  public $forum = false;
+
+  /** Данные о текущей теме, если они есть */
+  public $topic = false;
+
+  /** Данные о выбранном стиле */
+  protected $style = 'def';
 
   /** Главная функция, из нее вызывается все остальное
    * Действия:

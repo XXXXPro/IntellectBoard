@@ -15,7 +15,7 @@ class research extends stdforum {
     $this->out->fields = $fields;
     $this->out->field = $field;
 
-    $tlib = $this->load_lib('topic');
+    $tlib = new Library_topic;
     $tid = $this->topic['id'];
     $this->out->poll = $tlib->get_poll($tid);
 

@@ -36,7 +36,7 @@
     if (!$this->get_opt('oauth_server_enable')) $this->output_403('Использование сервера авторизации запрещено настройками форума.');
     if (isset($_REQUEST['redirect_uri']) && isset($_REQUEST['client_id']) && ((isset($_REQUEST['me']) && isset($_REQUEST['state'])) || isset($_POST['code']))) {
       /** @var Library_userlib **/
-      $userlib = $this->load_lib('userlib',true);
+      $userlib = new Library_userlib;
       $client_id=strtolower($_REQUEST['client_id']); // приводим все URL к нижнему регистру
       $redirect_uri = strtolower($_REQUEST['redirect_uri']);
       if (!isset($_POST['code'])) {
@@ -122,7 +122,7 @@
     if (!$this->get_opt('oauth_server_enable')) $this->output_403('Использование сервера авторизации запрещено настройками форума.');
     if (isset($_POST['code']) && isset($_POST['client_id']) && isset($_POST['redirect_uri'])) {
       /** @var Library_userlib **/
-      $userlib = $this->load_lib('userlib',true);
+      $userlib = new Library_userlib;
       
       $client_id=strtolower($_POST['client_id']); // приводим все URL к нижнему регистру
       $redirect_uri = strtolower($_POST['redirect_uri']);

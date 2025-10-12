@@ -25,7 +25,7 @@ class micro extends stdforum {
     $this->out->topics=$this->view_forum_get_topics($cond,$tperpage);
 
     /** @var Library_topic **/
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $this->out->topics = $tlib->get_first_posts($this->out->topics,array('ratings'=>$this->forum['rate'],'attach'=>true)); // получаем тексты сообщений для всех выводимых тем
     for ($i=0, $count=count($this->out->topics); $i<$count; $i++) {
       $this->out->topics[$i]['post']['norate']=$this->check_rateable($this->out->topics[$i]['post']); // проверяем, можно ли рейтинговать сообщение
@@ -66,7 +66,7 @@ class micro extends stdforum {
   }
 
    function action_rss() {
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $cond['topics']=true;
     $cond['noflood']=true;
     $cond['sort']='DESC';
@@ -81,7 +81,7 @@ class micro extends stdforum {
     $cond['perpage']=$limit; //
 
     /* @var Library_bbcode */
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
 
     $this->out->intb->link=$this->http($this->url($this->forum['hurl'].'/'));
     $this->out->intb->descr=$this->forum['descr'];
@@ -118,7 +118,7 @@ class micro extends stdforum {
 
   /** Обновление расширенных данных о разделе, где, в частности, кешируется несколько последних сообщений  **/
   function update_extdata() {
-     $tlib = $this->load_lib('topic',false);
+     $tlib = class_exists('Library_topic') ? new Library_topic : false;
      if (!$tlib) return false; // если библиотеку тем загрузить не удалось, выходим, не отображая ничего
 
      $cond['fid']=$this->forum['id'];
@@ -128,7 +128,7 @@ class micro extends stdforum {
      $topics = $tlib->list_topics($cond);
 
      $topics = $tlib->get_first_posts($topics,array('ratings'=>false,'attach'=>true)); // получаем тексты сообщений для всех выводимых тем
-     $flib = $this->load_lib('forums',false);
+     $flib = class_exists('Library_forums') ? new Library_forums : false;;
      if ($flib) $flib->update_forum($this->forum['id'],array('last_topics'=>$topics));
   }
 
