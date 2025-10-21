@@ -32,7 +32,7 @@
 ^team\.htm$ misc.php?a=team
 ^mark_all\.htm$ misc.php?a=mark_all
 ^(.*)/mark_all\.htm$ misc.php?a=mark_all&forum=$1
-category/(\d+)\.htm index.php?cat=$1
+category/(\d+)\.htm mainpage.php?cat=$1
 ^admin/(\w+)/(\w+).htm$ admin.php?m=$1&a=$2
 
 ^$ homepage.php?f=15
