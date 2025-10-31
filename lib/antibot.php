@@ -235,12 +235,13 @@
       $key = isset($_POST['captcha_key']) ? $_POST['captcha_key'] : '';
       $value = isset($_POST['captcha_value']) ? $_POST['captcha_value'] : '';
       $time1 = $_POST['captcha_timecode'];
-      $time2 = $this->app()->time % 10000;
+      $time2 = $this->app()->time % 10000;      
 
       $sql = 'SELECT code FROM '.DB_prefix.'captcha WHERE hash=\''.$this->app()->db->slashes($key).'\' AND active=\'1\'';
       $code = trim($this->app()->db->select_str($sql));
+
       if ((($time2-$time1) % 10000)<3 || $time1>10000) return false; // если с момента генерации CAPTCHA до ее ввода прошло меньше трех секунд, то это, скорее всего, бот
-      if ($code!=false && $code==$value) { // если код, введенный пользователем и сохраненный в базе совпадают, и при этом не пустые
+      if ($code!=false && $code===$value) { // если код, введенный пользователем и сохраненный в базе совпадают, и при этом не пустые
         if ($deactivate) {
           $sql = 'UPDATE '.DB_prefix.'captcha SET active=\'0\' WHERE hash=\''.$this->app()->db->slashes($key).'\'';
           $this->app()->db->query($sql);
@@ -278,6 +279,16 @@
       return !empty($data['success']);
     }
     else return true; // если CAPTCHA выключена вообще, считаем, что она пройдена
+  }
+
+  /** Деактивирует значение CAPTCHA, хеш которого передан в $_POST['captcha_key']. 
+   * Имеет смысл использовать в том случае, если проверка captcha_check была выполнена с $deactivate=false (актуально для форм отправки сообщения) 
+   **/
+  function deactivate_captcha() {
+    if (!empty($_POST['captcha_key'])) {
+      $sql = 'UPDATE '.DB_prefix.'captcha SET active=\'0\' WHERE hash=\''.$this->app()->db->slashes($_POST['captcha_key']).'\'';
+      $this->app()->db->query($sql);
+    }
   }
 
    /** Функция подчистки таблицы CAPTCHA. Предполагается ее вызов через crontab

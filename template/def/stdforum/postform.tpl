@@ -1,5 +1,6 @@
 {% import 'macro.tpl' as macros %}
 <div class="preview"></div>
+<div id="messages_container"></div>
 <form action="{{ editpost.action }}" method="post" enctype="multipart/form-data" class="postform {{ form_params.form_class }} noprint" id="replyform">
 <fieldset><legend>{{ editpost.topmsg }}</legend>
 {% if form_params.username %}

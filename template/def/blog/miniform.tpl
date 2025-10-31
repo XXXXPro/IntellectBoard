@@ -1,5 +1,6 @@
 {% import 'macro.tpl' as macros %}
 <div class="preview"></div>
+<div id="messages_container"></div>
 <form action="{{ editpost.action }}" method="post" enctype="multipart/form-data" class="postform" id="replyform" {% if (posts|length>0) %}id="comments"{% endif %}>
 <fieldset><legend>{{ editpost.topmsg }}</legend>
 {% if is_guest() %}

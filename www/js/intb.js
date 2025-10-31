@@ -4,6 +4,134 @@
 //# sourceMappingURL=head.load.min.js.map
 */
 
+// FormStorage script for saving forms
+function FormStorage(form_element,storage_key,headers=null) {
+  var self=this;
+  if (!form_element instanceof HTMLFormElement) throw Error('Parameter form_element is not HTML form!');
+  self.form_element = form_element;
+  if (!storage_key instanceof String) throw Error('Parameter storage_key is not string!');
+  self.storage_key = storage_key;
+  form_element.addEventListener('submit',function (e) { self.processFormSubmit(e) });
+  self.headers = headers;
+  self.save_mode = null;  // we will enable it when some input occurs
+  form_element.addEventListener('input',function (e) { if (self.save_mode===null) self.save_mode = true; }); // enabling autosave on first input
+  window.addEventListener('pagehide',function (e) { self.save() }); // saving form when user goes away
+
+  self.getFormData = function() {
+    let data = {};
+    for (let i=0, count=self.form_element.elements.length; i<count; i++) {
+      let element = self.form_element.elements[i];
+      if (!element.name) continue; // skipping elements without name attribute
+      if (element.getAttribute('autocomplete')==='off') continue; // skipping elements with autocomplete="off" (i.e. CAPTCHA)
+      if (element.tagName==='SELECT') {
+        data[element.name]=new Array;
+        for (let j=0; j<element.selectedOptions.length; j++) data[element.name].push(element.selectedOptions.item(j).value);
+      }
+      else {
+        if (element.tagName!=='BUTTON' && element.type!=='password' && element.type!=='file' && element.type!=='checkbox' && element.type!=='radio') {
+          if (element.name.includes('[]')) {
+            if (!data.hasOwnProperty(element.name)) data[element.name]=new Array();
+            data[element.name].push(element.value);
+          }
+          else data[element.name]=element.value;
+        }
+        if (element.type==='checkbox') {
+          if (!data.hasOwnProperty(element.name)) data[element.name]=new Array();
+          if (element.checked) data[element.name].push(element.value);
+        }
+        if (element.type==='radio' && element.checked===true) data[element.name]=element.value; 
+      }
+    }
+    return data;
+  }
+
+  self.fillFormData = function(data) {
+    for (let field in data) {
+      let elements = self.form_element.querySelectorAll('[name="'+field+'"]');
+      for (var i=0; i<elements.length; i++) {
+        var element = elements[i];
+        if (element!==null) {
+          if (element.tagName==='SELECT') { // processing select tag
+            for (let j=0; j<element.options.length; j++) element.options.item(j).selected=data[field].includes(element.options.item(j).value);
+          }
+          else { 
+            if (element.tagName!=='BUTTON' && element.type!=='password' && element.type!=='file' && element.type!=='checkbox' && element.type!=='radio'  && element.type!=='submit' && element.type!=='button' && element.type!=='reset') { // common elements (like text, date, email and so on)
+              if (element.name.includes('[]')) {
+                element.value = data[element.name].shift();
+              }
+              else element.value=data[field];
+            }
+            if (element.type==='checkbox') { // checkboxes
+              element.checked=data[field].includes(element.value);
+            }
+            if (element.type==='radio') element.checked=(data[field]==element.value); 
+          }
+        }
+      }
+    }
+  }
+
+  self.processFormSubmit = function(e) {
+    e.preventDefault();
+    var formData = new FormData(self.form_element);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', self.form_element.action, true);
+    for (const header in self.headers) xhr.setRequestHeader(header,self.headers[header]);
+    xhr.onload = function() {
+      if (xhr.status<400) { 
+        window.localStorage.removeItem(self.storage_key); // if status is not error, form is submitted successfully, so removing its data from localStorage
+        self.save_mode = false;
+      }
+      else self.save_mode =  true; // restoring form saving if submitting failed
+      self.onSubmitResult(xhr);
+    };
+    xhr.send(formData); 
+  }
+
+  self.onBeforeSave = function () {}  
+  self.onSave = function (data) {}  
+  self.onLoad = function (data) {} 
+  self.onSubmitResult = function (xhr) {
+        if (xhr.status===200 || xhr.status===206 || xhr.status===204) {
+            document.location=xhr.responseURL;
+        } 
+        else if (xhr.status===201 || xhr.status===302 || xhr.status===303) {
+          document.location=xhr.getResponseHeader('Location');
+        } 
+        else {
+          self.onSubmitError(xhr);
+        }
+  }
+  self.onSubmitError = function(xhr) {
+      console.log(xhr.response);
+  }
+  self.onDecodeError = function(data,error) {} 
+
+  self.save = function() {
+    if (self.save_mode) {
+      self.onBeforeSave();
+      var data = self.getFormData();
+      if (data) {
+        self.onSave(data);
+        window.localStorage.setItem(self.storage_key,JSON.stringify(data));
+      }
+    }
+  }
+
+  self.load = function () {
+    let data = window.localStorage.getItem(self.storage_key);
+    if (data===null) return; // if no stored data, then nothing to do, just exiting
+    try {
+      data = JSON.parse(data);
+      self.onLoad(data);
+      self.fillFormData(data);
+    }
+    catch (error) {
+      self.onDecodeError(data,error);
+    }
+  }
+}
+
 // Intellect Board Script
 
 function IntB_main(opts) {
@@ -213,9 +341,61 @@ function IntB_main(opts) {
       });
     });
   }
+
   // визуальный редактор для bbcode
   var bbcode_nodes=$('.bbcode');
-  if (opts.draft && opts.draft_reset && typeof(Storage)!=="undefined") localStorage.setItem('IntB_'+opts.draft,null); // сброс черновика, если предыдущее сообщение было успешно отправлено
+
+  // автосохранение форм
+  var postform = document.querySelector('form.postform');
+  if (!postform) postform = document.querySelector('form.miniform');
+  if (postform) {
+    var fstor = new FormStorage(postform,'IntB_'+opts.draft,{ 'Accept' : 'application/json' });
+    fstor.onDecodeError = function(text,error) {
+      var data = { 'post[text]': text };
+      if (error instanceof SyntaxError) this.fillFormData(data); // для сохранения обратной совместимости, если в хранилище лежит только текст сообщения
+    }
+    fstor.onBeforeSave = function(data) {
+      bbcode_nodes.sceditor('instance').updateOriginal();
+    }
+    fstor.putErrorMessage = function(msg,level) {
+      console.log('Putting message: '+msg+' '+3);
+      var msg_container=document.getElementById('messages_container');
+      if (msg_container) {
+        var new_elm=document.createElement('div');
+        if (!level) level=3;
+        else level=parseInt(level);
+        var cls = ['msg_ok','msg_warn','msg_error'][level-1];
+        new_elm.className=cls;
+        new_elm.innerText=msg;
+        msg_container.appendChild(new_elm);
+      }
+      else alert(msg);
+    }
+    fstor.onSubmitError = function (xhr) {
+      try {
+        var msg_container=document.getElementById('messages_container');
+        msg_container.scrollIntoView(true);
+        if (msg_container) msg_container.innerHTML=''; // удаляем старые сообщения об ошибках
+        var errors = JSON.parse(xhr.response);
+        if (errors.errors_list instanceof Array) {
+          for (var i=0; i<errors.errors_list.length; i++) fstor.putErrorMessage(errors.errors_list[i]['text'],errors.errors_list[i]['level']);
+        }
+        else if (errors.error_description) {
+          fstor.putErrorMessage(errors.error_description,3);
+        }
+      }
+      catch (e) {
+        console.log(e);
+        fstor.putErrorMessage('При отправке возникла ошибка: '+xhr.responseText);
+      }
+    }
+
+    if (!opts.draft.startsWith('post') || (window.localStorage.getItem('IntB_'+opts.draft)!=null && confirm('Восстановить отредактированный вариант сообщения из автосохранения?'))) {
+      fstor.load();
+    }
+    setInterval(fstor.save.bind(fstor),10000); // автосохранение каждые 10 секунд    
+  }
+
   if (opts.wysiwyg && opts.wysiwyg!='0' && bbcode_nodes.length) {
     head.load([scepath+'minified/themes/default.min.css',scepath+'minified/jquery.sceditor.min.js',
       opts.basedir+'js/sceditor/minified/formats/bbcode.js',scepath+'languages/ru.js'],function() {
@@ -237,15 +417,7 @@ function IntB_main(opts) {
             $(e.target).closest('form').submit();
           }
       });
-      if (typeof(Storage)!=="undefined" && opts.draft) {
-        $('.bbcode').val(localStorage.getItem("IntB_"+opts.draft));
-        bbcode_nodes.sceditor('instance').blur(function(){
-          localStorage.setItem('IntB_'+opts.draft,$('.bbcode').sceditor('instance').val());
-        });
-        setInterval(function () {
-          localStorage.setItem('IntB_'+opts.draft,$('.bbcode').sceditor('instance').val());
-        },15000);
-      }
+
       var mini_nodes=$('.miniform');
       if (mini_nodes.length) {
          mini_nodes.find('.sceditor-toolbar').hide();
@@ -259,26 +431,9 @@ function IntB_main(opts) {
            mini_nodes.find('.user_field').slideDown();
          });
       }
-//      $('#ib_all div.sceditor-container').show();
     });
   }
 
-  // восстановление сохраненных данных и организация автосохранения, если виз. редактор выключен
-  if (bbcode_nodes.length && typeof(Storage)!=="undefined" && (!opts.wysiwyg || opts.wysiwyg=='0')) {
-    this.paste_quoted(localStorage.getItem("IntB_"+opts.draft));
-    setInterval(function () {
-      localStorage.setItem('IntB_'+opts.draft,bbcode_nodes.val());
-    },15000);
-    bbcode_nodes.change(function (e) {
-      localStorage.setItem('IntB_'+opts.draft,bbcode_nodes.val());
-    });
-  }
-  // сброс сохраненного черновика при отправке формы
-  if (bbcode_nodes.length && typeof(Storage)!=="undefined") {
-    bbcode_nodes.parents('form').submit(function (e) {
-      localStorage.removeItem('IntB_'+opts.draft);
-    });
-  }
   var mini_bbcode_nodes=$('.mini_bbcode');
 
   var date_nodes = $('.date');
@@ -392,7 +547,6 @@ function IntB_main(opts) {
       if (e.inputType !== undefined) {
         if (prev_timer!=null) clearTimeout(prev_timer);
         prev_timer = setTimeout(function() {
-          var username = el.value;
           jQuery.get(opts.basedir+'search/complete_user.htm','q='+el.value,function(users) {
             var opts = users.map(function (item) { let elm = document.createElement('option'); elm.value=item; return elm });
             list_elm.replaceChildren(...opts);
@@ -411,7 +565,6 @@ function IntB_main(opts) {
       if (e.inputType !== undefined) {
         if (prev_timer!=null) clearTimeout(prev_timer);
         prev_timer = setTimeout(function() {
-          var username = el.value;
           jQuery.get(opts.basedir+'search/complete_tag.htm','q='+el.value,function(users) {
             var opts = users.map(function (item) { let elm = document.createElement('option'); elm.value=item; return elm });
             list_elm.replaceChildren(...opts);
@@ -420,6 +573,25 @@ function IntB_main(opts) {
       }
     });
   });  
+
+  jQuery('input.topic_id_finder').each(function (i,el) {
+    let list_id = el.getAttribute('list');
+    let list_elm = document.getElementById(list_id);
+    if (!list_elm) return;
+    let prev_timer = null;
+    el.addEventListener('input', function (e) {
+      if (e.inputType !== undefined) {
+        if (prev_timer!=null) clearTimeout(prev_timer);
+        if (el.value.match(/^\d+$/)!==null) return;
+        prev_timer = setTimeout(function() {
+          jQuery.get(opts.basedir+'search/complete_topic.htm','q='+el.value,function(users) {
+            var opts = users.map(function (item) { let elm = document.createElement('option'); elm.value=item.id; elm.label=item.title; return elm });
+            list_elm.replaceChildren(...opts);
+          },'json');
+        },800);
+      }
+    });
+  });    
 
   var sandwich_main = document.getElementById('intb_sandwich_main');
   if (sandwich_main) {
