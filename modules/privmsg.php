@@ -13,7 +13,7 @@ class privmsg extends Application {
 
 /** Выдача списка тем личных сообщений **/
   function action_view() {
-    $pmlib = $this->load_lib('privmsg',true);
+    $pmlib = new Library_privmsg;
 
     $pg['page'] = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 0;
 
@@ -51,7 +51,7 @@ class privmsg extends Application {
       $this->output_404('Не указан номер темы переписки!');
     }
 
-    $pmlib = $this->load_lib('privmsg',true);
+    $pmlib = new Library_privmsg;
     $cond['uid']=$this->get_uid();
     $cond['users']=true;
     $cond['relations']=true;
@@ -85,8 +85,8 @@ class privmsg extends Application {
     }
     // если есть непрочитанные сообщения и их больше, чем общее количество, выводим все непрочитанные и пару предыдущих
     elseif ($this->out->thread['unread']>$per_page) {
-      $cond['start']=$this->thread['total']-$this->thread['unread']-2;
-      $cond['perpage']=$this->thread['unread']+2;
+      $cond['start']=$this->out->thread['total']-$this->out->thread['unread']-2;
+      $cond['perpage']=$this->out->thread['unread']+2;
     }
     // выводим сообщения за неделю
     elseif ($show==='week') {
@@ -114,7 +114,7 @@ class privmsg extends Application {
     $pm = $pmlib->get_messages($cond);
     $this->out->hidden_pm = $this->out->thread['total']-count($pm); // количество
 
-    $bbcode = $this->load_lib('bbcode',false); // ЛС могут функционировать и без BBCode
+    $bbcode = class_exists('Library_bbcode') ? new Library_bbcode : false;; // ЛС могут функционировать и без BBCode
     if ($bbcode) for ($i=0, $count=count($pm);$i<$count;$i++) { // обработка смайликов и BoardCode
       $pm[$i]['text']=$bbcode->parse_msg($pm[$i]);
       $this->lastmod=max($this->lastmod,$pm[$i]['postdate']);
@@ -130,7 +130,7 @@ class privmsg extends Application {
     $this->out->post=$pmlib->set_new_post($this->out->perms);
     $this->out->deletekey = $this->gen_auth_key(false,'delete');
 
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
     if ($bbcode) $this->out->smiles = $bbcode->load_smiles_hash();
   }
 
@@ -138,12 +138,12 @@ class privmsg extends Application {
   function action_send() {
     if (!$this->is_post()) $this->redirect($this->http($this->url('privmsg/'))); // если тип запроса не POST, значит, что-то не так, делаем редирект на список ЛС
     $pm_thread = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
-    $pmlib = $this->load_lib('privmsg',true);
+    $pmlib = new Library_privmsg;
     $this->out->perms = $pmlib->get_permissions();
     $errors = array();
     $post = $_POST['post'];
 
-    $bbcode = $this->load_lib('bbcode',false);
+    $bbcode = class_exists('Library_bbcode') ? new Library_bbcode : false;;
     if ($bbcode) $parsed = $bbcode->parse_msg($post);
 
     if (empty($pm_thread)) { // если thread_pm не задан или равен нулю, создается новая тема
@@ -155,7 +155,7 @@ class privmsg extends Application {
       // проверка количества сообщений в час (в целях защиты от несанкционированной рекламы)
       $pm_per_hour = $this->get_opt('privmsg_hour','group');
       if ($pm_per_hour>0) {
-        $pm_lib = $this->load_lib('privmsg');
+        $pm_lib = new Library_privmsg;
         $timelimit = $this->time - 60*60;
         $pm_sent = $pm_lib->count_threads(array('uid'=>$this->get_uid(),'lasttime'=>$timelimit));
         if ($pm_sent>=$pm_per_hour) $errors[]=array('text'=>$this->incline($pm_per_hour,'При вашем уровне доступа разрешается создавать не более %d темы в час!','При вашем уровне доступа разрешается создавать не более %d тем в час!','При вашем уровне доступа разрешается создавать не более %d тем в час!'),'level'=>3);
@@ -164,7 +164,7 @@ class privmsg extends Application {
       }
 
       for ($i=0, $count=count($names); $i<$count; $i++) $names[$i]=trim($names[$i]);
-      $userlib = $this->load_lib('userlib',true);
+      $userlib = new Library_userlib;
       $udata = $userlib->list_users(array('login'=>$names,'relations'=>true));
       for ($i=0, $count=count($udata); $i<$count; $i++) {
         if ($udata[$i]['type']!=='ignore' && $udata[$i]['id']!==$this->get_uid()) $_POST['uids'][]=$udata[$i]['id'];
@@ -224,7 +224,7 @@ class privmsg extends Application {
     if (!$thread_id) {
       $this->output_404('Не указан номер темы переписки!');
     }
-    $pmlib = $this->load_lib('privmsg',true);
+    $pmlib = new Library_privmsg;
     $pmlib->unsubscribe($thread_id,$this->get_uid());
     $this->message('Вы были отписаны от темы. Теперь сообщения в ней вам не доступны.',1);
     $this->redirect($this->http($this->url('privmsg/')));
@@ -236,7 +236,7 @@ class privmsg extends Application {
     if (!$thread_id) {
       $this->output_404('Не указан номер темы переписки!');
     }
-    $pmlib = $this->load_lib('privmsg',true);
+    $pmlib = new Library_privmsg;
     $pmlib->delete($thread_id,$_REQUEST['del'],$this->get_uid());
     if ($this->get_request_type()!=1) {
       $this->message('Выбранные сообщения удалены.',1);
@@ -248,18 +248,18 @@ class privmsg extends Application {
   function action_new() {
     $this->out->newpost=true;
     $this->out->max_pms = $this->get_opt('privmsg_hour','group');
-    $pmlib = $this->load_lib('privmsg',true);
+    $pmlib = new Library_privmsg;
     $this->out->perms = $pmlib->get_permissions();
     $this->out->post=$pmlib->set_new_post($this->out->perms);
     if (!empty($_REQUEST['to'])) $this->out->recepients=$_REQUEST['to'];
     $this->out->draft_name = 'pm_new'; // имя черновика для автосохранения на стороне клиента
 
-    $userlib = $this->load_lib('userlib',false); // отсутствие пользовательской библиотеки в данном случае некритично, без нее просто не будет списка друзей
+    $userlib = class_exists('Library_userlib') ? new Library_userlib : false; // отсутствие пользовательской библиотеки в данном случае некритично, без нее просто не будет списка друзей
     if ($userlib) {
       $this->out->friends = $userlib->list_users(array('friends_list'=>$this->get_uid()));
     }
     $this->out->authkey = $this->gen_auth_key(false,'send'); // аутентификационный ключ нужен для того, чтобы если пользователя разлогинит по таймауту, его сообщение все равно бы отправилось
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
     if ($bbcode) $this->out->smiles = $bbcode->load_smiles_hash();
   }
 
@@ -284,7 +284,7 @@ class privmsg extends Application {
     // проверка таймаута. Если таймаут равен нулю, считаем, что ограничений нет.
     $timeout = $this->get_opt('floodtime','group');
     if ($timeout>0) {
-      $antibot = $this->load_lib('antibot',false);
+      $antibot = class_exists('Library_antibot') ? new Library_antibot :  false;;
       if ($antibot && !$antibot->timeout_check('privmsg',$timeout)) $result[]=array('text'=>$this->incline($timeout,
         'После отправки вашего предыдущего сообщения прошло меньше %d секунды',
         'После отправки вашего предыдущего сообщения прошло меньше %d секунд',
@@ -292,7 +292,7 @@ class privmsg extends Application {
     }
 
     // определение количества смайликов
-    $bbcode = $this->load_lib('bbcode',false);
+    $bbcode = class_exists('Library_bbcode') ? new Library_bbcode : false;;
 
     // проверка на наличие стоп-слов
     $stopwords = explode("\n",$this->get_text(0,4));
@@ -326,7 +326,7 @@ class privmsg extends Application {
 
   /** Выполнение действий после отправки сообщения, в частности, рассылки уведомлений **/
   function pm_postprocess($thread,$pm,$parsed) {
-    $notify_lib = $this->load_lib('notify',false);
+    $notify_lib = class_exists('Library_notify') ? new Library_notify : false;
     if ($notify_lib) {
       $userdata = $this->load_user($this->get_uid(),2);
       $notify_lib->new_pm($thread,$pm,$parsed,$this->get_username(),$userdata['basic']['email']);
@@ -334,7 +334,7 @@ class privmsg extends Application {
   }
 
   function action_mark_all() {
-    $pmlib = $this->load_lib('privmsg',true);
+    $pmlib = new Library_privmsg;
     $pmlib->mark_read($this->get_uid(),false); // false означает, что отмечаем как просмотренные все цепочки сообщений
     $this->message('Все личные сообщения отмечены как прочитанные');
     $this->redirect($this->http($this->url('privmsg/')));

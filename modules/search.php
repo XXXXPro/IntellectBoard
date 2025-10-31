@@ -96,7 +96,6 @@ class search extends Application {
            'WHERE '.$this->db->full_match('t.title,t.descr',$data['query']).' AND t.status=\'0\''.
            'AND '.$this->db->array_to_sql($forum_ids,'f.id');      
       }
-      echo "SQL ".$sql;
       $this->db->query($sql);
       $this->redirect($this->http($this->url('search/'.$data['id'].'/')));   
     }    
@@ -145,7 +144,7 @@ class search extends Application {
       }
      
       /** @var Library_sphinx $sphinx_lib */
-      $sphinx_lib = $this->load_lib('sphinx',true);
+      $sphinx_lib = new Library_sphinx;
        
       $oids = $sphinx_lib->search($_REQUEST['search']['query'],$forum_ids,$cond,$data['search_type']);
 
@@ -247,7 +246,7 @@ class search extends Application {
     $this->out->forum_list = $this->get_forum_list('read',1);
     $this->out->extdata = (!empty($search['extdata']) ? unserialize($search['extdata']) : false);
         
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $cond['search']=$search['id'];
     $cond['order']='relevancy';
     $cond['sort']='DESC';
@@ -262,7 +261,7 @@ class search extends Application {
       $cond['topics']=true;
       
       $posts = $tlib->get_posts($cond);
-       $bbcode = $this->load_lib('bbcode');
+       $bbcode = new Library_bbcode;
       $this->out->posts=array();
       foreach ($posts as $post) {
         $post['text']=$bbcode->parse_msg($post);
@@ -344,11 +343,28 @@ class search extends Application {
     else $users = array();
     return json_encode($users);
   }
+
+  function action_complete_topic() {
+    if (empty($_GET['q'])) return '';
+    $query = $_GET['q'];
+    if (!empty($query)) {
+      $forum_ids = $this->get_forum_list('read'); // поиск возможен только в тех разделах, в которых у пользователя есть права на чтения
+      $sql = 'SELECT t.id, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl, t.title, '.$this->db->full_relevancy('t.title,t.descr',$query).' AS relevancy '.
+          'FROM '.DB_prefix.'topic t '.
+          'LEFT JOIN '.DB_prefix.'forum f ON (f.id=t.fid) '.
+          'WHERE ('.$this->db->full_match('t.title,t.descr',$query.'*').' OR t.hurl LIKE \''.$this->db->slashes($query).'%\') AND t.status=\'0\''.
+          'AND '.$this->db->array_to_sql($forum_ids,'f.id').' '.
+          'ORDER BY relevancy DESC';
+      $topics = $this->db->select_all($sql,5);
+    }
+    else $topics = array();
+    return json_encode($topics);
+  }
   
   function check_timeout() {
     $timeout = $this->get_opt('search_timeout');
     if (empty($timeout)) $timeout=2;
-    $antibot = $this->load_lib('antibot',false);
+    $antibot = class_exists('Library_antibot') ? new Library_antibot :  false;;
     if ($antibot) {
       if (!$antibot->timeout_check('search',$timeout)) {
         $this->output_403($this->incline($timeout,'Поиск разрешен не чаще чем раз в %d секунду!','Поиск разрешен не чаще чем раз в %d секунды!','Поиск разрешен не чаще чем раз в %d секунд!'));
@@ -371,12 +387,12 @@ class search extends Application {
   }
 
   function get_mime() {
-    if (in_array($this->action,array('complete_user','complete_tag'))) return 'application/json';
+    if (in_array($this->action,array('complete_user','complete_tag','complete_topic'))) return 'application/json';
     else return parent::get_mime();    
   }
 
   function get_request_type() {
-    if (in_array($this->action,array('complete_user','complete_tag'))) return 4;
+    if (in_array($this->action,array('complete_user','complete_tag','complete_topic'))) return 4;
     else return parent::get_request_type();
   }
   

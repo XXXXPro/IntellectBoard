@@ -28,7 +28,7 @@ class Library_notify extends Library implements iNotifier {
       ' GROUP BY u.id, u.email, u.display_name, us.email_fulltext, lv.type, lv.oid, ue.group_id';
     $users = $this->app()->db->select_all($sql);
     $parents = $this->app()->get_parent_forums($forum['id']);
-    $userlib = $this->app()->load_lib('userlib',false);
+    $userlib = class_exists('Library_userlib') ? new Library_userlib : false;
     if (!$userlib) return; // если библиотека не загрузилась, то никакой рассылки, так как нельзя проверить права доступа   
     
     for ($i=0, $count=count($users);$i<$count;$i++) {
@@ -38,7 +38,7 @@ class Library_notify extends Library implements iNotifier {
         $mdata['unsubscribe_key']=$this->app()->gen_auth_key($users[$i]['id'],'unsubscr',$this->app()->url('bookmark/'));
         $mdata['unsubscribe_key2']=$this->app()->gen_auth_key($users[$i]['id'],'unsubscribe_all',$this->app()->url('user/'));;
         $this->app()->mail(array('to'=>$users[$i]['email'],'to_name'=>$users[$i]['display_name'],
-          'subj'=>'Уведомление о новом сообщении в теме "'.$topic['title'].'"','unsubscribe'=>$unsubscribe,
+          'subj'=>'Уведомление о новом сообщении в теме "'.$topic['title'].'"','unsubscribe'=>$mdata['unsubscribe_key'],
           'template'=>$template,'data'=>$mdata,'html'=>true,'list-id'=>'Topic notification <topic.'.intval($topic['id']).'.'.$_SERVER['HTTP_HOST'].'>'));
       }
     }
@@ -48,7 +48,7 @@ class Library_notify extends Library implements iNotifier {
   function new_post($post,$topic,$forum,$parsed) {
     $this->send_post_notification($post, $topic, $forum, $parsed,'stdforum/mail_newpost.tpl');
     /** @var Library_forums */
-    $forumlib = $this->app()->load_lib('forums', false);
+    $forumlib = class_exists('Library_forums') ? new Library_forums : false;
     if ($forumlib) {
       $fdata = $forumlib->get_forum($this->app()->forum['id'], true); // нам нужны расширенные данные форума
       if (!empty($fdata['extdata']['telegram_id']) && !empty($fdata['extdata']['telegram_key'])) {
@@ -78,7 +78,7 @@ class Library_notify extends Library implements iNotifier {
   function new_topic($post,$topic,$forum,$parsed) {
     $this->send_post_notification($post, $topic, $forum, $parsed, 'stdforum/mail_newtopic.tpl');
     /** @var Library_forums */
-    $forumlib = $this->app()->load_lib('forums',false);
+    $forumlib = class_exists('Library_forums') ? new Library_forums : false;
     if ($forumlib) {
       $fdata=$forumlib->get_forum($this->app()->forum['id'],true); // нам нужны расширенные данные форума
       if (!empty($fdata['extdata']['telegram_id']) && empty($_POST['no_export'])) {
@@ -137,7 +137,7 @@ class Library_notify extends Library implements iNotifier {
   /** Уведомление о регистрации нового пользователя. 
    * В качестве адреса для ответа указываем Email отправителя, чтобы пользователь мог ответить через кнопку Reply в почтовом клиенте **/
   function new_user($udata,$activate_mode) {
-    $userlib = $this->app()->load_lib('userlib');
+    $userlib = new Library_userlib;
     $admins=$userlib->get_admins();
     $udata['activate_mode'] = $activate_mode;
     for ($i=0,$count=count($admins);$i<$count;$i++) {

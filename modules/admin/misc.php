@@ -12,7 +12,7 @@
 class misc extends Application_Admin {
   function action_badwords() {
     if ($this->is_post()) {
-      $misclib = $this->load_lib('misc',true);
+      $misclib = new Library_misc;
       $misclib->save_text($_POST['stopwords'],0,4);
       $misclib->save_text($_POST['badwords'],0,5);
     }
@@ -129,8 +129,8 @@ class misc extends Application_Admin {
   }
 
   function do_resync_topics($offset,$limit) {
-    $modlib = $this->load_lib('moderate',true);
-    $tlib = $this->load_lib('topic',true);
+    $modlib = new Library_moderate;
+    $tlib = new Library_topic;
     $topics=$tlib->list_topics(array('start'=>$offset,'perpage'=>$limit)); // TODO: при таком запросе удаленные темы и темы на премодерации останутся необработанными, подумать, правильное ли это решение или нужно добавить all=true
     for ($i=0, $count=count($topics);$i<$count;$i++) $modlib->topic_resync($topics[$i]['id']);
     $_SESSION['do_resync']['topics']+=$count;
@@ -143,7 +143,7 @@ class misc extends Application_Admin {
   }
 
   function do_resync_users($offset,$limit) {
-    $userlib = $this->load_lib('userlib',true);
+    $userlib = new Library_userlib;
     $users=$userlib->list_users(array('start'=>$offset,'perpage'=>$limit)); // TODO: при таком запросе удаленные темы и темы на премодерации останутся необработанными, подумать, правильное ли это решение или нужно добавить all=true
     for ($i=0, $count=count($users);$i<$count;$i++) $userlib->user_resync($users[$i]['id']);
     $_SESSION['do_resync']['users']+=$count;
@@ -151,7 +151,9 @@ class misc extends Application_Admin {
   }
 
   function action_cache_reset() {
-    $outlib = $this->load_lib($this->template_lib,true); // отсутствие парсера должно вызывать фатальный шаблон, поэтому ставим true
+    $libname = 'Library_'.$this->template_lib;
+    $outlib = new $libname; // отсутствие парсера должно вызывать фатальный шаблон, поэтому ставим true
+    /** @var $outlib iParser */
     if ($outlib instanceof iParser) {
       $outlib->clear_cache();
       $this->message('Кеш шаблонизатора очищен!',1);
@@ -190,7 +192,7 @@ class misc extends Application_Admin {
         else $this->message('Смайлик '.$code.' не может быть изменен, так как другой смайлик с таким кодом уже есть в системе!',2);
       }
       if (!empty($_FILES['newsmiles'])) {
-        $imglib = $this->load_lib('image',true);
+        $imglib = new Library_image;
         $uploaded=0;
         for ($i=0,$count=count($_FILES['newsmiles']['tmp_name']); $i<$count; $i++) {
           if (is_uploaded_file($_FILES['newsmiles']['tmp_name'][$i])) {
@@ -311,7 +313,7 @@ class misc extends Application_Admin {
 
     $this->out->period = $period;
 
-    $tlib = $this->load_lib('topic',false);
+    $tlib = class_exists('Library_topic') ? new Library_topic : false;
     if ($tlib) {
       $sql = 'SELECT t.id, COUNT(p.id) AS post_count FROM '.DB_prefix.'topic t, '.DB_prefix.'post p '.
         'WHERE p.postdate>='.intval($time2).' AND p.tid=t.id AND p.status=\'0\' AND t.status=\'0\' '.
@@ -392,7 +394,7 @@ class misc extends Application_Admin {
       return 'main.tpl';
     }
     if ($this->is_post() && !empty($_POST['confirm'])) {
-      $dellib = $this->load_lib('delete',true);
+      $dellib = new Library_delete;
       /* @var $dellib Library_delete */
       $timelimit = $this->time - $_POST['days']*24*60*60;
       if (!empty($_POST['posts'])) $dellib->delete_older_posts($timelimit);

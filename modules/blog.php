@@ -28,7 +28,7 @@ class blog extends stdforum {
     if ($this->forum['tags']) $cond['tags']=true;
     $this->out->topics=$this->view_forum_get_topics($cond,$tperpage);
 
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $this->out->topics = $tlib->get_first_posts($this->out->topics,array('ratings'=>$this->forum['rate'],'attach'=>true)); // получаем тексты сообщений для всех выводимых тем
 
     // обработка сообщений для вывода
@@ -125,7 +125,7 @@ class blog extends stdforum {
   }
 
   function action_rss() {
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $cond['topics']=true;
     $cond['noflood']=true;
     $cond['sort']='DESC';
@@ -140,7 +140,7 @@ class blog extends stdforum {
     $cond['perpage']=$limit; //
 
     /* @var Library_bbcode */
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
 
     $this->out->intb->link=$this->http($this->url($this->forum['hurl'].'/'));
     $this->out->intb->descr=$this->forum['descr'];
@@ -165,7 +165,7 @@ class blog extends stdforum {
   }
   
   function action_turbo() {
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $cond['topics']=true;
     $cond['noflood']=true;
     $cond['sort']='DESC';
@@ -177,7 +177,7 @@ class blog extends stdforum {
     $cond['perpage']=500; // таков лимит Яндекса
 
     /* @var Library_bbcode */
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
 
     $this->out->intb->link=$this->http($this->url($this->forum['hurl'].'/'));
     $this->out->intb->descr=$this->forum['descr'];
@@ -253,12 +253,12 @@ class blog extends stdforum {
 
   function update_extdata() {
      /* @var Library_topic */
-     $tlib = $this->load_lib('topic',false);
+     $tlib = class_exists('Library_topic') ? new Library_topic : false;
      if (!$tlib) return false; // если библиотеку тем загрузить не удалось, выходим, не отображая ничего
 
      $cond['fid']=$this->forum['id'];
      $cond['first']=true;
-     $forumlib = $this->load_lib('forums',false);
+     $forumlib = class_exists('Library_forums') ? new Library_forums : false;;
      if ($forumlib) $forum = $forumlib->get_forum($this->forum['id'],true);
      else $forum=$this->forum;
      
@@ -266,7 +266,7 @@ class blog extends stdforum {
      $cond['order']='first_post_date';
      $topics = $tlib->list_topics($cond);
 
-     $flib = $this->load_lib('forums',false);
+     $flib = class_exists('Library_forums') ? new Library_forums : false;;
      if ($flib) $flib->update_forum($this->forum['id'],array('last_topics'=>$topics));
   }
    
@@ -278,7 +278,7 @@ class blog extends stdforum {
 
     list($need_count,$perpage,$sort)=$this->view_topic_params($tid);
     $total = $this->topic['post_count']-1; // общее количество сообщений без текста статьи
-    $tlib=$this->load_lib('topic',true); // ошибка загрузки библиотеки является критичной, без нее перехода не получится
+    $tlib=new Library_topic; // ошибка загрузки библиотеки является критичной, без нее перехода не получится
     $more = 0;
     
     $cond['after_pid']=$pid;  

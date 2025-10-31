@@ -72,7 +72,7 @@ class Library_topic extends Library {
 
     if (!empty($cond['with_tags'])) {
       /** @var Library_tags **/
-      $taglib = $this->app()->load_lib('tags',false);
+      $taglib = class_exists('Library_tags') ? new Library_tags : false;;
       $cond['id']=$taglib->get_ids_by_tags($cond['with_tags'],0);
     }
 
@@ -155,7 +155,7 @@ class Library_topic extends Library {
     $result=$this->app()->db->select_all($sql,$offset,$count);
     if (!empty($cond['tags'])) {
       /** @var Library_tags **/
-      $taglib = $this->app()->load_lib('tags',false);
+      $taglib = class_exists('Library_tags') ? new Library_tags : false;;
       if ($taglib) {
         $tids = array();
         for ($i=0, $count=count($result); $i<$count; $i++) $tids[]=$result[$i]['id'];
@@ -191,7 +191,7 @@ class Library_topic extends Library {
 
     if (!empty($cond['with_tags'])) {
       /** @var Library_tags **/
-      $taglib = $this->app()->load_lib('tags',false);
+      $taglib = class_exists('Library_tags') ? new Library_tags : false;;
       $cond['id']=$taglib->get_ids_by_tags($cond['with_tags'],0);
     }
     if (!empty($cond['id'])) {
@@ -383,7 +383,7 @@ class Library_topic extends Library {
     $options['attach']=true;
     $options['blocklinks']=true;
     $posts = $this->get_posts($options);
-    $bcode = $this->app()->load_lib('bbcode',false);
+    $bcode = class_exists('Library_bbcode') ? new Library_bbcode : false;
     for ($i=0,$count=count($topics);$i<$count;$i++) {
       for ($j=0,$count2=count($posts);$j<$count2;$j++) {
         if ($posts[$j]['tid']==$topics[$i]['id']) {
