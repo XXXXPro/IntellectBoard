@@ -41,6 +41,7 @@ class micro extends stdforum {
     $this->out->delete_key=$this->gen_auth_key($this->get_uid(),'delete_post',$this->url('moderate/'.$this->forum['hurl'].'/'));
     $this->out->mod_no_marks = true; // запрещаем помечать сообщения при просмотре в разделе
     $this->out->authkey=$this->gen_auth_key($this->get_uid(),'newtopic');
+    $this->out->draft_name = 'newtopic'.$this->forum['id'];
   }
 
   function action_newtopic($anonym=false) {

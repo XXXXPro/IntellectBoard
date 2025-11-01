@@ -42,6 +42,7 @@ class anon extends stdforum {
     $this->out->editpost['action']='newtopic.htm';
     $this->out->editpost['topmsg']='Задать вопрос';
     $this->out->authkey = $this->gen_auth_key(false,'newtopic'); // аутентификационный ключ нужен для того, чтобы если пользователя разлогинит по таймауту, его сообщение все равно бы отправилось
+    $this->out->draft_name = 'newtopic'.$this->forum['id'];
   }
 
   function action_newtopic($anonym=false) {
