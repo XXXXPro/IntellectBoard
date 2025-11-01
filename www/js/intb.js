@@ -93,10 +93,12 @@ function FormStorage(form_element,storage_key,headers=null) {
   self.onLoad = function (data) {} 
   self.onSubmitResult = function (xhr) {
         if (xhr.status===200 || xhr.status===206 || xhr.status===204) {
-            document.location=xhr.responseURL;
+            window.location.href=xhr.responseURL;
+            window.location.reload(); // на случай, если адрес страницы совпадает с загруженным
         } 
         else if (xhr.status===201 || xhr.status===302 || xhr.status===303) {
-          document.location=xhr.getResponseHeader('Location');
+          window.location.href=xhr.getResponseHeader('Location');
+          window.location.reload(); // на случай, если адрес страницы совпадает с загруженным
         } 
         else {
           self.onSubmitError(xhr);
@@ -187,7 +189,7 @@ function IntB_main(opts) {
     }
   });
   // отпрвка форм по Ctrl+Enter
-  $('textarea').keyup(function(e) { if (e.ctrlKey && e.keyCode==13) $(this).closest('form').submit(); });
+  $('textarea').keyup(function(e) { if (e.ctrlKey && e.keyCode==13) e.target.form.requestSubmit(); });
   // подтверждение опасных действий
   $('.confirm:not(.ajax)').click(function (e) {
       return (confirm('Вы действительно хотите выполнить это действие?'));
@@ -414,7 +416,7 @@ function IntB_main(opts) {
       bbcode_nodes.sceditor('instance').keyDown(function(e) {        
           if (e.ctrlKey && e.keyCode==13) {
             bbcode_nodes.sceditor('instance').updateOriginal();
-            $(e.target).closest('form').submit();
+            e.target.form.requestSubmit();
           }
       });
 
