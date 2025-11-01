@@ -7,5 +7,3 @@
   gtag('js', new Date());
   gtag('config', 'UA-5518309-19');
 </script>
-
-<script src="http://localhost:35729/livereload.js?snipver=1"></script>
