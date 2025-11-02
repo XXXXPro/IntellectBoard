@@ -230,7 +230,7 @@ class Library_notify extends Library implements iNotifier {
   function notify_tg($text,$tg_data) {
     $api_key = $tg_data['telegram_key'];
     if ($api_key) {
-      $params['text']=strip_tags($text, '<a><b><strong><i><em><u><ins><s><strike><del><code><pre>');
+      $params['text']=html_entity_decode(strip_tags($text, '<a><b><strong><i><em><u><ins><s><strike><del><code><pre>'),ENT_SUBSTITUTE,'UTF-8');
       $params['chat_id']=$tg_data['telegram_id'];
       $params['parse_mode'] = 'HTML';
       $params['disable_web_page_preview']=1;
