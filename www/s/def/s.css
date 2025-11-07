@@ -50,13 +50,13 @@ table.design { padding: 0; margin: 0; border-spacing: 0; empty-cells: show; bord
 #ib_all .ibtable { width: 100%; table-layout: fixed; border-collapse: collapse; border: #C1DEFF 2px solid }
 
 /* Сообщения */
-#ib_all div.msg_error, #ib_all div.msg_warn, #ib_all div.msg_ok { padding: 4px 10px; margin: 2px 0; border-width: 1px; border-style: solid }
-#ib_all div.msg_error { background: #FEE; border-color: #800 }
-#ib_all div.msg_warn { background: #FFE; border-color: #993 }
-#ib_all div.msg_ok { background: #EFE; border-color: #080 }
-#ib_all span.msg_error { color: #800 }
-#ib_all span.msg_warn { color: #993 }
-#ib_all span.msg_ok { color: #080 }
+#ib_all div.msg_error,#ib_all div.msg_warn,#ib_all div.msg_ok{padding:8px 10px;margin:4px 0;border-width:0 0 0 4px;border-style:solid;font-size:110%}
+#ib_all div.msg_error{background:#FEE;border-color:#800}
+#ib_all div.msg_error::before{content:'⮿';font-size:200%;padding-right:10px;line-height:100%;vertical-align:middle;color:#e00}
+#ib_all div.msg_warn{background:#FFE;border-color:#993}
+#ib_all div.msg_warn::before{content:'⚠';font-size:120%;padding-right:10px;line-height:100%;vertical-align:middle;color:#dd4}
+#ib_all div.msg_ok{background:#EFE;border-color:#080}
+#ib_all div.msg_ok::before{content:'✔';font-size:120%;padding-right:10px;line-height:100%;vertical-align:middle;color:#0e0}
 
 #ib_all address.copyright { text-align: center; font-size: 90%; font-style: normal; margin: 10px }
 

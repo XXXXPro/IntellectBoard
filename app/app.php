@@ -810,13 +810,14 @@ class Application {
     exit();
   }
 
-  function output_400($message,$code) {
+  function output_400($message,$code,$errors_list = array()) {
     header($_SERVER['SERVER_PROTOCOL'].' 400 Bad request');
     header('Content-Type: application/json;charset=UTF-8');
     header('Cache-Control: no-store');
     if ($_SERVER['SERVER_PROTOCOL']=='HTTP/1.0') header('Pragma: no-cache');
     $result['error']=$code;
     $result['error_description']=$message;
+    if (!empty($errors_list)) $result['errors_list']=$errors_list;
     print (json_encode($result));
     $this->process_mail(); // отправляем почту в случае необходимости
     exit();
