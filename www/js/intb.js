@@ -90,19 +90,29 @@ function FormStorage(form_element,storage_key,headers=null) {
 
   self.onBeforeSave = function () {}  
   self.onSave = function (data) {}  
-  self.onLoad = function (data) {} 
+  self.onLoad = function (data) {}
+  self.gotoUrl = function (url) {
+    console.log(url);
+    var new_url = new URL(url);
+    new_url.hash = '';
+    var old_url = new URL(window.location);
+    old_url.hash = '';
+    window.location.href=url;
+    if (new_url.href==old_url.href) {
+      window.location.reload(); // изменение только хеша не приводит к обновлению страницы, поэтому сделаем его принудительно
+    }
+  }
   self.onSubmitResult = function (xhr) {
-        if (xhr.status===200 || xhr.status===206 || xhr.status===204) {
-            window.location.href=xhr.responseURL;
-            window.location.reload(); // на случай, если адрес страницы совпадает с загруженным
-        } 
-        else if (xhr.status===201 || xhr.status===302 || xhr.status===303) {
-          window.location.href=xhr.getResponseHeader('Location');
-          window.location.reload(); // на случай, если адрес страницы совпадает с загруженным
-        } 
-        else {
-          self.onSubmitError(xhr);
-        }
+    console.log(xhr);
+    if (xhr.status===200 || xhr.status===206 || xhr.status===204) {
+        self.gotoUrl(xhr.responseURL);
+    } 
+    else if (xhr.status===201 || xhr.status===302 || xhr.status===303) {
+      self.gotoUrl(xhr.getResponseHeader('Location'));
+    } 
+    else {
+      self.onSubmitError(xhr);
+    }
   }
   self.onSubmitError = function(xhr) {
       console.log(xhr.response);
@@ -110,8 +120,8 @@ function FormStorage(form_element,storage_key,headers=null) {
   self.onDecodeError = function(data,error) {} 
 
   self.save = function() {
+    self.onBeforeSave();
     if (self.save_mode) {
-      self.onBeforeSave();
       var data = self.getFormData();
       if (data) {
         self.onSave(data);

@@ -544,6 +544,7 @@ class stdforum extends Application_Forum {
     if ($this->get_request_type()==4) { // если запрос через API, выдаём статус 201 и Location новой темы
       header($_SERVER['SERVER_PROTOCOL'].' 201 Created');
       header('Location: '.$redirect_url);
+      exit();
     }
     else $this->redirect($redirect_url);
   }
@@ -1475,7 +1476,7 @@ class stdforum extends Application_Forum {
         if ($attach['format']=='image' && $this->get_opt('pics','user') && $attach['fkey']!='#') {
           $prev_url = $this->http($this->url('f/up/1/pr/'.$prev_x.'x'.$prev_y.'/'.$attach['oid'].'-'.$attach['fkey'].'.'.$attach['extension']));
           $parsed .= '<a class="lightbox" href="'.$this->url($attach_url).'">';
-          $parsed .= '<img src="'.$prev_url.'" alt="'.htmlspecialchars($attach['filename']).'" align="middle" height="'.$prev_y.'" width="'.$prev_x.'" />'.$attach['filename'].'</a>'.$size;
+          $parsed .= '<img src="'.$prev_url.'" alt="'.htmlspecialchars($attach['filename']).'" align="middle" height="'.$prev_y.'" width="'.$prev_x.'" /> '.$attach['filename'].'</a>'.$size;
         }
         else $parsed .= '<a class="lightbox" href="'.$attach_url.'">'.$attach['filename'].'</a>'.$size;
         $parsed.='</div>'.PHP_EOL;

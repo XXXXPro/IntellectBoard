@@ -273,20 +273,28 @@ class blog extends stdforum {
   function post_redirect($pid) {
     $tid=$this->topic['id'];
     $cond['tid']=$tid;
-    if ($pid==$this->topic['first_post_id']) $this->redirect($this->http($this->url($this->topic['full_hurl']))); // если запросили саму статью, то редирект на обычный URL
-    if ($pid==$this->topic['last_post_id']) $this->redirect($this->http($this->url($this->topic['full_hurl'].'#p'.intval($pid)))); // если запросили последнее сообщение, то тоже редирект сразу, так как оно видно всегда
+    print "Request type: ".$this->get_request_type();
+    if ($pid==$this->topic['first_post_id']) $redirect_url = $this->http($this->url($this->topic['full_hurl'])); // если запросили саму статью, то редирект на обычный URL
+    elseif ($pid==$this->topic['last_post_id']) $redirect_url = $this->http($this->url($this->topic['full_hurl'].'#p'.intval($pid))); // если запросили последнее сообщение, то тоже редирект сразу, так как оно видно всегда
+    else {
+      list($need_count,$perpage,$sort)=$this->view_topic_params($tid);
+      $total = $this->topic['post_count']-1; // общее количество сообщений без текста статьи
+      $tlib=new Library_topic; // ошибка загрузки библиотеки является критичной, без нее перехода не получится
+      $more = 0;
+      
+      $cond['after_pid']=$pid;  
+      $count = $tlib->count_posts($cond)+1;
+      $more = $count - $perpage;
 
-    list($need_count,$perpage,$sort)=$this->view_topic_params($tid);
-    $total = $this->topic['post_count']-1; // общее количество сообщений без текста статьи
-    $tlib=new Library_topic; // ошибка загрузки библиотеки является критичной, без нее перехода не получится
-    $more = 0;
-    
-    $cond['after_pid']=$pid;  
-    $count = $tlib->count_posts($cond)+1;
-    $more = $count - $perpage;
-
-    if ($more>0) $this->redirect($this->http($this->url($this->topic['full_hurl'].'?more='.intval($more).'#p'.$pid)));
-    else $this->redirect($this->http($this->url($this->topic['full_hurl'].'#p'.$pid)));    
+      if ($more>0) $redirect_url = $this->http($this->url($this->topic['full_hurl'].'?more='.intval($more).'#p'.$pid));
+      else $redirect_url = $this->http($this->url($this->topic['full_hurl'].'#p'.$pid));
+    }
+    if ($this->get_request_type()==4) { // если запрос через API, выдаём статус 201 и Location новой темы
+      header($_SERVER['SERVER_PROTOCOL'].' 201 Created');
+      header('Location: '.$redirect_url);
+      exit();
+    }
+    else $this->redirect($redirect_url);
   }  
 
   function set_form_fields($perms,$action,$topic=false) {
