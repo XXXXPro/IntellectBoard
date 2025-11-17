@@ -876,6 +876,7 @@ class stdforum extends Application_Forum {
     $this->out->editpost['action']='newtopic.htm';
     $this->out->editpost['edittopic']=true;
     $this->out->editpost['topmsg']='Создание новой темы';
+    $this->out->wysiwyg_text = nl2br(Library_cleaner::clean($this->out->editpost['post']['text'],Library_cleaner::TAGS_ALL));
 
     if ($bbcode) $this->out->smiles = $bbcode->load_smiles_hash();
 
@@ -1040,6 +1041,7 @@ class stdforum extends Application_Forum {
     $this->out->editpost['action']='edit.htm';
     $this->out->editpost['topmsg']='Редактирование сообщения';
     $this->out->draft_name = 'post'.$oldpost['id'];
+    $this->out->wysiwyg_text = nl2br(Library_cleaner::clean($this->out->editpost['post']['text'],Library_cleaner::TAGS_ALL));
     $this->out->authkey = $this->gen_auth_key(); // аутентификационный ключ нужен для того, чтобы если пользователя разлогинит по таймауту, его сообщение все равно бы отправилось
     if ($this->topic['first_post_id']==$oldpost['id']) { // если редактируем первое сообщение темы, то можно редактировать некоторые параметры и самой темы
       $this->out->editpost['edittopic']=true;
@@ -1476,7 +1478,8 @@ class stdforum extends Application_Forum {
         if ($attach['format']=='image' && $this->get_opt('pics','user') && $attach['fkey']!='#') {
           $prev_url = $this->http($this->url('f/up/1/pr/'.$prev_x.'x'.$prev_y.'/'.$attach['oid'].'-'.$attach['fkey'].'.'.$attach['extension']));
           $parsed .= '<a class="lightbox" href="'.$this->url($attach_url).'">';
-          $parsed .= '<img src="'.$prev_url.'" alt="'.htmlspecialchars($attach['filename']).'" align="middle" height="'.$prev_y.'" width="'.$prev_x.'" /> '.$attach['filename'].'</a>'.$size;
+          $parsed .= '<img src="'.$prev_url.'" alt="'.htmlspecialchars($attach['filename']).'" align="middle" height="'.$prev_y.'" width="'.$prev_x.'" /></a> ';
+          $parsed .= '<a class="lightbox" href="'.$this->url($attach_url).'">'.$attach['filename'].'</a>'.$size;
         }
         else $parsed .= '<a class="lightbox" href="'.$attach_url.'">'.$attach['filename'].'</a>'.$size;
         $parsed.='</div>'.PHP_EOL;
@@ -1538,11 +1541,22 @@ class stdforum extends Application_Forum {
    * @param integer $length — желаемая длина 
    * @return string — Teaser статьи без HTML-тегов.
    */
+
   function get_teaser($parsed,$length,$min_length=0) {
+    $teaser = chop($this->get_teaser_preprocess($parsed,$length,$min_length));
+    $teaser = preg_replace("|\n+|","<p>",$teaser);
+    $teaser = nl2br($teaser);
+    $teaser = str_replace('<p><br />','<p>',$teaser);
+    return $teaser;
+  }
+
+  /** Почти вся обработка teaser делается тут. Разбиение на две функции сделано из-за необходимости постобработки и большого количества return */
+  private function get_teaser_preprocess($parsed,$length,$min_length=0) {
      // предварительная обработка — расстановка переводов строк
      $parsed = preg_replace('|(<p\W)|is',"\n\n\n$1",$parsed);
      $parsed = preg_replace('|(<br\W)|is',"\n\n$1",$parsed);
-     $parsed = preg_replace('/(<(img|audio|video|pre|hr|iframe|object|code)\W)/is',"\n$1",$parsed); // место, где вставлены указанные теги, тоже может служить точкой разбиения
+     $parsed = preg_replace('|(</h\d>)|is',"\n\n$1",$parsed); // перевод строки после заголовка
+     $parsed = preg_replace('/(<(img|audio|video|pre|hr|iframe|object|code|blockquote)\W)/is',"\n$1",$parsed); // место, где вставлены указанные теги, тоже может служить точкой разбиения
      $parsed = preg_replace('/\s*\n\*s/',"\n",$parsed); // убираем лишние пробелы рядом с переводами строк
      $parsed = preg_replace('|<table\W.*?</table>|is','',$parsed); // содержимое таблиц удаляется, так как его вывод в teaser всё равно бессмысленен
      $parsed = preg_replace('|<pre\W.*?</pre>|is','',$parsed); // из тех же соображений удаляем исходный код

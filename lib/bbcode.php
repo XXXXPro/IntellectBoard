@@ -43,7 +43,7 @@ class Library_bbcode extends Library {
       $cleaner = new Library_cleaner;
       $text = $cleaner->clean($text,Library_cleaner::TAGS_ALL);  // по умолчанию разрешаем все теги, включенные в список cleanerа
     }
-    if (!empty($params['bcode'])) $text=str_ireplace(array('[code]','[/code]'),array('<code>','</code>'),$text); // если включено использование тегов bcode, производим предварительное преобразование тега code в HTML
+    if (!empty($params['bcode'])) $text=str_ireplace(array('[code]','[/code]'),array('<p class="intb_wrap_code"><code>','</code></p>'),$text); // если включено использование тегов bcode, производим предварительное преобразование тега code в HTML
     // выявляем те последовательности, которые не должны изменяться в процессе обработки (теги <code> и [nocode])
     if (!empty($params['html']) || !empty($params['bcode'])) {
       $code_count = preg_match_all('|<code>(.*?)</code>|s',$text,$code_match);
@@ -196,7 +196,7 @@ class Library_bbcode extends Library {
       self::$ext_search[]='|\[q=([^\]"\']+)\](.*?)\[/q\]|s'; self::$ext_replace[]='<div class="quote"><span class="username">$1</span> написал(а): <blockquote>$2</blockquote></div>';
         // TODO: доделать обработку тегов quote большой вложенности
 
-      self::$ext_search[]='|\[off\](.*?)\[/off\]|s'; self::$ext_replace[]='<div class="offtopic">$1</div>';
+      self::$ext_search[]='|\[off\](.*?)\[/off\]|s'; self::$ext_replace[]='<p class="offtopic">$1</p>';
       self::$ext_search[]='|\[pre\](.*?)\[/pre\]|s'; self::$ext_replace[]='<pre>$1</pre>';
       self::$ext_search[]='|\[cut\](.*?)\[/cut\]|s'; self::$ext_replace[]='<details class="inline"><summary>Показать скрытый текст</summary>$1</details>';
       self::$ext_search[]='|\[cut=([^\]]+)\](.*?)\[/cut\]|s'; self::$ext_replace[]='<details class="inline"><summary>$1</summary>$2</details>';

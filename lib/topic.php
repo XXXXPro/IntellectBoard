@@ -473,6 +473,7 @@ class Library_topic extends Library {
     $result['author']=($this->app()->is_guest() && !empty($_COOKIE[$session_name.'_guest'])) ? $_COOKIE[$session_name.'_guest'] : $this->app()->get_username();
     $result['uid']=$this->app()->get_uid();
     $result['value']="0";
+    $result['text']='';
     return $result;
   }
 

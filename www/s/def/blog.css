@@ -11,7 +11,7 @@
 #ib_all .blogpost a:hover { text-decoration: underline; }
 #ib_all .blogpost_text a { text-decoration: underline; }
 #ib_all .blogpost_text { line-height: 180%; padding: 20px 0; clear: both; font-size: 120% }
-#ib_all .blogpost_text code br { display: none }
+#ib_all .blogpost_text p.intb_wrap_code br { display: none }
 #ib_all .blogpost_text br { line-height: 2.5em }
 #ib_all .blogpost_text .foldlink { display: none }
 #ib_all .prating { display: inline; font-size: 140% }
@@ -51,7 +51,7 @@
 #ib_all #blog_forum_view .rss, #ib_all #blog_tags .rss {display:block; float:right; font-size:280%}
 #ib_all #uLogin { display:inline-block; line-height: 110%}
 
-#ib_all .blogpost_text pre, #ib_all .blogpost_text code, #ib_all .comment_text code{overflow:auto;background:#eaecef;border:1px solid #dcddde;display:block;padding:8px 10px;margin:5px 0;white-space:pre}
+#ib_all .blogpost_text pre, #ib_all .blogpost_text p.intb_wrap_code, #ib_all .comment_text p.intb_wrap_code{overflow:auto;background:#eaecef;border:1px solid #dcddde;display:block;padding:8px 10px;margin:5px 0;white-space:pre}
 #ib_all .blogpost_text pre br{display:none}
 #ib_all .comment_text .ib_outer_table { table-layout: fixed; width: 100% }
 #ib_all .comment_text .ib_outer_table td { padding: 0; overflow: auto }

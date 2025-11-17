@@ -16,7 +16,7 @@
 #ib_all .post .postsys { text-align: center; padding: 8px }
 #ib_all .post .offtopic { font-size: 90%; color: #666 }
 #ib_all .post .offtopic:before { content: 'Оффтопик: '; color: #999 }
-#ib_all .post code { display: block; white-space: pre; line-height: 100%; border: #A3CEFF 1px solid; padding: 10px; max-height: 20em; overflow: auto; margin: 5px 20px; background: #eee; font-size: 125%; max-height: 15em; overflow: auto }
+#ib_all .post p.intb_wrap_code { display: block; white-space: pre; line-height: 100%; border: #A3CEFF 1px solid; padding: 10px; max-height: 20em; overflow: auto; margin: 5px 20px; background: #eee; font-size: 125%; max-height: 15em; overflow: auto }
 #ib_all .post pre { display: block; white-space: pre; overflow: auto }
 #ib_all .post blockquote { border: #ddd 1px solid; font-size: 90%; background: #f4f4ff; padding: 4px; overflow: auto; max-height: 7em; margin: 5px 20px }
 #ib_all .post .ptext { font-size: 110%; line-height: 133%; overflow: hidden; }

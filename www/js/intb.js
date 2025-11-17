@@ -15,7 +15,7 @@ function FormStorage(form_element,storage_key,headers=null) {
   self.headers = headers;
   self.save_mode = null;  // we will enable it when some input occurs
   form_element.addEventListener('input',function (e) { if (self.save_mode===null) self.save_mode = true; }); // enabling autosave on first input
-  window.addEventListener('pagehide',function (e) { self.save() }); // saving form when user goes away
+  window.addEventListener('pagehide',function (e) { self.save.call(self) }); // saving form when user goes away
 
   self.getFormData = function() {
     let data = {};
@@ -72,6 +72,7 @@ function FormStorage(form_element,storage_key,headers=null) {
   }
 
   self.processFormSubmit = function(e) {
+    document.body.classList.add('intb-loading-cursor');
     self.onBeforeSubmit(self.form_element);
     e.preventDefault();
     var formData = new FormData(self.form_element);
@@ -85,6 +86,7 @@ function FormStorage(form_element,storage_key,headers=null) {
       }
       else self.save_mode =  true; // restoring form saving if submitting failed
       self.onSubmitResult(xhr);
+      document.body.classList.remove('intb-loading-cursor');
     };
     xhr.send(formData); 
   }
@@ -404,10 +406,14 @@ function IntB_main(opts) {
       }
     }
 
-    if (!opts.draft.startsWith('post') || (window.localStorage.getItem('IntB_'+opts.draft)!=null && confirm('Восстановить отредактированный вариант сообщения из автосохранения?'))) {
-      fstor.load();
-    }
-    setInterval(fstor.save.bind(fstor),10000); // автосохранение каждые 10 секунд    
+    document.addEventListener('IntBLoaded',function () { // это нужно запускать в самом конце, когда уже всё загрузилось, и основные скрипты выполнены
+      setTimeout(function () { // пустой таймаут, чтобы избежать состояния гонок с другими обработчиками IntBLoaded
+      if (!opts.draft.startsWith('post') || (window.localStorage.getItem('IntB_'+opts.draft)!=null && confirm('Восстановить отредактированный вариант сообщения из автосохранения?')===true)) {      
+        fstor.load.call(fstor);
+      }
+      setInterval(fstor.save.bind(fstor),10000); // автосохранение каждые 10 секунд          
+      },0);
+    });
   }
 
   if (opts.wysiwyg && opts.wysiwyg!='0' && bbcode_nodes.length) {
