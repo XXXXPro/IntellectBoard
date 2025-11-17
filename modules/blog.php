@@ -168,7 +168,6 @@ class blog extends stdforum {
   function action_edit() {
     $result = parent::action_edit();    
     if ($_REQUEST['id']==$this->topic['first_post_id']) {
-      if ($this->check_access('html')) $this->out->editpost['post']['html']=true;
       $result = 'blog/newtopic.tpl';
     }
     return $result;    
