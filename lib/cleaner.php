@@ -37,7 +37,8 @@ class Library_cleaner extends Library {
     'del'=>[],
     'ins'=>[],
     'kbd'=>[],
-    'hr'=>[]
+    'hr'=>[],
+    'span'=>[]
   ];
 
   const TAGS_FORMAT = [
@@ -59,17 +60,23 @@ class Library_cleaner extends Library {
 
   const TAGS_HEADERS = [
     'h2'=>[],
-    'h3'=>[]
+    'h3'=>[],
+    'h4'=>[],
+    'h5'=>[],
+    'h6'=>[]
   ];
 
   const TAGS_ALL = self::TAGS_MINIMUM+self::TAGS_MEDIA+self::TAGS_INLINE+self::TAGS_FORMAT+self::TAGS_HEADERS;
 
   /** Cleans unallowed HTML tags or attributes
-   * @param string $html HTML code to cleanup
-   * @param array $tags Hash array of allowed tags and attributes. The keys of 
-   * 
+   * @param string $html HTML code to sanitize
+   * @param array $tags Hash array of allowed tags and attributes. The keys are tag names and values are arrays with attributes allowed for the tag. Attributes class and style are always allowed
+   * @param 
+   * @return string Sanitized HTML code
    */
-  public static function clean(string $html,array $tags=self::TAGS_INLINE,array $schemas=['http','https','ftp','magnet','gemini','gopher','tel','mailto']):string {
+  public static function clean(string $html,array $tags=self::TAGS_INLINE,
+                               array $schemas=['http','https','ftp','magnet','gemini','gopher','tel','mailto'],
+                               array $css_properties=['color', 'background-color', 'background','font','font-size','font-family']):string {
     $charset = 'UTF-8';
     if (empty($html)) return ''; // чтобы избежать ошибок loadHTML, которая не принимает пустые строки
     $html = \strip_tags($html,'<'.\join('><',\array_keys($tags)).'>'); // at first clean tags except allowed
@@ -93,7 +100,14 @@ class Library_cleaner extends Library {
 
       if (isset($tags[$tag_name])) { // if tag in in list, checking attribute
         $attrs = is_array($tags[$tag_name]) ? $tags[$tag_name] : [$tags[$tag_name]]; // if string specified as value, convert it to array
+        $attrs = $attrs + array('class','style'); // class and style are allowed to all tags
         if (!in_array($attr_name,$attrs)) $node->parentNode->removeAttribute($attr_name); // if attribute is not in allowed list, remove it
+        elseif ($attr_name==='style') {
+          $style_value = $node->parentNode->getAttribute($attr_name);
+          $style_value = self::sanitize_style_attribute($style_value,$css_properties);
+          if ($style_value!='') $node->parentNode->setAttribute($attr_name,$style_value); // if all CSS removed, removing style attribute itself to minimize size of HTML code
+          else $node->parentNode->removeAttribute($attr_name); 
+        }
       }
     }
     $links = $xpath->query('//@href|//@src');
@@ -111,4 +125,37 @@ class Library_cleaner extends Library {
     }
     return $result;
   }
+
+/**
+ * Sanitize a CSS style attribute by allowing only specific properties.
+ *
+ * @param string $style The raw style attribute string.
+ * @param array $allowed_properties List of allowed CSS properties
+ * @return string The sanitized style attribute string.
+ */
+public static function sanitize_style_attribute(string $style,array $allowed_properties=[]): string
+{
+    // Define a regular expression pattern to find key-value pairs.
+    $pattern = '/([a-zA-Z-]+)\s*:\s*([^;]+);?/i';
+
+    $style = preg_replace('|/\*.*?\*/|','',$style); // removing CSScomments to avoid some attacks 
+
+    $sanitized_styles = [];
+    if (preg_match_all($pattern, $style, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+            $property = strtolower(trim($match[1]));
+            $value = trim($match[2]);
+
+            // Check if the property is in the allowed list.
+            if (in_array($property, $allowed_properties, true)) {
+                // Ensure the value is not a malicious URL or script.
+                // This is a basic check. For more robust security, use a dedicated library.
+                if (strpos($value, 'url(') === false && strpos($value, 'expression(') === false) {
+                    $sanitized_styles[] = "{$property}: {$value}";
+                }
+            }
+        }
+    }
+    return implode('; ', $sanitized_styles);
+  }  
 }
