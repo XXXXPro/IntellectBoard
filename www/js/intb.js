@@ -72,6 +72,7 @@ function FormStorage(form_element,storage_key,headers=null) {
   }
 
   self.processFormSubmit = function(e) {
+    self.onBeforeSubmit(self.form_element);
     e.preventDefault();
     var formData = new FormData(self.form_element);
     var xhr = new XMLHttpRequest();
@@ -89,6 +90,7 @@ function FormStorage(form_element,storage_key,headers=null) {
   }
 
   self.onBeforeSave = function () {}  
+  self.onBeforeSubmit = function () {}  
   self.onSave = function (data) {}  
   self.onLoad = function (data) {}
   self.gotoUrl = function (url) {
@@ -362,6 +364,7 @@ function IntB_main(opts) {
   if (!postform) postform = document.querySelector('form.miniform');
   if (postform) {
     var fstor = new FormStorage(postform,'IntB_'+opts.draft,{ 'Accept' : 'application/json' });
+    self.fstor = fstor;
     fstor.onDecodeError = function(text,error) {
       var data = { 'post[text]': text };
       if (error instanceof SyntaxError) this.fillFormData(data); // для сохранения обратной совместимости, если в хранилище лежит только текст сообщения
@@ -370,7 +373,6 @@ function IntB_main(opts) {
       bbcode_nodes.sceditor('instance').updateOriginal();
     }
     fstor.putErrorMessage = function(msg,level) {
-      console.log('Putting message: '+msg+' '+3);
       var msg_container=document.getElementById('messages_container');
       if (msg_container) {
         var new_elm=document.createElement('div');
@@ -542,7 +544,7 @@ function IntB_main(opts) {
     frm.action="preview.htm";
     frm.enctype="application/x-www-form-urlencoded";
     frm.elements['authkey'].setAttribute('name', 'disabled_authkey'); // убираем ключ из формы, так как он не для preview, а для другого action
-    bbcode_nodes.sceditor('instance').updateOriginal();
+    if (bbcode_nodes.sceditor!==undefined) bbcode_nodes.sceditor('instance').updateOriginal();
     frm.submit();
     frm.elements['disabled_authkey'].setAttribute('name', 'authkey');
     frm.target=old_target;
@@ -693,9 +695,12 @@ function IntB_main(opts) {
     head.load(["https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"]);
   }
 
-  document.dispatchEvent(new CustomEvent("IntBLoaded"));
+  var event = new CustomEvent("IntBLoaded");
+  event.intb_loader = self;
+  document.dispatchEvent(event);
 }
 
 head.load(window.IntB_params.jquery_cdn, function() {
   intb_loader = new IntB_main(window.IntB_params);
 });
+           

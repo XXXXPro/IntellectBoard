@@ -18,7 +18,7 @@
 {% if form_params.topic_hurl %}
 <div><label><span>Частичный URL темы:<br />
 <small>Необязательное поле.</small></span>
-{{ macros.input('topic[hurl]',editpost.topic.hurl,40,255,'pattern="[a-zA-Z][a-zA-Z0-9\-_]{0,254}"') }}</label></div>{% endif %}
+{{ macros.input('topic[hurl]',editpost.topic.hurl,40,255,'pattern="[a-zA-Z][a-zA-Z0-9\-_]+"') }}</label></div>{% endif %}
 </div>{% endif %}
 
 <div class="maintext"><div>

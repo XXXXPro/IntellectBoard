@@ -47,7 +47,7 @@ class blog extends stdforum {
   function action_newtopic($anonym=false) {
     $template=parent::action_newtopic($anonym);
     $this->out->editpost['topmsg']='Новая запись в блог';
-    return $template;
+    return 'blog/newtopic.tpl';
   }
   
   function view_topic_get_posts($cond) {
@@ -162,6 +162,16 @@ class blog extends stdforum {
       $data[$i]['comments']=intval($data[$i]['post_count'])-1;
     }
     $this->out->items=$data;
+  }
+
+  // переопределим action_edit для того, чтобы для записи блога выводить другую форму редактирования
+  function action_edit() {
+    $result = parent::action_edit();    
+    if ($_REQUEST['id']==$this->topic['first_post_id']) {
+      if ($this->check_access('html')) $this->out->editpost['post']['html']=true;
+      $result = 'blog/newtopic.tpl';
+    }
+    return $result;    
   }
   
   function action_turbo() {

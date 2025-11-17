@@ -464,7 +464,7 @@ class Library_topic extends Library {
 
   /** Установка значений по умолчанию для нового сообщения **/
   function set_new_post($perms) {
-    $result['html']="0";
+    $result['html']=$perms['html'];
     $result['bcode']=$perms['bcode'];
     $result['smiles']=$perms['smiles']!=0;
     $result['links']="1";
