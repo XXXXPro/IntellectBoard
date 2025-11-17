@@ -1124,8 +1124,8 @@ class Application {
       $lang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '';
       $charset = isset($_SERVER['HTTP_ACCEPT_CHARSET']) ? $_SERVER['HTTP_ACCEPT_CHARSET'] : '';
       $hash = isset($_COOKIE['IntB_uh']) ? $_COOKIE['IntB_uh'] : md5($data['ip'].$agent.$connection.$enc.$lang.$charset); // если у пользователя в cookie стоит идентификатор, используем его, иначе генерируем новый
-      $data['fid'] = isset($this->forum) ? intval($this->forum['id']) : 0; // если загружены данные о текущем разделе, то фиксируем его номер
-      $data['tid'] = isset($this->topic) ? intval($this->topic['id']) : 0; // если загружены данные о текущей теме, то фиксируем ее тоже
+      $data['fid'] = !empty($this->forum) ? intval($this->forum['id']) : 0; // если загружены данные о текущем разделе, то фиксируем его номер
+      $data['tid'] = !empty($this->topic) ? intval($this->topic['id']) : 0; // если загружены данные о текущей теме, то фиксируем ее тоже
       $data['visittime'] = $this->time;
       $data['uid'] = $this->get_uid();
       $data['text'] = $this->get_action_name();
