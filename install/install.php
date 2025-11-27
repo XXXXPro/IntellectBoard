@@ -545,7 +545,7 @@ ESCRIPT;
        if (!file_exists(BASEDIR.'etc/routes.txt')) {
          $buffer = file_get_contents(BASEDIR.'etc/routes.def');
          file_put_contents(BASEDIR.'etc/routes.txt',$buffer);
-         echo tag('div','Копирование файла перенаправления запросов etc/routes.def в etc/.routes.txt: '.cond($result,'Ok','Ошибка!'));
+         echo tag('div','Копирование файла перенаправления запросов etc/routes.def в etc/routes.txt: '.cond($result,'Ok','Ошибка!'));
        }
        else echo tag('div','Файл etc/routes.txt уже существует, оставляем без изменений.');
        
