@@ -39,6 +39,7 @@ rm $BUILDDIR/modules/research.php
 cp install/install.php $BUILDDIR/www/install.php
 rm $BUILDDIR/etc/htaccess.txt
 rm $BUILDDIR/etc/routes.txt
+rm $BUILDDIR/etc/tags.txt
 rm $BUILDDIR/etc/routes.cfg
 rm $BUILDDIR/etc/ib_config.php
 rm -rf $BUILDDIR/www/download

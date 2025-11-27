@@ -9,7 +9,6 @@
  *  ================================ */
 define('AUTH_SYSTEM_USERS', 3);
 define('INTB_VERSION', '3.05');
-ini_set('display_errors','true');
 
 class Application {
 

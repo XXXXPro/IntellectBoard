@@ -41,7 +41,8 @@ class Library_bbcode extends Library {
     if (empty($params['html'])) $text = htmlspecialchars($text); // если использование HTML запрещено, экранируем все символы
     else {
       $cleaner = new Library_cleaner;
-      $text = $cleaner->clean($text,Library_cleaner::TAGS_ALL);  // по умолчанию разрешаем все теги, включенные в список cleanerа
+      $tags = $this->load_tags();
+      $text = $cleaner->clean($text,$tags);  // по умолчанию разрешаем все теги, включенные в список cleanerа
     }
     if (!empty($params['bcode'])) $text=str_ireplace(array('[code]','[/code]'),array('<p class="intb_wrap_code"><code>','</code></p>'),$text); // если включено использование тегов bcode, производим предварительное преобразование тега code в HTML
     // выявляем те последовательности, которые не должны изменяться в процессе обработки (теги <code> и [nocode])
@@ -403,6 +404,37 @@ class Library_bbcode extends Library {
     return $result;
   }
 
+  /**
+   * Загружает список разрешённых HTML-тегов в формате для библиотеки LibraryCleaner: ключи хеша содержат теги, а значения — разрешённые атрибуты в виде массива строк (или строки, если атрибут всего один).
+   * Также возможно специальное значения: ключ "*" задаёт разрешённые атрибуты для всех тегов.
+   * Загрузка производится из файла etc/tags.txt, формат каждой строки: тег:=атрибут1,атрибут2. Строки, начиающиеся с # считаются комментариями
+   * В случае отсутствия файла берётся список из Library_cleaner::TAGS_ALL и добавляются теги div и span, а для всех тегов — атрибуты class и style.
+   */
+  function load_tags() {
+    static $result;
+    if (empty($result)) {
+      $filename = BASEDIR.'etc/tags.txt'; // основной файл с тегами
+      if (is_readable($filename) && $fh=fopen($filename,'r')) {
+        while ($str=trim(fgets($fh))) {
+          if (!empty($str) && $str[0]!='#') { // если в строке что-то есть и это не комментарий
+            if (strpos($str,':=')!==false) { // тег и его атрибуты разделяются строкой :=
+              list($tag_name,$tag_attrs) = explode(':=',$str,2);
+              $tag_attrs = explode(',',$tag_attrs);
+              array_all($tag_attrs,'trim'); // на всякий случай убираем пробелы 
+            }
+            else { // если разделитель := не найден, то считаем всю строку именем тега, а список атрибутов — пустым
+              $tag_name=trim($str);
+              $tag_attrs=array();
+            }
+            $result[trim($tag_name)]=$tag_attrs;
+          }
+        }
+      }
+      else $result = Library_cleaner::TAGS_ALL + array('*'=>array('class','style'),'span'=>array(),'div'=>array()); // если файла нет, берём разрешённые теги библиотеки Library_cleaner, добавляем к ним span и div, и разрешаем class и style для всех атрибутов
+    }
+    return $result;    
+  }
+
   function process_videos($text) {
       $text = preg_replace_callback('|\[video\](https?://[\d\w\.:/\?][^\]"\']+)\[/video\]|is',array($this,'process_video_link'),$text);
       $text = preg_replace_callback('|\[video=(https?://[\d\w\.:/\?][^\]"\']+)\]|is',array($this,'process_video_link'),$text);
@@ -476,7 +508,8 @@ class Library_bbcode extends Library {
     $text = preg_replace('|<audio[^>]+src=["\']?(\w+script:.*?)["\']?[^>]+>(.*?)</audio>|i','<span class="bad_link">Небезопасный аудио-объект удален!</span>',$text);
     $text = preg_replace('|<video[^>]+src=["\']?(\w+script:.*?)["\']?[^>]+>(.*?)</video>|i','<span class="bad_link">Небезопасный видео-объект удален!</span>',$text); */
     $cleaner = new Library_cleaner;
-    $text = $cleaner->clean($text,Library_cleaner::TAGS_ALL);  // по умолчанию разрешаем все теги, включенные в список cleanerа
+    $tags = $this->load_tags(); // загружаем список разрешённых тегов и атрибутов
+    $text = $cleaner->clean($text,$tags); 
     return $text;
   }
 

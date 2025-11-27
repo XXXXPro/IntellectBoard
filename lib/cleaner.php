@@ -37,8 +37,7 @@ class Library_cleaner extends Library {
     'del'=>[],
     'ins'=>[],
     'kbd'=>[],
-    'hr'=>[],
-    'span'=>[]
+    'hr'=>[]
   ];
 
   const TAGS_FORMAT = [
@@ -98,9 +97,11 @@ class Library_cleaner extends Library {
       $attr_name = $node->nodeName;
       $tag_name = strtolower($node->parentNode->nodeName);
 
+      $all_attrs = isset($tags['*']) ? $tags['*'] : array(); // will apply attributes from "*" key to all tags
+
       if (isset($tags[$tag_name])) { // if tag in in list, checking attribute
         $attrs = is_array($tags[$tag_name]) ? $tags[$tag_name] : [$tags[$tag_name]]; // if string specified as value, convert it to array
-        $attrs = $attrs + array('class','style'); // class and style are allowed to all tags
+        $attrs = $attrs + $all_attrs; // adding attributes for all tags to list of allowed
         if (!in_array($attr_name,$attrs)) $node->parentNode->removeAttribute($attr_name); // if attribute is not in allowed list, remove it
         elseif ($attr_name==='style') {
           $style_value = $node->parentNode->getAttribute($attr_name);

@@ -522,6 +522,12 @@ ESCRIPT;
          echo tag('div','Копирование файла www/robots.def в www/robots.txt: '.cond($result,'Ok','Ошибка!'));
        }
        else echo tag('div','Файл www/robots.txt уже существует, оставляем без изменений.');
+
+       if (!file_exists(BASEDIR.'etc/tags.txt')) {
+         $buffer = file_get_contents(BASEDIR.'etc/tags.def');
+         $result = file_put_contents(BASEDIR.'etc/tags.txt',$buffer);
+         echo tag('div','Копирование файла со списком разрешённых тегов etc/tags.def в etc/tags.txt: '.cond($result,'Ok','Ошибка!'));
+       }
      }
      elseif ($this->mode==2) {
        @include(BASEDIR.'etc/ib_config.def');
@@ -541,8 +547,15 @@ ESCRIPT;
          file_put_contents(BASEDIR.'etc/routes.txt',$buffer);
          echo tag('div','Копирование файла перенаправления запросов etc/routes.def в etc/.routes.txt: '.cond($result,'Ok','Ошибка!'));
        }
-       else echo tag('div','Файл etc/routes.txt уже существует, оставляем без изменений.');      
+       else echo tag('div','Файл etc/routes.txt уже существует, оставляем без изменений.');
        
+       if (!file_exists(BASEDIR.'etc/tags.txt')) {
+         $buffer = file_get_contents(BASEDIR.'etc/tags.def');
+         $result = file_put_contents(BASEDIR.'etc/tags.txt',$buffer);
+         echo tag('div','Копирование файла со списком разрешённых тегов etc/tags.def в etc/tags.txt: '.cond($result,'Ok','Ошибка!'));
+       }          
+       else echo tag('div','Файл etc/tags.txt уже существует, оставляем без изменений.');
+
        if (empty($params['DB_structure_version'])) $params['DB_structure_version']=100;
        $version = $params['DB_structure_version']+1;
        if ($params['DB_structure_version']==IntB_db_version) {
