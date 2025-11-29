@@ -109,3 +109,13 @@ define('CONFIG_captcha_public_key','');
 define('CONFIG_captcha_secret_key','');
 define('CONFIG_search_sphinx_post_index','idx_intb_post');
 define('CONFIG_search_sphinx_topic_index','idx_intb_topic');
+
+// New settings in 3.06
+
+define('CONFIG_post_edittime',0);
+define('CONFIG_post_shortlength',0);
+define('CONFIG_blog_noindex',0);
+define('CONFIG_blog_maxteaser',300);
+define('CONFIG_blog_minteaser',140);
+define('CONFIG_blog_maxdescr',200);
+define('CONFIG_blog_mindescr',70);

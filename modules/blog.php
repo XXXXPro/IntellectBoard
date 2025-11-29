@@ -41,7 +41,7 @@ class blog extends stdforum {
     if (!empty($this->out->moderator)) $this->view_forum_moderator();
     $this->fix_view(); // фиксируем просмотр раздела
 
-    $this->meta('robots','noindex, follow'); // страницы блога с teaserами статей индексировать нет смысла
+    if ($this->get_opt('blog_noindex')) $this->meta('robots','noindex, follow'); // запрещаем индексирование страницы с тизерами, если это включено в настройках
   }
 
   function action_newtopic($anonym=false) {
@@ -96,8 +96,11 @@ class blog extends stdforum {
     $this->out->comments_remain=min($perpage,$this->topic['post_count']-count($this->out->posts)-1); 
     if (isset($_REQUEST['more']) && $this->get_request_type()==1) $this->out->comments_remain=$this->topic['post_count']-intval($_REQUEST['more'])-$perpage-1;
     if (empty($this->topic['descr'])) {
-      $text = strip_tags($this->out->article['text']);
-      $descr = substr($text,0,strpos($text,'.')+1);
+      $descr_len = $this->get_opt('blog_maxdescr');
+      $descr_min_len = $this->get_opt('blog_mindescr');
+      if (empty($descr_len)) $descr_len = 200; // подставляем значение по умолчанию
+      if (empty($descr_min_len)) $descr_len = 70; // подставляем значение по умолчанию
+      $descr = $this->get_teaser($this->out->article['text'],$descr_len,$descr_min_len);
       $this->meta('description',strip_tags($descr));
     }
   }
@@ -244,9 +247,16 @@ class blog extends stdforum {
         if (preg_match('|\[teaserbreak=([^\]]*)\]|',$post['text'],$matches)) $nexttext = str_replace('&quot;','',$matches[1]);
         $post['text']=substr($post['text'],0,$pos).'<br /><a href="'.$topic['t_hurl'].'#readmore">'.$nexttext.'</a>';
       }
-      elseif ($this->get_opt('longposts','users')!=3) { // автоматическая генерация teaser, если в настройках не выставлено, что и в блоге 
-        $teaser = $this->get_teaser($post['text'],1024,256);
-        if ($teaser!==$post['text']) $post['text']=$teaser.'<br /><a href="'.$topic['t_hurl'].'#readmore">'.$nexttext.'</a>';
+      else { 
+        $maxteaser = $this->get_opt('blog_maxteaser');
+        if (empty($maxteaser)) $teaser = $post['text']; // если длина тизера не задана, выводим текст целиком без обработки (как в старых версиях IntB)
+        else {
+          $minteaser = $this->get_opt('blog_minteaser'); 
+          if (empty($minteaser)) $minteaser = 140; // по умолчанию минимальная длина тизера равна 140 символам
+          // TODO: длина тизера в extra-данных раздела может переопределять длину по умолчанию
+          $teaser = $this->get_teaser($post['text'],$maxteaser,$minteaser);
+          if ($teaser!==$post['text']) $post['text']=$teaser.'<br /><a href="'.$topic['t_hurl'].'#readmore">'.$nexttext.'</a>';
+        }
       }
     }
     $post['text'] = preg_replace('|</li>\s*<br />|is','</li>',$post['text']);
