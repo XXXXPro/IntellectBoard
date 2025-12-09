@@ -2,7 +2,7 @@
 
 <div class="blogpost" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
           <h3><a href="{{ url(topic.full_hurl) }}">{{ topic.title }}</a></h3>
-<div class="blogpost_text">
+<div class="blogpost_text{% if post.short_post %} short_post{% endif %}">
 {{ topic.text|raw }}
 </div>
           <ul class="tags"><li>JS</li> <li>internationalization</li> <li>PHP</li> </ul>

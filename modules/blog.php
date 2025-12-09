@@ -31,10 +31,12 @@ class blog extends stdforum {
     $tlib = new Library_topic;
     $this->out->topics = $tlib->get_first_posts($this->out->topics,array('ratings'=>$this->forum['rate'],'attach'=>true)); // получаем тексты сообщений для всех выводимых тем
 
+    $short_post_len = $this->get_opt('post_shortlength'); // длина, меньше которой сообщение считается коротким (к нему применяется дополнительный класс short_post)    
     // обработка сообщений для вывода
     for ($i=0, $count=count($this->out->topics); $i<$count; $i++) {
       $this->out->topics[$i]['post']['norate']=$this->check_rateable($this->out->topics[$i]['post']); // проверка возможности рейтинговать запись
       $this->out->topics[$i]['post']['text']=$this->blog_preprocess($this->out->topics[$i]['post'],$this->out->topics[$i],false); // выполняем предобработку сообщения
+      if (!empty($short_post_len) && mb_strlen($this->out->topics[$i]['post']['text'])<=$short_post_len) $this->out->topics[$i]['post']['short_post']=true;
     }
 
     $this->view_forum_misc();

@@ -4,7 +4,9 @@
 {% if post.status==1 %} premod{% endif %}
 {% if post.marked %} marked{% endif %}
 {% if post.sticky %} sticky{% endif %}
-{% if post.collapsed or post.sticky %} collapsed{% endif %}" id="p{{ post.id }}">
+{% if post.collapsed or post.sticky %} collapsed{% endif %}
+{% if post.short_post %} short_post{% endif %}
+" id="p{{ post.id }}">
 {% if post.uid!=2 and (post.relation!='ignore' or opts.filter=='nohide') %}
 <div class="postin"><div class="pu h-card p-author{% if post.banned %} banned{% endif %}{% if post.uid==topic.first_post_uid %} topic_author{% endif %}{% if post.uid==topic.owner and topic.owner>0 and forum.selfmod>0 %} topic_curator{% endif %}">
 {{ macros.user(post.author,post.uid,post.gender,"p-name") }}

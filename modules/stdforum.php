@@ -274,6 +274,9 @@ class stdforum extends Application_Forum {
     $tid = $this->topic['id'];
     $marked_messages = isset($_SESSION['moderate_'.$tid]) ? $_SESSION['moderate_'.$tid] : array(); // в данном ключе сессии хранится список сообщений, помеченных модератором для обработки
     $collapse = $this->get_opt('longposts','user'); // настройка сворачивания длинных сообщений
+    $short_post_len = $this->get_opt('post_shortlength'); // длина, меньше которой сообщение считается коротким (к нему применяется дополнительный класс short_post)
+    $post_deltime = $this->get_opt('post_edittime'); // время (в минутах), в течение которого можно удалить своё сообщение
+    if (empty($post_deltime)) $post_deltime = 24*60; // если время максимального редактирования не задано, максимальное время удаления — сутки
 
     for ($i=0, $count=count($result); $i<$count; $i++) {
       if ($bbcode) {
@@ -283,6 +286,16 @@ class stdforum extends Application_Forum {
       $result[$i]['editable']=$this->check_editable($result[$i]);
       $result[$i]['marked']=in_array($result[$i]['id'], $marked_messages);
       $result[$i]['norate']=$this->check_rateable($result[$i]);
+      $result[$i]['deletable']=$this->is_moderator(true); // для модераторов и кураторов сразу выставляем признак возможности удаления постов
+
+      if ($this->topic['last_post_id']==$result[$i]['id'] // если сообщение — последнее в теме и у пользователя есть права на редактирование, и не прошло время удаления, выставляем признак разрешения удаления и для обычных пользователей
+           && $this->time < $result[$i]['postdate']+$post_deltime*60
+           && $result[$i]['editable']
+           
+           ) $result[$i]['deletable']=true; 
+
+      if (!empty($short_post_len) && mb_strlen($result[$i]['text'])<=$short_post_len) $result[$i]['short_post']=true;
+
 //      if ($collapse>0) { // определяем, нужно ли показывать сообщение свернутым
 //        if (preg_match_all('|<br\s*/? >|', $result[$i]['text'])>5) {
 //          if ($collapse==1 || ($result[$i]['value']=-1 && $collapse==2)) $result[$i]['collapsed']=true;
@@ -304,8 +317,13 @@ class stdforum extends Application_Forum {
   /** Проверка, может ли пользователь редактировать данное сообщение **/
   function check_editable($post) {
     if ($this->is_moderator()) return true;
+    $post_edittime = $this->get_opt('post_edittime');
+    $edit_limit_hit = false; // признак того, что превышено предельное время редактирования
+    if (!empty($post_edittime) && $this->time > $post['postdate']+$post_edittime*60) { // если текущее время больше времени отправки сообщения + указанного в настройке post_edittime количества минут, то лимит по времени редактирования достигнут
+      $edit_limit_hit = true;
+    }
     if (!$this->is_guest() && $post['uid']==$this->get_uid() && $this->check_access('edit')
-      && empty($post['locked']) && empty($this->topic['locked']) && empty($this->forum['locked'])) return true;
+      && empty($post['locked']) && empty($this->topic['locked']) && empty($this->forum['locked']) && !$edit_limit_hit) return true;
     return false;
   }
 
@@ -903,12 +921,22 @@ class stdforum extends Application_Forum {
     $oldposts = $tlib->get_posts(array('tid'=>$this->topic['id'],'id'=>array($pid),'all'=>true,'attach'=>true));
     if (empty($oldposts)) $this->output_404('Сообщение с таким номером не найдено!');
     $oldpost = $oldposts[0];
+
+    $post_edittime = $this->get_opt('post_edittime');
+    if (!empty($post_edittime)) {
+      $diff = floor($post_edittime - ($this->time - $oldpost['postdate'])/60);
+      if ($diff < 0) $this->output_403('Истекло время редактирования сообщения!');
+      elseif ($diff == 0) $this->message('Идёт последняя минута для редактирования сообщения!',2);
+      elseif ($diff <=5 ) $this->message(sprintf('%s для редактирования сообщения', $this->incline($diff,'Осталась примерно %d минута','Осталось примерно %d минуты','Осталось примерно % минут')),2);
+    }
+
     if (!$this->check_editable($oldpost)) $this->output_403('Вы не можете редактировать это сообщение.');
     $modlib = class_exists('Library_moderate') ? new Library_moderate : false;
     // проверка прав на вынесение предупреждения. Делается через check_access, а не через
     // is_moderator, чтобы исключить возможность вынесения предупреждения создателями
     // темы при включенной самомодерации
     $this->out->allow_warning = $this->check_access('moderate') && $oldpost['uid']!=$this->get_uid();
+
     if ($this->is_post()) {
       if (empty($_POST['authkey']) && !$this->is_guest()) $this->output_403('Отсутствует ключ авторизации, подозрение на CSRF-атаку.');
       $tslib = new Library_tsave;

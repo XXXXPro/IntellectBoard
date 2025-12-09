@@ -45,7 +45,18 @@
   <div><span>Макс. количество сообщений, выдаваемых в RSS</span> {{ macros.input('config[rss_max_items]',config.rss_max_items,5) }}</label></div>
 
 </fieldset><fieldset><legend>Настройки сообщений и блогов</legend>  
-  <div><label><span>Время редактирования сообщений<small>0 — если без ограничения</small></span> {{ macros.input('config[post_edittime]',config.post_edittime,6) }} секунды</label><dataset id=""></dataset></div>
+  <div><label><span>Время редактирования сообщений<small>0 — если без ограничения</small></span> {{ macros.input('config[post_edittime]',config.post_edittime,6,8,'list="edittime_hints"') }} минуты</label>
+  <datalist id="edittime_hints">
+  <option value="60" label="1 час"></option>
+  <option value="120" label="2 часа"></option>
+  <option value="180" label="3 часа"></option>
+  <option value="360" label="6 часов"></option>
+  <option value="720" label="12 часов"></option>
+  <option value="1440" label="1 сутки"></option>
+  <option value="4320" label="3 суток"></option>
+  <option value="10080" label="1 неделя"></option>
+  </datalist>
+  </div>
   <div><label><span>Минимальная длина сообщения</span> {{ macros.input('config[post_minlength]',config.post_minlength,6) }} символов</label></div>
   <div><label><span>Максимальная длина сообщения</span> {{ macros.input('config[post_maxlength]',config.post_maxlength,6) }} символов</label></div>
   <div><label><span>Применять особое оформление к сообщениям короче<small>К таким сообщениям будет применён CSS-класс short_post</small></span> {{ macros.input('config[post_shortlength]',config.post_shortlength,6) }} символов</label></div>
@@ -115,6 +126,9 @@
 {# <div><label><span>Ключ бота Telegram</span> {{ macros.input('config[telegram_key]',config.telegram_key,50,50) }}</label></div> #}
 {#   <div><span>Поддержка взаимодействия с Fediverse</span> {{ macros.radio('config[fediverse_enable]', {'0':'Выключена','1':'Включена'}, config.fediverse_enable) }}</div>   #}
 
+</fieldset><fieldset><legend>PWA (Progressive Web Application)</legend>
+<div><label><span>Поддержка PWA включена</span> {{ macros.checkbox('config[pwa_enabled]',1,config.pwa_enabled) }}</label></div>
+<div><label><span>Краткое название приложения</span>{{ macros.input('config[pwa_short_name]',config.pwa_short_name,48,80) }}</label></div>
 
 
 <div class="submit"><button type="submit">Сохранить</button><input type="hidden" name="authkey" value="{{ authkey }}" /></div>

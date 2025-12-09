@@ -12,7 +12,7 @@ require_once(BASEDIR.'modules/stdforum.php');
 
 class moderate extends stdforum {
   function process() {
-    if (!$this->is_moderator()) $this->output_403('Вы не являетесь модератором данного раздела!');
+    if (!$this->is_moderator() && $this->action!=='delete_post') $this->output_403('Вы не являетесь модератором данного раздела!'); // удаление сообщения теперь возможно и для обычных пользователей, поэтому проверим в самом action
     else {
       $this->out->authkey = $this->gen_auth_key();
       if ($this->is_post() || $this->action=='delete_post' || $this->action=='delete_topic' || $this->action=='rollback') {
@@ -297,13 +297,14 @@ class moderate extends stdforum {
   }
 
   /** Проверка, что сообщение действительно находится в этом разделе
-   * и установка $this->topic данными соответствующей темы, чтобы корректно работала самомодерация
+   * и установка $this->topic данными соответствующей темы и поста, чтобы корректно работала самомодерация
+   * Кроме данных темы, устанавливаются также данные запрошенного поста: p.uid (id автора), p.postdate (время отправки) — это нужно для возможности самоудаления поста.
    **/
   function check_topic_by_pid($pid) {
-    $sql= ' SELECT t.* FROM '.DB_prefix.'post p, '.DB_prefix.'topic t '.
+    $sql= ' SELECT t.*, p.uid, p.postdate FROM '.DB_prefix.'post p, '.DB_prefix.'topic t '.
         'WHERE p.id='.intval($pid).' AND p.tid=t.id';
     $topic = $this->db->select_row($sql);
-    if ($topic['fid']!=$this->forum['id']) $this->output_403('Указанное сообщение не принадлежит данному разделу!');
+    if ($topic['fid']!=$this->forum['id']) $this->output_403('Указанное сообщение не принадлежит данному разделу!');  
     $this->topic=$topic;
     return $topic['id'];
   }
@@ -378,10 +379,35 @@ class moderate extends stdforum {
     $this->out->accept_key=$this->gen_auth_key(false,'accept',$this->url('moderate/'.$this->forum['hurl'].'/'));
   }
 
+  /** Проверка, может ли пользователь удалить сообщение **/
+  function check_deletable($post) {
+    if ($this->is_moderator(true)) return true; // модератор или куратор может всегда, без дополнительных проверок
+    $post_edittime = $this->get_opt('post_edittime');
+    $edit_limit_hit = false; // признак того, что превышено предельное время редактирования
+    if (!empty($post_edittime) && $this->time > $post['postdate']+$post_edittime*60) { // если текущее время больше времени отправки сообщения + указанного в настройке post_edittime количества минут, то лимит по времени редактирования достигнут
+      $edit_limit_hit = true;
+    }
+    if (!$this->is_guest() && $post['uid']==$this->get_uid() && $this->check_access('edit')
+      && empty($post['locked']) && empty($this->topic['locked']) && empty($this->forum['locked']) && !$edit_limit_hit) return true;
+    return false;
+  }  
+
   function action_delete_post() {
     if (empty($_REQUEST['id'])) $this->output_403('Не указан номер сообщения для удаления!');
     $pid = intval($_REQUEST['id']);
-    $tid = $this->check_topic_by_pid($pid);
+    $tid = $this->check_topic_by_pid($pid); // после этого вызова выставляется $this->topic
+    if (!$this->is_moderator(true)) { // если пользователь — не модератор, нужны дополнительные проверки
+      if ($this->is_guest()) $this->output_403('Гостям нельзя удалять свои сообщения!',true);
+      if ($this->get_uid()!=$this->topic['uid']) $this->output_403('Вы не являетесь ни автором этого сообщения, ни модератором!');
+      if ($this->topic['last_post_id']!=$pid) $this->output_403('Удалить можно только последнее сообщение в теме!');
+      if (!$this->check_access('edit')) $this->output_403('У вас нет прав редактировать или удалять сообщения в этом разделе!');
+      if (!empty($post['locked']) || !empty($this->topic['locked']) || !empty($this->forum['locked'])) $this->output_403('Какие-либо изменения в данном сообщении, теме или разделе запрещены модераторами!');
+    
+      $post_deltime = $this->get_opt('post_edittime'); // время (в минутах), в течение которого можно удалить своё сообщение
+      if (empty($post_deltime)) $post_deltime = 24*60; // если время максимального редактирования не задано, максимальное время удаления — сутки
+      
+      if ($this->time > $this->topic['postdate']+$post_deltime*60) $this->output_403(sprintf('Нельзя удалить сообщение: прошло больше %s с момента отправки!',$this->incline($post_deltime,'%d минуты','%d минут','%d минут')));
+    }
     $modlib = new Library_moderate;
     $modlib->status_posts(array($pid=>2),$tid);
     if ($this->get_request_type()!=1) {
