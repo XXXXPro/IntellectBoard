@@ -26,7 +26,7 @@ class Database_mysqli extends Database {
     if (empty($params['DB_port'])) $params['DB_port']=NULL;
     if (empty($params['DB_name'])) $params['DB_name']=NULL;
     $this->link=mysqli_connect($host,$params['DB_username'],$params['DB_password'],$params['DB_name'],$params['DB_port'],$params['DB_socket']);
-    if (!empty($params['DB_charset'])) mysqli_query($this->link,'SET NAMES utf8');
+    if (!empty($params['DB_charset'])) mysqli_query($this->link,'SET NAMES utf8mb4');
     mysqli_query($this->link,"SET sql_mode = 'ANSI_QUOTES'");
     if (!$this->link) trigger_error('Ошибка подключения к базе данных! '.$this->error_str(),E_USER_ERROR);    
   }
