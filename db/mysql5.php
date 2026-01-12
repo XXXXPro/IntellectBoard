@@ -32,7 +32,7 @@ class Database_mysql5 extends Database {
     if (!empty($params['DB_persist'])) $this->link=mysql_pconnect($params['DB_host'],$params['DB_username'],$params['DB_password']);
     else $this->link=mysql_connect($params['DB_host'],$params['DB_username'],$params['DB_password']);
     if ($this->link) $result=mysql_select_db($params['DB_name']);
-    mysql_query('SET NAMES utf8');
+    mysql_query('SET NAMES utf8mb4');
     if (!$this->link || !$result) trigger_error('Ошибка подключения к базе данных! '.$this->error_str(),E_USER_ERROR);
   }
 
