@@ -123,6 +123,7 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
 #ib_all a.minbtn { border: 0 }
 #ib_all .warnbtn { border-color: #600; color: #a00 }
 #ib_all .bad_link { color: #600; padding: 0 5px }
+#ib_all a.unclickable {pointer-events: none; color: inherit; opacity: 0.33}
 
 #ib_all .location_path a { color: #2524b0 }
 #ib_all .postact a { font-size: 100%; padding: 5px }

@@ -654,6 +654,18 @@ function IntB_main(opts) {
     }
   });
 
+  window.addEventListener('online', function (e) {
+    $('.prating a').removeClass('unclickable');
+    console.log('Going online');
+    $('.submit button').attr('disabled',false);
+  });
+
+  window.addEventListener('offline', function (e) {
+    $('.prating a').addClass('unclickable');
+    console.log('Going offline');
+    $('.submit button').attr('disabled',true);
+  });  
+
   if (!navigator.canShare) $('#quotemenu_share').addClass('invis');
   if ($('form.postform').find('textarea[name="post[text]"]').length == 0) $('#quotemenu_quote').addClass('invis');
 

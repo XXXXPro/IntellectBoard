@@ -129,6 +129,10 @@
 </fieldset><fieldset><legend>PWA (Progressive Web Application)</legend>
 <div><label><span>Поддержка PWA включена</span> {{ macros.checkbox('config[pwa_enabled]',1,config.pwa_enabled) }}</label></div>
 <div><label><span>Краткое название приложения</span>{{ macros.input('config[pwa_short_name]',config.pwa_short_name,48,80) }}</label></div>
+<div><label><span>Цвет фона приложения</span><input type="color" name="config[pwa_background_color]" value="{{ config.pwa_background_color }}" /></label></div>
+<div><label><span>Цвет темы приложения</span><input type="color" name="config[pwa_theme_color]" value="{{ config.pwa_theme_color }}" /></label></div>
+<div><label><span>Значок 512x512</span>{{ macros.input('config[pwa_icon_512]',config.pwa_icon_512,32,80) }}</label></div>
+<div><label><span>Значок 192x192</span>{{ macros.input('config[pwa_icon_192]',config.pwa_icon_192,32,80) }}</label></div>
 
 
 <div class="submit"><button type="submit">Сохранить</button><input type="hidden" name="authkey" value="{{ authkey }}" /></div>
