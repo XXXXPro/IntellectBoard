@@ -30,7 +30,9 @@ const CACHE_PATTERNS = {
     /\/js\/.*\w+\.(png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot)$/,
     BASE_URL+'js/jquery.min.js',
     BASE_URL+'f/av/no.jpg',
-    /\/sm\/\w+\.png$/
+    /\/sm\/\w+\.png$/,
+    /\/s\/.*\/\w+\.(css|js)(\?\d+)?$/,
+    /\/js\/.+\.(js|css)(\?\d+)?$/
   ],
   'networkOrAvatar': [
     /\/f\/av\/\d+\.(png|jpg|jpeg|gif|svg)$/,
@@ -39,8 +41,6 @@ const CACHE_PATTERNS = {
     /\/f\/up\/.*\.(png|jpg|jpeg|gif|svg|webp)$/,
   ],
   'cacheRefresh': [
-    /\/s\/.*\/\w+\.(css|js)(\?\d+)?$/,
-    /\/js\/.+\.(js|css)(\?\d+)?$/,
   ],
   'networkOrOffline': [
     /\/user\//,
@@ -136,20 +136,14 @@ function cacheRefresh(request) {
 function networkFallback(request, fallbackUrl) {
   return fetch(request).then(function(networkResponse) {
     // Если сетевой запрос успешен, возвращаем его
-    if (networkResponse && networkResponse.status === 200) {      
-      return caches.open(CACHE_NAME).then(function(cache) {
-        if (request.method==="GET") cache.put(request, networkResponse.clone());
-        return networkResponse;
-      });
-    }
-    if (networkResponse && networkResponse.status > 200) {
+    if ((networkResponse && networkResponse.status >= 200) || networkResponse.type==='opaque' || networkResponse.type==='opaqueredirect') {
       return networkResponse;
     }
     
     // Если ошибка сети, пробуем fallback
     return Promise.reject('Network request failed');
   }).catch(function(error) {
-    // console.log('Используем fallback для:', request.url);
+    console.log('Используем fallback для:', request.url);
     return caches.open(CACHE_NAME).then(function(cache) {
       return cache.match(new Request(fallbackUrl)).then(function(fallbackResponse) {
         if (fallbackResponse) {
@@ -168,13 +162,13 @@ function networkFallback(request, fallbackUrl) {
 function networkFirst(request, fallbackUrl) {
   return fetch(request).then(function(networkResponse) {
     // Сохраняем успешный ответ в кеш
-    if (networkResponse && networkResponse.status === 200 || networkResponse.type==='opaqueredirect') {
+    if ((networkResponse && networkResponse.status === 200) || networkResponse.type==='opaqueredirect') {
       return caches.open(CACHE_NAME).then(function(cache) {
         if (request.method==="GET") cache.put(request, networkResponse.clone());
         return networkResponse;
       });
     }
-    if (networkResponse && networkResponse.status > 200) {
+    if ((networkResponse && networkResponse.status > 200) || networkResponse.type==='opaque') {
       return networkResponse;
     }
     
@@ -213,11 +207,10 @@ function networkFirst(request, fallbackUrl) {
 
 function networkFirstWithOffline(request) {
   let fallbackUrl = BASE_URL+'offline/offline.htm';
-  const accept = request.headers.get('Accept');
-  if (accept.indexOf('image/')!==-1) {
+  if (/\.(jpe?g|gif|png|webp|svg)/.test(request.url)) {
     fallbackUrl = BASE_URL+'offline/noimage.png';
   }
-  if (accept.indexOf('/javascript')!==-1 || accept.indexOf('text/css')!==-1 || request.url.endsWith('.js') || request.url.endsWith('.css')) {
+  if (request.url.endsWith('.js') || request.url.endsWith('.css')) {
     fallbackUrl = BASE_URL+'offline/empty.js';
   }
   // локальные запросы — кешируем, для внешних — используем fallback
