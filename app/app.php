@@ -264,6 +264,10 @@ class Application {
       $cachename.='Library_'.$cachename;
       if (class_exists($cachename)) $this->server_cache = new $cachename; // отсутствие кеш-библиотеки фатальным не является, если ее не будет, просто будем брать все из базы
     }
+
+    // настройки безопасности для сессий
+    ini_set('session.use_strict_mode',true);
+    ini_set('session.cookie_samesite','Strict'); 
   }
 
   /** Инициализация базы данных * */
