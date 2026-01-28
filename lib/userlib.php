@@ -153,7 +153,7 @@ class Library_userlib extends Library {
     }
     $result = false;
     if (empty($errors)) { // если при валидации пользователя не произошло ошибок
-      $data['rnd']=mt_rand(0,0x7FFFFFFF);      
+      $data['rnd']=hexdec(bin2hex(random_bytes(4))) & 0x7FFFFFFF;
       if (!$social) { // если обычная регистрация, шифруем пароль в соответствии с выбранными настройками
         $uncrypt_password=$data['password'];
         $data['password']=$this->app()->crypt_password($data['password'], $data['pass_crypt'],$data['rnd']);  //шифруем пароль

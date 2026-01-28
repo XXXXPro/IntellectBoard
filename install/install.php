@@ -632,7 +632,7 @@ ESCRIPT;
     }
     $userdata['display_name']=$userdata['login'];
     $userdata['pass_crypt']=5;
-    $userdata['rnd']=mt_rand(0,0x7FFFFFFF);
+    $userdata['rnd']=hexdec(bin2hex(random_bytes(4))) & 0x7FFFFFFF;
     $userdata['password']=hash('sha256',$userdata['password'].$userdata['rnd']);
     $userdata['canonical']=$this->canonize_name($userdata['display_name']);
     $userdata['location']='';
@@ -667,7 +667,7 @@ ESCRIPT;
     $settings['CONFIG_email']=$userdata['email'];
     $settings['CONFIG_email_from']=$userdata['email'];
     $settings['CONFIG_email_return']=$userdata['email'];
-    $settings['CONFIG_site_secret']=substr(hash('sha256',mt_rand(1,mt_getrandmax())),0,16);
+    $settings['CONFIG_site_secret']=bin2hex(random_bytes(8));
     $this->save_config($settings, $params);
     echo tag('div','Сохранение начальных настроек форума: Ok');
    }
@@ -679,7 +679,7 @@ ESCRIPT;
        $this->allow_next=false;
        return;
      }
-     $new_rnd=mt_rand(0,0xFFFFFFFF);
+     $new_rnd=hexdec(bin2hex(random_bytes(4))) & 0x7FFFFFFF;
      $new_pass=hash('sha256',$_POST['user']['password'].$new_rnd);    
      $sql = 'UPDATE '.DB_prefix.'user SET password="'.$this->db->slashes($new_pass).'", rnd='.intval($new_rnd).', '.
      'pass_crypt="5", email="'.$this->db->slashes($_POST['user']['email']).'" WHERE id='.intval($userdata['id']);

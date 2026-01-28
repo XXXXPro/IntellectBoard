@@ -70,7 +70,7 @@
         $this->session();
         if ($_SESSION['oauth']['redirect_uri']!=$redirect_uri || $_SESSION['oauth']['state']!=$_POST['state']) $this->output_400($this->lang('Попытка исказить параметры авторизации!'),'server_error');
         if ($_SESSION['oauth']['csrf']!=$_POST['csrf']) $this->output_403($this->lang('Неверный CSRF-токен!'));
-        $code = hash('sha256',mt_rand().$client_id.mt_rand().$_POST['state'].mt_rand().$this->get_opt('site_secret').mt_rand().strrev('site_secret').mt_rand(),false); // авторизационный код будет в hex
+        $code = bin2hex(random_bytes(32)); // авторизационный код будет в hex
         $data['code']=$code;
         $data['client_id']=$client_id;
         $data['uid']=$this->get_uid();
@@ -108,7 +108,7 @@
         $_SESSION['oauth']['me']=$me;
         $this->out->me=$me;
         $this->out->scope = isset($_GET['scope']) ? $_GET['scope'] : '';
-        $_SESSION['oauth']['csrf']=substr(hash('sha256',mt_rand().mt_rand().$this->get_opt('site_secret').mt_rand(),false),0,24); // false — возвращать данные в виде hex
+        $_SESSION['oauth']['csrf']=bin2hex(random_bytes(12));
         $this->out->oauth['csrf'] = $_SESSION['oauth']['csrf'];
       }
     }
@@ -140,7 +140,7 @@
       $result = $this->db->select_row($sql,array($_POST['code'],$redirect_uri,$client_id,$this->time));
       
       if (!empty($result)) {
-        $token = str_replace('=','',base64_encode(hash('sha256',mt_rand().$client_id.mt_rand().$this->get_opt('site_secret').mt_rand().strrev('site_secret').mt_rand(),true))); // авторизационный код будет в hex
+        $token = bin2hex(random_bytes(64)); // авторизационный код будет в hex
 
         // TODO: сохранение tokenа
         $data['token']=$token;
