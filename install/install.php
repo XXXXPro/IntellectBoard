@@ -714,13 +714,13 @@ ESCRIPT;
   function gen_long_key($userdata, $session_name=false) {
     if (!$session_name)  $session_name = CONFIG_session;
     // TODO: возможно, доделать добавку очищенного User Agent
-    return $userdata['id'].'-'.md5($userdata['id'].$userdata['password'].$userdata['rnd'].$userdata['pass_crypt'].$session_name);
+    return $userdata['id'].'-'.hash('sha256',$userdata['id'].$userdata['password'].$userdata['rnd'].$userdata['pass_crypt'].$session_name);
   }
 
   function gen_admin_cookie($udata) {
     $agent = $_SERVER['HTTP_USER_AGENT'];
     $agent = preg_replace('|\d+|', '', $agent);
-    return md5($udata['id'].$udata['password'].$udata['rnd'].$agent.$_SERVER['REMOTE_ADDR']);
+    return hash('sha256',$udata['id'].$udata['password'].$udata['rnd'].$agent.$_SERVER['REMOTE_ADDR']);
   }
 
   /** Приведение имени пользователя к "каноническому" виду (замена похожих по начертанию букв и цифры) в целях недопущения регистрации пользователей с похожими именами **/

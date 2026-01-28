@@ -1183,6 +1183,7 @@ class Application {
    * 6 -- SHA-2 512 bit от соли+пароля
    * 7 -- SHA-2 512 bit от пароля+соли
    * 8 -- использование функции crypt
+   * 9 -- использование функции password_hash
    * */
   function crypt_password($password, $method, $salt='') {    
     if ($method == 1) return md5($password);
@@ -1193,6 +1194,7 @@ class Application {
     elseif ($method==6) return hash('sha512',$salt.$password);
     elseif ($method==7) return hash('sha512',$password.$salt);
     elseif ($method==8) return crypt($password,$salt);
+    elseif ($method==9) return password_hash($password,$salt);
     else
       return $password;
   }
@@ -1214,7 +1216,7 @@ class Application {
       $userdata = $this->load_user($uid, 0);
     $url = str_replace('/./', '/', $url); // для случаев, если раздел является корневым и имеет HURL в виде точки
     $secret = $this->get_opt('site_secret'); // секретный ключ сайта, хранимый в настройках
-    return $uid.'-'.md5($uid.$action.$secret.$userdata['rnd'].$url.$userdata['password'].$userdata['pass_crypt'].$userdata['email']);
+    return $uid.'-'.hash('sha256',$uid.$action.$secret.$userdata['rnd'].$url.$userdata['password'].$userdata['pass_crypt'].$userdata['email']);
   }
 
   /** Генерация ключа для долгосрочной идентификации * */
@@ -1222,7 +1224,7 @@ class Application {
     if (!$session_name)
       $session_name = CONFIG_session;
     // TODO: возможно, доделать добавку очищенного User Agent
-    return $userdata['id'].'-'.md5($userdata['id'].$userdata['password'].$userdata['rnd'].$userdata['pass_crypt'].$session_name);
+    return $userdata['id'].'-'.hash('sha256',$userdata['id'].$userdata['password'].$userdata['rnd'].$userdata['pass_crypt'].$session_name);
   }
 
   /** Проверка, является ли пользователь гостем.
