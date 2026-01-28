@@ -88,7 +88,7 @@ class Library_cleaner extends Library {
       $html = \mb_encode_numericentity($html, [0x80, 0x10FFFF, 0, ~0], $charset);      
       $dom = new \DOMDocument('1.0',$charset);
       $dom->formatOutput = false;
-      $dom->loadHTML($html, LIBXML_NONET|LIBXML_HTML_NODEFDTD); // LIBXML_NONET — for protection against XXE, LIBXML_HTML_NOIMPLIED|LIBXML_HTML_NODEFDTD — to don't add DOCTYPE and html/body tags
+      $dom->loadHTML($html, LIBXML_NONET|LIBXML_HTML_NODEFDTD|LIBXML_NOERROR); // LIBXML_NONET — for protection against XXE, LIBXML_HTML_NOIMPLIED|LIBXML_HTML_NODEFDTD — to don't add DOCTYPE and html/body tags, NO_ERROR — do not show DOM errors
       $xpath = new \DOMXPath($dom);            
     }
 
