@@ -42,10 +42,10 @@
 <div style="clear: both" class="pages right">{{ macros.pages(pages) }}</div>
 {% if perms.post %}<a class="actionbtn reply mainbtn" href="reply.htm"><i class="far fa-comment-alt"></i> Ответить</a>{% endif %}
 {% if perms.topic %}<a class="actionbtn newtopic" href="newtopic.htm"><i class="far fa-edit"></i> Новая тема</a>{% endif %}
-{% if not is_guest() %}{% if not topic.bookmark %}<a class="actionbtn bookmark minbtn" href="change_mode.htm?mode=bookmark&amp;authkey={{ bookmark_key }}"><i class="far fa-bookmark"></i> В закладки</a>{% endif %}
-{% if not topic.subscribe %}<a class="actionbtn subscribe minbtn" href="change_mode.htm?mode=subscribe&amp;authkey={{ bookmark_key }}" title="Подпишитесь на тему, чтобы получать уведомления о новых ответах в ней на EMail"><i class="far fa-envelope"></i> Подписаться</a>{%
-else %}<a class="actionbtn subscribe minbtn" href="change_mode.htm?mode=subscribe&amp;cancel=1&amp;authkey={{ bookmark_key }}"><i class="fa fa-minus-circle"></i> Отписаться</a>{% endif %}{% endif %}
-<a class="actionbtn print minbtn" href="javascript:window.print()"><i class="fa fa-print"></i> Распечатать</a>
+{% if not is_guest() %}{% if not topic.bookmark %}<a class="actionicon bookmark" href="change_mode.htm?mode=bookmark&amp;authkey={{ bookmark_key }}" title=" В закладки"><i class="far fa-bookmark"></i></a>{% endif %}
+{% if not topic.subscribe %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;authkey={{ bookmark_key }}" title="Подписаться на тему, чтобы получать уведомления о новых ответах в ней на EMail"><i class="far fa-envelope"></i></a>{%
+else %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;cancel=1&amp;authkey={{ bookmark_key }}" title="Отписаться"><i class="fa fa-minus-circle"></i></a>{% endif %}{% endif %}
+<a class="actionicon print" href="javascript:window.print()" title="Распечатать"><i class="fa fa-print"></i></a>
 <!--/noindex-->
 <div class="posts h-feed">
 {% endif %}
@@ -63,10 +63,10 @@ else %}<a class="actionbtn subscribe minbtn" href="change_mode.htm?mode=subscrib
 <div class="pages right">{{ macros.pages(pages) }}</div>
 {% if perms.post %}<a class="actionbtn reply mainbtn" href="reply.htm"><i class="far fa-comment-alt"></i> Ответить</a>{% endif %}
 {% if perms.topic %}<a class="actionbtn newtopic" href="newtopic.htm"><i class="far fa-edit"></i> Новая тема</a>{% endif %}
-{% if not is_guest() %}{% if not topic.bookmark %}<a class="actionbtn bookmark minbtn" href="change_mode.htm?mode=bookmark&amp;authkey={{ bookmark_key }}"><i class="far fa-bookmark"></i> В закладки</a>{% endif %}
-{% if not topic.subscribe %}<a class="actionbtn subscribe minbtn" href="change_mode.htm?mode=subscribe&amp;authkey={{ bookmark_key }}" title="Подпишитесь на тему, чтобы получать уведомления о новых ответах в ней на EMail"><i class="far fa-envelope"></i> Подписаться</a>{%
-else %}<a class="actionbtn subscribe minbtn" href="change_mode.htm?mode=subscribe&amp;cancel=1&amp;authkey={{ bookmark_key }}"><i class="fa fa-minus-circle"></i> Отписаться</a>{% endif %}{% endif %}
-<a class="actionbtn print minbtn" href="javascript:window.print()"><i class="fa fa-print"></i> Распечатать</a>
+{% if not is_guest() %}{% if not topic.bookmark %}<a class="actionicon bookmark" href="change_mode.htm?mode=bookmark&amp;authkey={{ bookmark_key }}" title=" В закладки"><i class="far fa-bookmark"></i></a>{% endif %}
+{% if not topic.subscribe %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;authkey={{ bookmark_key }}" title="Подписаться на тему, чтобы получать уведомления о новых ответах в ней на EMail"><i class="far fa-envelope"></i></a>{%
+else %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;cancel=1&amp;authkey={{ bookmark_key }}" title="Отписаться"><i class="fa fa-minus-circle"></i></a>{% endif %}{% endif %}
+<a class="actionicon print" href="javascript:window.print()" title="Распечатать"><i class="fa fa-print"></i></a>
 
 {% if forum.tags and tags|length>0%}
 <ul class="tags">

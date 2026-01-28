@@ -23,8 +23,9 @@ table.design { padding: 0; margin: 0; border-spacing: 0; empty-cells: show; bord
 #ib_all .ibform .sceditor-button div { padding: 0; clear: none; }
 #ib_all .ibform div:nth-child(even) { background: #F6F6F6 }
 #ib_all .ibform div small { display: block; font-size: 80% }
-#ib_all .ibform span { display: block; width: 40%; text-align: right; padding: 2px 5px; float: left }
+#ib_all .ibform span { display: block; width: 40%; text-align: right; padding: 2px 5px; float: left; line-height: 1.6; }
 #ib_all .ibform .submit { padding-left: 40%; }
+#ib_all .ibform input[type="text"],#ib_all .ibform input[type="email"],#ib_all .ibform input[type="password"],#ib_all .ibform textarea, .ibform select {padding:5px 6px;border-radius:3px;border-style:solid;border-width:1px;margin-left:4px}
 #ib_all .ibform .submit button, #ib_all .postform .submit button { padding: 3px 11px; margin: 4px 9px 4px 0; text-decoration: none;
    background: #3d98ff; color: #fff;  font-weight: bold; margin-left: 9px; font-size: 133%; padding: 3px 10px; border: #A3CEFF 1px solid }
 #ib_all .postform .submit input[type="button"] { background: #fff; border: rgb(118,118,118) 1px solid; padding: 3px 11px; font-size: 133%; }
@@ -120,6 +121,7 @@ padding: 5px 10px; margin: 10px 0 }
 #ib_all .actionbtn, #ib_all a.actionbtn { display: inline-block; border: #A3CEFF 2px solid; padding: 3px 11px; margin: 4px 5px 4px 0; background: none;
 text-decoration: none; font-size: 110%; color: #0101C4 }
 #ib_all .mainbtn, #ib_all .actionbtn.mainbtn { background: #1482ff; color: #fff; font-weight: bold; border: #1482ff 2px solid }
+#ib_all a.actionicon { padding: 6px; margin: 0 0 0 12px; font-size: 140%; line-height: 1; vertical-align: middle; color: #0101C4 }
 #ib_all a.minbtn { border: 0 }
 #ib_all .warnbtn { border-color: #600; color: #a00 }
 #ib_all .bad_link { color: #600; padding: 0 5px }
@@ -284,6 +286,9 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
   #ib_all .main_menu { padding: 0 }
   #ib_all .postform input[type=text] { width: 98% }
   #ib_all .postform .postboxes label { flex-basis: 50% }
+  #ib_all a.actionicon { padding: 4px; margin: 0 0 0 8px; }
+  #ib_all .topic_start { margin-bottom: 0 }
+  #ib_all .pages.right { float: none; text-align: right; margin: 6px 0; }  
 }
 
 @media print {
