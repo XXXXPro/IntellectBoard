@@ -40,7 +40,7 @@ class Database_sqlite extends Database {
   }
 
   function version() {
-    return "SQLite ".SQLite3::version();
+    return "SQLite ".SQLite3::version()['versionString'];
   }
   
 

@@ -8,7 +8,7 @@
  *  Основной модуль сайтового движка Intellect Board 3 Pro
  *  ================================ */
 define('AUTH_SYSTEM_USERS', 3);
-define('INTB_VERSION', '3.05');
+define('INTB_VERSION', '3.05 Rebuild 2');
 
 class Application {
 
@@ -1183,7 +1183,6 @@ class Application {
    * 6 -- SHA-2 512 bit от соли+пароля
    * 7 -- SHA-2 512 bit от пароля+соли
    * 8 -- использование функции crypt
-   * 9 -- использование функции password_hash
    * */
   function crypt_password($password, $method, $salt='') {    
     if ($method == 1) return md5($password);
@@ -1194,7 +1193,6 @@ class Application {
     elseif ($method==6) return hash('sha512',$salt.$password);
     elseif ($method==7) return hash('sha512',$password.$salt);
     elseif ($method==8) return crypt($password,$salt);
-    elseif ($method==9) return password_hash($password,$salt);
     else
       return $password;
   }
