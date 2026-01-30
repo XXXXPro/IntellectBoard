@@ -17,7 +17,7 @@
 
 require_once(BASEDIR.'db/mysql5.php');     
 
-class Database_mysql3 extends Database_mysql5 implements iDBDriver {
+class Database_mysql3 extends Database_mysql5 {
     function set_charset($charset) {} // Early MySQL does not support charsets
 
     function has_stored_proc() {

@@ -55,7 +55,7 @@ class Library_attach extends Library {
 
     for ($i=0, $count=count($files['tmp_name']); $i<$count; $i++) {
       if (is_uploaded_file($files['tmp_name'][$i])) {
-        $key = substr(hash('sha256',rand().$_SERVER['REMOTE_ADDR'].$_SERVER['REMOTE_PORT'].Library::$app->time.Library::$app->get_opt('site_secret').$files['name'][$i].$i),0,12);
+        $key = substr(hash('sha256',rand().$_SERVER['REMOTE_ADDR'].$_SERVER['REMOTE_PORT'].$this->app()->time.$this->app()->get_opt('site_secret').$files['name'][$i].$i),0,12);
         if ($finfo) $mime = finfo_file($finfo, $files['tmp_name'][$i]);
         else $mime = $files['type'][$i];
         $filename = BASEDIR.'/www/f/up/'.intval($objtype).'/'.intval($oid).'-'.$key.'.dat';
@@ -77,15 +77,15 @@ class Library_attach extends Library {
                 $exifjson=json_encode($exif);
               }
             }
-            $imglib = Library::$app->load_lib('image',false);
+            $imglib =class_exists('Library_image') ? new Library_image : false;
             if ($imglib) {
                $imgdata = $imglib->load($filename);
                if (!empty($imgdata)) {
-                 $maxx = Library::$app->get_opt('attach_max_x') ?: 1200; // если не заданы максимальные размеры, вписываем фото в 1200x1080
-                 $maxy = Library::$app->get_opt('attach_max_y') ?: 1080;
+                 $maxx = $this->app()->get_opt('attach_max_x') ?: 1200; // если не заданы максимальные размеры, вписываем фото в 1200x1080
+                 $maxy = $this->app()->get_opt('attach_max_y') ?: 1080;
                  $qty=NULL; // для прочих форматов, кроме JPEG
                  if ($imgdata['type']==IMAGETYPE_JPEG) { // для JPEG берем качество из настройки качества пользовательского фото
-                   $qty=Library::$app->get_opt('userlib_photo_jpeg_qty');
+                   $qty=$this->app()->get_opt('userlib_photo_jpeg_qty');
                    if (empty($qty)) $qty=80;
                  }
                  $imgdata = $imglib->fit_to($imgdata,$maxx,$maxy);
@@ -103,15 +103,14 @@ class Library_attach extends Library {
           // определяем широту и долготу, если они есть в EXIF
           if (!empty($exif['GPSLatitude']) || !empty($exif['GPSLongitude'])) {
             /** @var Librrary_exifgps $gpslib */
-            $gpslib = Library::$app->load_lib('exifgps',false);
+            $gpslib = class_exists('Library_exifgps') ? new Library_exifgps : false;
             if ($gpslib) {
               if (!empty($exif['GPSLongitude'])) $data['geo_longtitude']=$gpslib->calc_gps($exif["GPSLongitude"], $exif['GPSLongitudeRef']);
               if (!empty($exif['GPSLatitude'])) $data['geo_latitude']=$gpslib->calc_gps($exif["GPSLatitude"], $exif['GPSLatitudeRef']);
             }
           }
 
-
-          Library::$app->db->insert(DB_prefix.'file',$data);
+          $this->app()->db->insert(DB_prefix.'file',$data);
           $set_main = false; // для остальных файлов (кроме первого) признак set_main в любом случае выставляем в false
           $data['oid']="$oid";
           $result[]=$data;
@@ -132,8 +131,8 @@ class Library_attach extends Library {
       rename(BASEDIR.'/www/f/up/'.intval($type).'/0-'.$key.'.dat', $newoid.'-'.$key);
     }
     $sql = 'UPDATE '.DB_prefix.'file SET oid='.intval($newoid).
-    ' WHERE oid=0 AND type='.intval($type).'AND '.Library::$app->db->array_to_sql($keys,'fkey');
-    Library::$app->db->query($sql);
+    ' WHERE oid=0 AND type='.intval($type).'AND '.$this->app()->db->array_to_sql($keys,'fkey');
+    $this->app()->db->query($sql);
   }
 
   /** Удаление прикрепленных к сообщению файлов
@@ -143,12 +142,12 @@ class Library_attach extends Library {
    */
   function delete_uploads($keys,$oid,$type=1) {
     $sql = 'DELETE FROM '.DB_prefix.'file WHERE oid='.intval($oid).
-    ' AND type='.intval($type).' AND '.Library::$app->db->array_to_sql($keys,'fkey');
-    Library::$app->db->query($sql);
+    ' AND type='.intval($type).' AND '.$this->app()->db->array_to_sql($keys,'fkey');
+    $this->app()->db->query($sql);
 
     for ($i=0, $count=count($keys); $i<$count; $i++) {
       $filename=intval($type).'/'.$oid.'-'.$keys[$i].'.dat';
-      if (Library::$app->valid_file($filename))
+      if ($this->app()->valid_file($filename))
       unlink(BASEDIR.'/www/f/up/'.$filename);
       $dirs = glob(BASEDIR.'/www/f/up/'.intval($type).'/pr/*');
       for ($j=0,$count2=count($dirs);$j<$count2;$j++) if ($dirs[$j]!='.' && $dirs[$j]!='..') {
@@ -163,13 +162,13 @@ class Library_attach extends Library {
    */
   function check_main_attach($oid,$type=1) {
     $sql = 'SELECT COUNT(*) FROM '.DB_prefix.'file WHERE oid='.intval($oid).' AND type='.intval($type).' AND is_main=\'1\'';
-    $has_main = Library::$app->db->select_int($sql);
+    $has_main = $this->app()->db->select_int($sql);
 
     if (!$has_main) {
       $sql = 'SELECT MIN(fkey) FROM '.DB_prefix.'file WHERE oid='.intval($oid).' AND type='.intval($type);
-      $fkey = Library::$app->db->select_str($sql);
-      $sql = 'UPDATE '.DB_prefix.'file SET is_main=\'1\' WHERE fkey=\''.Library::$app->db->slashes($fkey).'\' AND oid='.intval($oid).' AND type='.intval($type);
-      Library::$app->db->query($sql);
+      $fkey = $this->app()->db->select_str($sql);
+      $sql = 'UPDATE '.DB_prefix.'file SET is_main=\'1\' WHERE fkey=\''.$this->app()->db->slashes($fkey).'\' AND oid='.intval($oid).' AND type='.intval($type);
+      $this->app()->db->query($sql);
     }
   }
 }

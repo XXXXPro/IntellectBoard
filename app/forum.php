@@ -51,14 +51,14 @@ class Application_Forum extends Application {
     // если задан не только раздел, но и тема
     if (!empty($_REQUEST['t'])) {
       $topic_url = $_REQUEST['t'];
-      $tlib = $this->load_lib('topic',true); // если библиотеку работы с темами/сообщениями загрузить не удастся, то считаем это фатальной ошибкой
+      $tlib = new Library_topic;
       $this->topic = $tlib->get_topic($topic_url,0,true);
       
       $result = true;
       if (!$this->topic) $result = false;
       elseif ($this->topic['fid']!=$this->forum['id']) { // если неправильно указан forum id, нужно сделать редирект (полезно для перемещенных тем)
         if ($this->check_access('view',$this->topic['fid'])) {
-          $flib = $this->load_lib('forums');
+          $flib = new Library_forums;
           if (!$flib) $result=false;
           else {
             $newforum = $flib->get_forum($this->topic['fid']);
@@ -86,7 +86,7 @@ class Application_Forum extends Application {
     $this->out->is_moderator = $this->is_moderator(); // для того, чтобы иметь возможность определить в шаблоне, нужно ли выводить модераторские опции
   }
 
-  function init_style() {
+  protected function init_style() {
     parent::init_style();
     if ($this->forum['template']) { // если в настройках раздела указан какой-то шаблон
       if ($this->forum['template_override']) $this->style=$this->forum['template']; // если включено безусловное переопределение, то заменяем текущий шаблон на тот, который указан в настройках раздела
@@ -95,7 +95,7 @@ class Application_Forum extends Application {
   }
 
 /** Отслеживание и обновление времени последнего визита **/
-  function init_last_visit() {
+  protected function init_last_visit() {
     if (!$this->is_guest()) {
       if (isset($this->forum) && isset($this->forum['id']) && $this->forum['id']!=0) $forum_id=$this->forum['id'];
       else $forum_id=0;
@@ -131,8 +131,7 @@ class Application_Forum extends Application {
   /** Выборка данных о подразделах, если их показ включен в настройках **/
   function get_subforums() {
     if ($this->get_opt('enable_subforums')) {
-      $forumlib=$this->load_lib('forums',true);
-      /* @var $forumlib Library_forums */
+      $forumlib=new Library_forums;
       $cond['parent']=$this->forum['id'];
       $cond['start']=true;
       $cond['extdata']=true;
@@ -350,8 +349,7 @@ class Application_Forum extends Application {
     $module = $this->forum['module'];
     $filename = $module.'/owner_settings.tpl';
     if (!$this->valid_file($filename) || !is_readable(BASEDIR.'template/def/'.$filename)) $this->output_404('Данный тип раздела не поддерживает задаваемые владельцем настройки!');
-    /** @var Library_forums **/
-    $forumlib = $this->load_lib('forums',true);
+    $forumlib = new Library_forums;
     if ($this->is_post()) {
       $forumlib->update_forum($this->forum['id'],$_POST['extdata']);
       $this->message('Настройки форума обновлены!',1);

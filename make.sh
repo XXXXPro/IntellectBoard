@@ -39,6 +39,7 @@ rm $BUILDDIR/modules/research.php
 cp install/install.php $BUILDDIR/www/install.php
 rm $BUILDDIR/etc/htaccess.txt
 rm $BUILDDIR/etc/routes.txt
+rm $BUILDDIR/etc/tags.txt
 rm $BUILDDIR/etc/routes.cfg
 rm $BUILDDIR/etc/ib_config.php
 rm -rf $BUILDDIR/www/download
@@ -91,8 +92,11 @@ echo "CREATE OR REPLACE FUNCTION ib_current.instr (p_str VARCHAR, p_substr VARCH
 
 echo Making installation dump for SQLite... 
 ~/bin/mysql2sqlite $BUILDDIR/db/sql/mysqli_new.sql >  $BUILDDIR/db/sql/sqlite_new.sql
+<<<<<<< HEAD
 echo Adding triggers for FTS...
 cat db/sql/sqlite_triggers.sql >> $BUILDDIR/db/sql/sqlite_new.sql
+=======
+>>>>>>> 1a1624e (Initial commit for Intb 3.05)
 
 echo Packing...
 rm distr/intbpro.zip

@@ -7,7 +7,7 @@
 {% endblock %}
 {% block content %}
 {% if not intb.is_ajax %}
-<div id="blog_view_topic" class="forum{{ forum.id }} topic{{ topic.id}}">
+<div id="blog_view_topic" class="forum{{ forum.id }} topic{{ topic.id}} posts">
 <article itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting" class="h-entry post postin">
 <div class="blogpost_top pu"><div class="h-card p-author">
 <div class="blogpost_avatar">
@@ -64,7 +64,7 @@
 {% endif %}
 {% if comments_remain>0 and opts.sort!='DESC' %}<a href="?more={{ more }}#comments" class="more_comments noprint load_more">Показать еще {{ comments_remain|incline('%d комментарий','%d комментария','%d комментариев') }}</a>{% endif %}
 
-<div class="comments">
+<div class="comments posts">
 {% for post in posts %}
 <div class="comment post{% if post.marked %} marked{% endif %} fadeout" itemscope itemtype="http://schema.org/UserComments" id="p{{ post.id }}">
 {% if post.uid!=2 and (post.relation!='ignore' or opts.filter=='nohide') %}
@@ -78,6 +78,7 @@
 {% else %}<span class="author" title="{{ post.user_title }}">{% endif %}
 {{ macros.user(post.author,post.uid,'username') }}</span>
 <time itemprop="commentTime" class="blogpost_date" datetime="{{ post.postdate|date('Y-m-d\\TH:i') }}" content="{{ post.postdate|date('Y-m-dTG:i') }}">{{ post.postdate|shortdate }}</time>
+{% include 'stdforum/rating.tpl' %}
 <div class="postnumber"><a href="post-{{ post.id }}.htm">#{% if opts.sort=='DESC' %}{{ topic.post_count-loop.index }}{% else %}{{ comments_remain+loop.index }}{% endif %}</a></div>
 {% include 'stdforum/postact.tpl' %}
 </div>

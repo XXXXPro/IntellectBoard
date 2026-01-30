@@ -1,10 +1,9 @@
 <?php
-
 /** ================================
  *  @package IntBPro
  *  @author 4X_Pro <me@4xpro.ru>
- *  @version 3.05
- *  @copyright 2007, 2010, 2012-2024 4X_Pro, INTBPRO.RU
+ *  @version 3.06
+ *  @copyright 2007, 2010, 2012-2025 4X_Pro, INTBPRO.RU
  *  @url https://intbpro.ru
  *  Основной модуль сайтового движка Intellect Board 3 Pro
  *  ================================ */
@@ -13,56 +12,62 @@ define('INTB_VERSION', '3.05');
 
 class Application {
 
-  public $lastmod = INTB_LAST_CONFIG_TIME;/** время последней модификации страницы, которое будет отдано в заголовке Last-Modified * */
+  public int $lastmod = INTB_LAST_CONFIG_TIME;/** время последней модификации страницы, которое будет отдано в заголовке Last-Modified * */
 
   /** Объект для взаимодействия с базой данных
    * @var Database $db  * */
-  public $db;
+  public Database $db;
 
   /** хеш с данными пользователя * */
-  private $userdata;
+  private array $userdata;
 
   /** путь к корню движка * */
-  protected $sitepath;
+  protected string $sitepath;
 
   /** сообщения для отправки Email * */
-  private $mail = array();
+  private array $mail = array();
 
   /** Время начала выполнения скрипта * */
-  private $start_time = 0;
+  private int $start_time = 0;
 
   /** Время, переданное в заголовке If-Modified-Since, используется для проверки наличия изменений в выводимой странице по сравнению с прошлым обращением * */
-  public $if_modified_time = 0;
+  public int $if_modified_time = 0;
 
   /** Запрошенное пользователем действие * */
-  public $action;
+  public string $action;
 
   /** Стиль, используемый для отображения сайта, по умолчанию используется стиль def. * */
-  public $template = 'def';
+  public string $template = 'def';
 
   /** Заголовок страницы * */
-  public $title = '';
+  public string $title = '';
 
   /** Идентификатор поискового бота, если пользователь опознан как бот * */
-  public $bot_id = 0;
-
-  /** В этой переменной будут храниться экземпляры классов-библиотек * */
-  private $libs = array();
+  public int $bot_id = 0;
 
   /** Имя библиотеки с помощью которой будет генерироваться выводимый код * */
-  public $template_lib = 'twig';
+  public string $template_lib = 'twig';
 
   /** Объект для хранения всех данных, предназначенных для вывода * */
-  public $out;
+  public stdClass $out;
 
   /** Здесь хранится время начала выполнения запроса. Рекомендуется брать время отсюда, чтобы избежать достаточно долгих вызвов функции time или рассинхронизации * */
-  public $time;
+  public int $time;
 
   /** Объект для работы с серверным кешем * */
-  public $server_cache = false;
+  protected iCache $server_cache;
 
   /** Данные для вывода мета-тегов */
-  public $meta = array();
+  public array $meta = array();
+
+  /** Данные о текущем разделе, если они есть */
+  public $forum = false;
+
+  /** Данные о текущей теме, если они есть */
+  public $topic = false;
+
+  /** Данные о выбранном стиле */
+  protected $style = 'def';
 
   /** Главная функция, из нее вызывается все остальное
    * Действия:
@@ -73,7 +78,7 @@ class Application {
    * Проверка, были ли изменения по сравнению с предыдущим запросом (при наличии соответствующих заголовков)
    * Вызов процедуры вывода данных
    * */
-  function main() {
+  public function main() {
     try {
       $this->init();
 
@@ -116,9 +121,8 @@ class Application {
       if (session_id() != false)
         session_write_close(); // сессию закрываем здесь, так как дальше закрывается соединение с БД и нужно успеть ее сохранить (если вдруг будем хранить сессии в БД)
       if (is_object($this->db))
-      $this->db->close(); // закрываем соединение с БД как можно раньше -- до осуществления вывода и отправки почты
-      $this->db = false; // уничтожаем объект БД, чтобы освободить память
-      $this->libs = array(); // очищаем кеш библиотек, так как в большинстве случаев они уже тоже не потребуются
+      if (isset($this->db)) $this->db->close(); // закрываем соединение с БД как можно раньше -- до осуществления вывода и отправки почты
+      unset($this->db); // уничтожаем объект БД, чтобы освободить память
       // Если оказалось, что данные так с прошлого раза и не менялись, то выдаем 304 и завершаем работу без генерации HTML
       if (!defined('CONFIG_nocache') || !CONFIG_nocache) { // проверка, что кеширование не запрещено
         if ($this->lastmod > 0 && $this->lastmod <= $this->if_modified_time)
@@ -171,7 +175,7 @@ class Application {
     $result = false;
     $start_url = preg_replace('|/+|', '/', $_SERVER['REQUEST_URI']);
     $base_url = substr($_SERVER['PHP_SELF'], 0, strrpos($_SERVER['PHP_SELF'], 'www/'));
-    if ($base_url!=='/') $url = str_replace($base_url, '', $start_url);   
+    if ($base_url!=='/' && $base_url!=='') $url = str_replace($base_url, '/', $start_url);   
     else $url = $start_url;
     if ($url[0]==='/') $url = substr($url, 1);
     if (($pos = strpos($url, '?')) !== false) $url = substr($url, 0, $pos);
@@ -204,7 +208,7 @@ class Application {
   }
 
   /** Функция общей инициализации: подключение обработчиков ошибок, буферизации и т.п. * */
-  function init() {
+  protected function init() {
     $this->init_basic(); // основная часть инициализиации (буфер вывода и т.п.)
     $this->init_db(); // инициализация подключения к БД
 //          $this->init_config(); // подключение файла конфигурации
@@ -220,25 +224,25 @@ class Application {
   }
 
   /** Общая часть инициализации: установка локали, часового пояса, обработчиков ошибок, буферизации данных * */
-  function init_basic() {
+  protected function init_basic() {
     // gc_disable(); // поэкспериментировать, будет ли от этого эффект
     $this->start_time = microtime(true); // фиксируется время запуска скрипта;
     $this->time = time();
     error_reporting(E_ALL);
 
-    Library::init($this);
-
-    $this->out = new stdClass;/** Данные для вывода * */
-    $this->out->intb = new stdClass;/** Для вывода общей информации, например, названия форума * */
-    if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']))
-      $this->if_modified_time = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+    Library::init($this); // TODO: убрать
 
     $GLOBALS['IntBF_debug'] = '';
     setlocale(LC_ALL, array('ru_RU.UTF-8', 'ru_RU.utf-8', 'Russian_Russia.65001'));
 
+    $this->init_lib_loader(); // автозагрузчик для классов Library_*
     set_error_handler(array($this, 'error_handler')); // вешаем собственный обработчик ошибок для фиксации их в логах и выдачи дружественных сообщений
     register_shutdown_function(array($this, 'shutdown')); // обработчик для корректного закрытия соединения с БД
     date_default_timezone_set('UTC'); // выставляем временную зону в UTC, чтобы для вывода даты было достаточно приплюсовать смещение, заданное в настройках пользователя
+
+    $this->out = new stdClass;/** Данные для вывода * */
+    $this->out->intb = new stdClass;/** Для вывода общей информации, например, названия форума * */
+    if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) $this->if_modified_time = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
 
     if (defined('CONFIG_gzip') && CONFIG_gzip)
       ob_start('ob_gzhandler');
@@ -257,14 +261,17 @@ class Application {
     // подключаем серверное кеширование, если оно задано в настройках
     $cachename = $this->get_opt('site_cache_lib');
     if ($cachename) {
-      $this->server_cache = $this->load_lib($cachename, false); // отсутствие кеш-библиотеки фатальным не является, если ее не будет, просто будем брать все из базы
-      if (!is_object($this->server_cache) || !($this->server_cache instanceof iCache))
-        $this->server_cache = false; // если вдруг библиотека не загрузилась или не подходит по интерфейсу, отключаем ее использование
+      $cachename.='Library_'.$cachename;
+      if (class_exists($cachename)) $this->server_cache = new $cachename; // отсутствие кеш-библиотеки фатальным не является, если ее не будет, просто будем брать все из базы
     }
+
+    // настройки безопасности для сессий
+    ini_set('session.use_strict_mode',true);
+    ini_set('session.cookie_samesite','Strict'); 
   }
 
   /** Инициализация базы данных * */
-  function init_db() {
+  protected function init_db() {
     require BASEDIR.'db/database.php'; // общий модуль базы данных
 
     if (!defined('DB_driver') || !include(BASEDIR.'db/'.DB_driver.'.php')) {
@@ -274,20 +281,25 @@ class Application {
     }
 
     $classname = 'Database_'.DB_driver;
-    $this->db = new $classname;
-    if (!($this->db instanceof iDBDriver)) {
+    $db = new $classname;
+    if (!(is_subclass_of($db,'Database'))) {
       header($_SERVER['SERVER_PROTOCOL'].' 503 Service Unavailable');
       echo 'Ошибка: класс '.$classname.' не является классом базы данных (не реализует интерфейс iDBDriver)!';
       exit();
     }
+    $this->db = $db;
     $params = array('DB_host'=>DB_host, 'DB_name'=>DB_name, 'DB_username'=>DB_username, 'DB_password'=>DB_password);
     foreach (array('DB_socket','DB_presist','DB_charset','DB_port','DB_schema') as $item) if (defined($item)) $params[$item]=constant($item);
     $this->db->connect($params);
   }
 
   /** Парсинг URL и подгрузка данных о разделе или объекте * */
-  function init_object() {
+  protected function init_object() {
 //                $this->forum = false;
+  }
+
+  protected function init_lib_loader() {
+    spl_autoload_register(array($this,'lib_loader')); // загрузчик для классов-библиотек
   }
 
   /** Подключение файла конфигурации * */
@@ -296,7 +308,7 @@ class Application {
     } */
 
   /** Восстановление сессии пользователя * */
-  function init_user() {
+  protected function init_user() {
     $banned = false;
     $time = time();
     $session_name = CONFIG_session;
@@ -331,7 +343,8 @@ class Application {
         elseif (!empty($_REQUEST[$session_name]) || !empty($_COOKIE[$session_name])) { // если в запросе есть идентификатор сессии, используем данные оттуда
           $this->session(); // вызываем процедуру создания сессии, чтобы установить свой обработчик и проверить необходимость перезагрузки данных
           if ($ext_lib_name = $this->get_opt('user_external_lib')) { // если задана библиотека внешней авторизации в настройках
-            $ext_lib = $this->load_lib($ext_lib_name, false); // загружаем ее
+            $ext_lib_name = 'Library_'.$ext_lib_name;
+            $ext_lib = class_exists($ext_lib_name) ? new $ext_lib_name : false; // загружаем ее
             if ($ext_lib) {
               $user_id = $ext_lib->get_user_by_session(); // и получаем ID пользователя (в нумерации IntB), которого будем считать авторизованным. Если библиотека возвращает false, то пользователь не подгружается
               if ($user_id > AUTH_SYSTEM_USERS) {
@@ -349,8 +362,9 @@ class Application {
           }
           if (isset($_SESSION['IntB_auth'])) { // если нет необходимости обновить данные пользователя, а можно взять их из сессии
             if (!$this->check_cache_expired()) {
-              if (!$this->get_opt('check_user_agent') || $_SESSION['IntB_user_agent'] === preg_replace('|\d+|', '', $_SERVER['HTTP_USER_AGENT'])) // если проверка User Agent выключена или же он совпадает с тем, что был при создании сессии
+              if (!$this->get_opt('check_user_agent') || $_SESSION['IntB_user_agent'] === preg_replace('|\d+|', '', $_SERVER['HTTP_USER_AGENT'])) { // если проверка User Agent выключена или же он совпадает с тем, что был при создании сессии
                 $this->userdata = $_SESSION['IntB_user']; // если сессия была инициализирована правильно (т.е. не произошло ее истечения или повреждения)
+              } 
               else {
                 $this->load_guest();
                 _dbg('Ошибка безопасности: не прошла проверка по User Agent!');
@@ -407,7 +421,7 @@ class Application {
   /**
    * Проверка на то, что пользователь является поисковым роботом *
    */
-  function init_check_bot() {
+  protected function init_check_bot() {
     $mode = $this->get_opt('check_bots');
     if ($mode == 0)
       return false; // если режим проверки ботов выключен, выходим сразу
@@ -426,10 +440,10 @@ class Application {
   /**
    * Отслеживание и обновление времени последнего визита *
    */
-  function init_last_visit() {
+  protected function init_last_visit() {
     if (!$this->is_guest()) {
       if (!empty($this->forum))
-        $forum_id = $this->forum ['id'];
+        $forum_id = $this->forum['id'];
       else
         $forum_id = 0;
       $curtime = $this->time;
@@ -453,7 +467,7 @@ class Application {
   /** Определение шаблона для отображения сайта. Вынесено в отдельную процедуру, чтобы можно было легко переопределить в объектах-наследниках.
    *
    */
-  function init_style() {
+  protected function init_style() {
     if ($this->get_opt('userlib_allow_template') && $this->get_opt('template', 'user'))
       $this->template = $this->userdata['template'];
     else
@@ -470,10 +484,23 @@ class Application {
       $this->template_lib = 'twig';
   }
 
+  /** Загрузчик для библиотек (классов, названия которых начинаются с Library_).
+   * Используется с версии 3.06 вместо load_lib.
+   * Подключается через spl_autoloader_register, чтобы даёт возможность создавать классы библиотек без include через обычный new.
+   * @param string $classname Имя класса для загрузки
+   */
+  private function lib_loader($classname) {
+    if (substr($classname,0,8)==='Library_') { // 8 is length of "Library_"
+      $filename = 'lib/'.substr($classname,8).'.php';
+      if (!file_exists(__DIR__.'/../'.$filename)) trigger_error('Не найден файл класса '.$filename,E_USER_WARNING);
+      if (!include_once __DIR__.'/../'.$filename) trigger_error('Ошибка в файле класса '.$filename,E_USER_WARNING);
+    }
+  }
+
   /* * Выполнение запрошенного пользователем действия. Действие может вернуть имя шаблона,
     * с помощью которого отображаются результаты. Если нет, берется имя шаблона по умолчанию в виде модуль/действие.htm.
     * Сами данные, полученные в ходе выполнения действия, должны сохраняться в $this->out. * */
-  function process() {
+  protected function process() {
     $action = $this->action;
     if (!is_string($action))
       $this->output_403('Некорректное запрошенное действие!');
@@ -495,7 +522,7 @@ class Application {
     if (defined('CONFIG_debug') && CONFIG_debug >= 4 && !$this->bot_id) {
       $tpass = microtime(true) - $this->start_time;
       $msg = 'Контрольная точка "'.$name.'". Время выполнения: '.sprintf('%.3f', $tpass);
-      if (is_object($this->db)) {
+      if (isset($this->db)) {
         $msg.='. Запросов: '.$this->db->query_count.', время запроса: '.sprintf('%.3f (%.2f)%%', $this->db->query_time, ($this->db->query_time / $tpass) * 100);
       }
       if (function_exists('memory_get_usage')) {
@@ -522,7 +549,9 @@ class Application {
     $sql.= ' ORDER BY priority';
     $subactions = $this->db->select_all($sql);
     for ($i=0, $count=count($subactions); $i<$count; $i++) {
-      if ($module=$this->load_lib($subactions[$i]['library'],false)) {
+      $classname = 'Library_'.$subactions[$i]['library'];
+      if (class_exists($classname)) {
+        $module=new $classname;
         if (method_exists($module,$subactions[$i]['proc'])) {
           $result = call_user_func(array($module,$subactions[$i]['proc']),$subactions[$i]['params']);
           if ($result && is_array($result)) $this->out->IntB_subactions[$subactions[$i]['block']][$result[0]]=$result[1]; // результаты сохраняются в IntB_subactions[имя_блока][имя_шаблона_без_tpl]
@@ -601,7 +630,7 @@ class Application {
    *   Также обновляет значение $this->lastmod в соответствии с временем последнего изменения текста
    * @return string Полученный из базы текст
    */
-  function get_text($id, $type) {
+  function get_text($id, $type):string {
     if ($type < 3) { // такие тексты как правила, объявления и вводные слова пытаемся взять из кеша, чтобы лишний раз не обращаться к БД
       $result = $this->get_cached('Text'.$type.'_'.$id);
       if ($result != NULL)
@@ -620,11 +649,10 @@ class Application {
    * То, из каких ключей в $_SERVER берутся значения для IP-адреса, можно задать в настройке ip_address_source.
    * Это позволяет работать в конфигурациях, где есть reverse proxy, и параметр передается не в REMOTE_ADDR,
    * а в каких-то других переменных, например, в X_REAL_IP.
-   * 
    *
    * @return int
    */
-  function get_ip() {
+  function get_ip():string {
     $ip_source = $this->get_opt('ip_address_source');
     if (!$ip_source) $ip_source="REMOTE_ADDR,HTTP_X_FORWARDED_FOR"; // на случай, если в настройках ничего не указано
     $ip_parts = explode(",",$ip_source);
@@ -634,7 +662,7 @@ class Application {
   }
 
   /** Возвращает ID текущего пользователя * */
-  function get_uid() {
+  function get_uid():int {
     $result = $this->userdata['id'];
     if (!$result)
       $result = 1; // если данных о пользователе нет, возвращаем идентификатор гостя
@@ -642,14 +670,17 @@ class Application {
   }
 
   /** Возвращает ID текущего пользователя без влияния имперсонализации, если она когда-либо будет сделана * */
-  function get_effective_uid() {
+  function get_effective_uid():int {
     return $this->get_uid(); // TODO: пока имперсонализации нет, возвращаем просто UID
   }
 
-  /** Загрузка модуля с указанным именем * */
+  /** DEPRECATED! 
+   * Загрузка модуля с указанным именем. Использовалась до 3.06. 
+   * Теперь следует использовать new Library_ИмяБиблиотеки, при необходимости предварительно проверяя существование класса с помощью class_exists.
+   * 
+   * * */
   function load_lib($name, $fatal = false) {
-//    if (isset($this->libs[$name])) return $this->libs[$name];
-//    else {
+    // trigger_error('Устаревший вызов: load_lib',E_USER_NOTICE);
     $filename = BASEDIR.'lib/'.$name.'.php';
     $result = false;
     if ($this->valid_file($name) && file_exists($filename)) {
@@ -661,7 +692,6 @@ class Application {
         trigger_error('В файле '.$filename.' класс '.$classname.' не найден!', ($fatal) ? E_USER_ERROR : E_USER_WARNING);
       else
         $result = new $classname($this);
-//         $this->libs[$name]=$result; // сохраняем экземпляр библиотеки в кеш
       return $result;
     }
     elseif ($fatal) {
@@ -754,7 +784,9 @@ class Application {
 
     /* Название правильного обработчика должно быть выставлено заранее в переменной template_lib.
       Предполгается, что это делается в функции init_style, но возможна и модификация где-то еще * */
-    $outlib = $this->load_lib($this->template_lib, true); // отсутствие парсера должно вызывать фатальный шаблон, поэтому ставим true
+    $libclass = 'Library_'.$this->template_lib;
+    /** @var iParser $outlib */
+    $outlib = new $libclass;
     if (!($outlib instanceof iParser))
       trigger_error('Библиотека '.$this->template_lib.' не является парсером!', E_USER_ERROR);
     $outlib->set_template($template);
@@ -781,13 +813,14 @@ class Application {
     exit();
   }
 
-  function output_400($message,$code) {
+  function output_400($message,$code,$errors_list = array()) {
     header($_SERVER['SERVER_PROTOCOL'].' 400 Bad request');
     header('Content-Type: application/json;charset=UTF-8');
     header('Cache-Control: no-store');
     if ($_SERVER['SERVER_PROTOCOL']=='HTTP/1.0') header('Pragma: no-cache');
     $result['error']=$code;
     $result['error_description']=$message;
+    if (!empty($errors_list)) $result['errors_list']=$errors_list;
     print (json_encode($result));
     $this->process_mail(); // отправляем почту в случае необходимости
     exit();
@@ -990,7 +1023,7 @@ class Application {
                 'WHERE uid='.intval($uid).' AND uc.cid=uct.cid '.
                 'ORDER BY c_sort';
         $result['contacts'] = $this->db->select_all($sql);
-        $taglib = $this->load_lib('tags', false);
+        $taglib = class_exists('Library_tags') ? new Library_tags : false;
         if ($taglib)
           $result['interests'] = $taglib->get_tags($result['basic']['id'], 1);
         else
@@ -1008,11 +1041,12 @@ class Application {
   }
 
   function load_guest() {
-    $this->userdata = $this->get_cached('Guest');
-    if ($this->userdata === NULL) {
+    $userdata = $this->get_cached('Guest');
+    if ($userdata === NULL) {
       $this->userdata = $this->load_user(1, 1);
       $this->set_cached('Guest', $this->userdata);
     }
+    else $this->userdata=$userdata;
     return $this->userdata; // TODO: проверить, а нужно ли вообще это возвращать?
   }
 
@@ -1020,8 +1054,9 @@ class Application {
    * Именно с этого момента все действия рассматриваются как действия этого
    * пользователя с соответствующими правами доступа * */
   function set_user($userdata, $long = 0) {
-    $this->session(); // создаем сессию, если это необходимо
-    if ($long) {
+    if ($long!=-1) $this->session(); // создаем сессию, если это необходимо
+    else $_SESSION=array(); // иначе создаём в качестве сессии пустой массив
+    if ($long>0) {
       $key = $this->gen_long_key($userdata);
       $period = $this->time + $long * 24 * 60 * 60;
       setcookie(CONFIG_session.'_long', $key, $period, $this->url('/'), false, $this->is_https(), true);
@@ -1029,7 +1064,7 @@ class Application {
 //      unset($userdata['password']);
     $_SESSION['IntB_auth'] = 1; // признак того, что сессия корректно инициализирована
     $_SESSION['IntB_user'] = $userdata; // устанавливаем данные о пользователе
-    $_SESSION['IntB_user_agent'] = preg_replace('|\d+|', '', $_SERVER['HTTP_USER_AGENT']);
+    if ($_SERVER['HTTP_USER_AGENT']!=='Crontab script') $_SESSION['IntB_user_agent'] = preg_replace('|\d+|', '', $_SERVER['HTTP_USER_AGENT']); // проверка на Crontab script нужна, чтобы не было разлогинивания пользователя
     $this->userdata = $userdata;
     $this->lastmod = $this->time;
   }
@@ -1092,8 +1127,8 @@ class Application {
       $lang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '';
       $charset = isset($_SERVER['HTTP_ACCEPT_CHARSET']) ? $_SERVER['HTTP_ACCEPT_CHARSET'] : '';
       $hash = isset($_COOKIE['IntB_uh']) ? $_COOKIE['IntB_uh'] : md5($data['ip'].$agent.$connection.$enc.$lang.$charset); // если у пользователя в cookie стоит идентификатор, используем его, иначе генерируем новый
-      $data['fid'] = isset($this->forum) ? intval($this->forum['id']) : 0; // если загружены данные о текущем разделе, то фиксируем его номер
-      $data['tid'] = isset($this->topic) ? intval($this->topic['id']) : 0; // если загружены данные о текущей теме, то фиксируем ее тоже
+      $data['fid'] = !empty($this->forum) ? intval($this->forum['id']) : 0; // если загружены данные о текущем разделе, то фиксируем его номер
+      $data['tid'] = !empty($this->topic) ? intval($this->topic['id']) : 0; // если загружены данные о текущей теме, то фиксируем ее тоже
       $data['visittime'] = $this->time;
       $data['uid'] = $this->get_uid();
       $data['text'] = $this->get_action_name();
@@ -1134,7 +1169,7 @@ class Application {
    * @param string $action_name Название действия, передаваемое в параметре a скрипту
    * @return string Человекочитаемое описание действия
    */
-  function get_action_name() {
+  public function get_action_name() {
     return 'Совершает неописуемое действие';
   }
 
@@ -1148,6 +1183,7 @@ class Application {
    * 6 -- SHA-2 512 bit от соли+пароля
    * 7 -- SHA-2 512 bit от пароля+соли
    * 8 -- использование функции crypt
+   * 9 -- использование функции password_hash
    * */
   function crypt_password($password, $method, $salt='') {    
     if ($method == 1) return md5($password);
@@ -1158,13 +1194,14 @@ class Application {
     elseif ($method==6) return hash('sha512',$salt.$password);
     elseif ($method==7) return hash('sha512',$password.$salt);
     elseif ($method==8) return crypt($password,$salt);
+    elseif ($method==9) return password_hash($password,$salt);
     else
       return $password;
   }
 
   /** Генерация аутентификационного ключа с привязкой к URL и действию
    * @param $uid integer Идентификатор пользоватля, для которого генерируется ключ * */
-  function gen_auth_key($uid=false, $action=false, $url=false) {
+  function gen_auth_key($uid=false, $action=false, $url=false):string {
     if (!$url)
       $url = substr($_SERVER['REQUEST_URI'], -1, 1) == '/' ? $_SERVER['REQUEST_URI'] : dirname($_SERVER['REQUEST_URI']).'/'; // если url не указан явно, берем его из адреса текущего запроса, отрезая хвостовую часть (в ней хранится действие)
     if (!$action)
@@ -1179,49 +1216,54 @@ class Application {
       $userdata = $this->load_user($uid, 0);
     $url = str_replace('/./', '/', $url); // для случаев, если раздел является корневым и имеет HURL в виде точки
     $secret = $this->get_opt('site_secret'); // секретный ключ сайта, хранимый в настройках
-    return $uid.'-'.md5($uid.$action.$secret.$userdata['rnd'].$url.$userdata['password'].$userdata['pass_crypt'].$userdata['email']);
+    return $uid.'-'.hash('sha256',$uid.$action.$secret.$userdata['rnd'].$url.$userdata['password'].$userdata['pass_crypt'].$userdata['email']);
   }
 
   /** Генерация ключа для долгосрочной идентификации * */
-  function gen_long_key($userdata, $session_name = false) {
+  function gen_long_key($userdata, $session_name = false):string {
     if (!$session_name)
       $session_name = CONFIG_session;
     // TODO: возможно, доделать добавку очищенного User Agent
-    return $userdata['id'].'-'.md5($userdata['id'].$userdata['password'].$userdata['rnd'].$userdata['pass_crypt'].$session_name);
+    return $userdata['id'].'-'.hash('sha256',$userdata['id'].$userdata['password'].$userdata['rnd'].$userdata['pass_crypt'].$session_name);
   }
 
   /** Проверка, является ли пользователь гостем.
    * @return boolean TRUE, если пользователь -- гость.
    */
-  function is_guest() {
+  function is_guest():bool {
     if (!isset($this->userdata['id']) || $this->userdata['id'] == 1)
       return true;
-    else
-      return false;
+    else return false;
   }
 
   /** Проверка, есть ли у пользователя права администратора  или founderа* */
-  function is_admin($founder = false) {
+  function is_admin($founder = false):bool {
     $varname = $founder ? 'founder' : 'admin';
     return (!empty($this->userdata[$varname]));
   }
 
   /** Получение отображаемого имени текущего пользователя
    * @return string Логин пользователя * */
-  function get_username() {
+  function get_username():string {
     return $this->userdata['display_name'];
   }
 
   /** Получение логина текущего пользователя
    * @return string Логин пользователя * */
-  function get_userlogin() {
+  function get_userlogin():string {
     return $this->userdata['login'];
   }
+
+  /** Получение логина текущего пользователя
+   * @return string Логин пользователя * */
+  function get_userlevel():string {
+    return $this->userdata['level'];
+  }  
 
   /** Ссылка на профиль пользователя
    * @param $uid integer — идентификатор пользователя. Если равен нулю, формируется ссылка для текущего пользователя
    */
-  function get_user_url($uid=false,$login=false) {
+  function get_user_url($uid=false,$login=false):string {
     $current_uid = $this->get_uid();
     if (!$uid) $uid = $current_uid;
     if (!$login && $uid==$current_uid) $login = $this->get_userlogin();
@@ -1242,7 +1284,7 @@ class Application {
    * @param $forum integer Идентификатор раздела, для которого проверяются права. Если равен FALSE, то в качестве такового берется текущий раздел
    * @return TRUE, если права на действие имеются.
    * */
-  function check_access($action, $forum = false) {
+  function check_access($action, $forum = false):bool {
     if ($forum === false)
       $forum = isset($this->forum['id']) ? $this->forum['id'] : 0;
     if ($action !== 'super' && $this->userdata['admin'])
@@ -1301,20 +1343,16 @@ class Application {
    *
    * @param string $rel_path Часть пути относительно корня
       */
-  function url($rel_path) {
-    /*          if ($this->sitepath==='/') $site_path=''; // чтобы избежать двойного / в пути к корню.
-      else $site_path = $this->sitepath;
-      if ($rel_path==='/') $rel_path='';
-      return $site_path.'/'.$rel_path; */
-    if ($rel_path === '/')
-      $rel_path = ''; // чтобы не было двойных // в адресе
+  function url($rel_path):string {
+    if (!isset($this->sitepath)) return $rel_path;
+    if ($rel_path === '/') $rel_path = ''; // чтобы не было двойных // в адресе
     return $this->sitepath.$rel_path; // после дорабтки алгоритма в $this->sitepath URL всегда кончается на /
   }
 
   /** Проверяет, что запрос нужно обрабатывать как https (требуется для методов http и session) 
    * @return boolean TRUE, если нужно использовать HTTPS.
   */
-  function is_https() {
+  function is_https():bool {
     return $this->get_opt('force_https') || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off');
   }
 
@@ -1324,7 +1362,7 @@ class Application {
    * @param string $path Путь относительно корня сайта
    * @return string Полная ссылка
    */
-  function http($path) {
+  function http($path):string {
     $result =  $this->is_https() ? 'https://' : 'http://';
     $result.= $_SERVER['HTTP_HOST'].$path;
     return $result;
@@ -1350,7 +1388,7 @@ class Application {
 
   /** Получение данных из серверного кеша * */
   function get_cached($cache_id) {
-    if (is_object($this->server_cache))
+    if (isset($this->server_cache))
       $result = $this->server_cache->get($cache_id);
     else
       $result = NULL;
@@ -1359,12 +1397,12 @@ class Application {
 
   /** Сохранение данных в серверный кеш * */
   function set_cached($cache_id, $data) {
-    if (is_object($this->server_cache))
+    if (isset($this->server_cache))
       $this->server_cache->set($cache_id, $data);
   }
 
   function clear_cached($cache_id) {
-    if (is_object($this->server_cache))
+    if (isset($this->server_cache))
       $this->server_cache->clear($cache_id);
   }
 
@@ -1404,11 +1442,12 @@ class Application {
   /** В случае, если требуется отправка почты (почтовый буфер не пуст), подключает модуль mail и передает ему буфер с почтовыми сообщениями для отправки * */
   function process_mail() {
     if (count($this->mail) > 0) {
-      $mailsender = $this->load_lib('mail');
+      $mailsender = new Library_mail;
       if (!$mailsender)
         trigger_error('Не удалось загрузить модуль отправки почты! Рассылка не будет произведена', E_USER_WARNING);
       else {
-        $outlib = $this->load_lib($this->template_lib, true); // отсутствие парсера должно вызывать фатальный шаблон, поэтому ставим true
+        $libclass = 'Library_'.$this->template_lib;
+        $outlib = new $libclass;
         if (!($outlib instanceof iParser))
           trigger_error('Библиотека '.$this->template_lib.' не является парсером!', E_USER_WARNING);
         else {
@@ -1485,14 +1524,6 @@ class Application {
     file_put_contents($filename, $buffer, FILE_APPEND | LOCK_EX); // во избежание затирания лога пытаемся записать его в эксклюзивном режиме
   }
 
-  /** Проверка, работаем ли мы в режиме Центра Администрирования (нужно для модулей администрирования, которые работают только оттуда).
-   * Для основного приложения это утверждение всегда неверно, поэтому возвращаем false.
-   * Для собственно модуля администрирования здесь будет дополнительная аутентификация.
-   */
-  /*        function is_admin_mode() { // закомментировано по причине того, что для обычной работы достаточно is_admin, а в админке будет своя проверка
-    return false;
-    } */
-
   /** Добавление META-тега в буфер meta или meta_properties. (Буфер meta выводится в виде тегов с <meta name="">, буфер meta_properties -- в виде <meta property="..">. **/
   function meta($name, $value, $property=false) {
     if ($property) $this->out->meta_properties[$name]=$value;
@@ -1506,7 +1537,7 @@ class Application {
     if ($id) $tag['id'] = $id;
     $this->out->link[] = $tag;
   }
-  
+ 
   /** Добавление тега SCRIPT в буфер meta * */
   /*        function script($src, $defer=false) {
     $tag['type'] = 'script';
@@ -1518,7 +1549,7 @@ class Application {
   // TODO: добавить функцию noindex
 
   /** Проверка, что выполняемый запрос отправлен POST-методом * */
-  function is_post() {
+  function is_post():bool {
     return ($_SERVER['REQUEST_METHOD'] === 'POST');
   }
 
@@ -1803,7 +1834,7 @@ class Application {
     } */
 
   function shutdown() {
-    if (is_object($this->db))
+    if (isset($this->db))
       $this->db->close();
   }
 
@@ -1968,17 +1999,16 @@ interface iExternalAuth {
 
 /** Общий предок для всех классов-библиотек, содержит только общее статическое поле -- ссылку на приложение * */
 class Library {
-
-/** @var Application $app **/
-  protected static $app;
+  protected static Application $app;
+  protected function app():Application {
+    return self::$app;
+  }
 
   static function init(Application $applink) {
     self::$app = $applink;
   }
-
 }
 
-// interface iUser
 
 
 /** Получение значения из хеша или значения по умолчанию, если в хеше такого ключа не имеется. **/

@@ -8,4 +8,6 @@ www/download/
 www/s/anon/
 www/*.html
 nbproject/
-
+etc/ib_config.php
+etc/routes.cfg
+etc/routes.txt

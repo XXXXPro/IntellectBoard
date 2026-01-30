@@ -18,19 +18,19 @@
     }
     
     function generate_html($data) {    
-      if (!isset($data->intb->link)) $data->intb->link=Library::$app->http(Library::$app->url('/'));
-      if (!isset($data->intb->descr)) $data->intb->descr = Library::$app->get_opt('site_description');
+      if (!isset($data->intb->link)) $data->intb->link=$this->app()->http($this->app()->url('/'));
+      if (!isset($data->intb->descr)) $data->intb->descr = $this->app()->get_opt('site_description');
         $buffer='<?xml version="1.0" encoding="utf-8"?>
   <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:slash="http://purl.org/rss/1.0/modules/slash/" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
   <title>'.htmlspecialchars($data->intb->title).'</title>
   <link>'.htmlspecialchars($data->intb->link).'</link>
   <description>'.htmlspecialchars($data->intb->descr).'</description>
-  <lastBuildDate>'.date('r',Library::$app->lastmod).'</lastBuildDate>
-  <atom:link href="'.Library::$app->http($_SERVER['REQUEST_URI']).'" rel="self" type="application/rss+xml" />
+  <lastBuildDate>'.date('r',$this->app()->lastmod).'</lastBuildDate>
+  <atom:link href="'.$this->app()->http($_SERVER['REQUEST_URI']).'" rel="self" type="application/rss+xml" />
   <generator>Intellect Board 3 Pro</generator>';
       for ($i=0, $count=count($data->items); $i<$count; $i++) 
-        if ($data->items[$i]['postdate']>Library::$app->if_modified_time) { // на всякий случай еще раз проверяем время, чтобы не отдавать старые записи, но все же учитывать start_time нужно сразу, еще на этапе вызова RSS-действия 
+        if ($data->items[$i]['postdate']>$this->app()->if_modified_time) { // на всякий случай еще раз проверяем время, чтобы не отдавать старые записи, но все же учитывать start_time нужно сразу, еще на этапе вызова RSS-действия 
         $buffer.=' <item>
           <title>'.htmlspecialchars(trim($data->items[$i]['title'])).'</title>
           <link>'.htmlspecialchars($data->items[$i]['link']).'</link>
@@ -43,8 +43,8 @@
           </item>';
         }
         $buffer.='</channel></rss>';
-        Library::$app->checkpoint('RSS сгенерирован.');
-        if (Library::$app->get_opt('debug') && !empty($GLOBALS['IntBF_debug'])) $buffer.='<!--'.htmlspecialchars($GLOBALS['IntBF_debug']).'-->';
+        $this->app()->checkpoint('RSS сгенерирован.');
+        if ($this->app()->get_opt('debug') && !empty($GLOBALS['IntBF_debug'])) $buffer.='<!--'.htmlspecialchars($GLOBALS['IntBF_debug']).'-->';
         return $buffer;
     }
  }

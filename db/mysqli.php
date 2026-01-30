@@ -13,7 +13,7 @@
 *    @package Database
 **/
 
-class Database_mysqli extends Database implements iDBDriver {
+class Database_mysqli extends Database {
   private $link;
 /** Open a connection to a database sever.
 **/
@@ -26,7 +26,7 @@ class Database_mysqli extends Database implements iDBDriver {
     if (empty($params['DB_port'])) $params['DB_port']=NULL;
     if (empty($params['DB_name'])) $params['DB_name']=NULL;
     $this->link=mysqli_connect($host,$params['DB_username'],$params['DB_password'],$params['DB_name'],$params['DB_port'],$params['DB_socket']);
-    if (!empty($params['DB_charset'])) mysqli_query($this->link,'SET NAMES utf8');
+    if (!empty($params['DB_charset'])) mysqli_query($this->link,'SET NAMES utf8mb4');
     mysqli_query($this->link,"SET sql_mode = 'ANSI_QUOTES'");
     if (!$this->link) trigger_error('Ошибка подключения к базе данных! '.$this->error_str(),E_USER_ERROR);    
   }
@@ -59,7 +59,7 @@ class Database_mysqli extends Database implements iDBDriver {
 *  @return mixed FALSE if there were errors, number of affected rows -- if successful
 *  @param string $sql SQL query to execute.
 **/
-  function _query($sql,$params=false) {
+  function _query($sql,$params=null) {
     while (preg_match('|^(\s*SELECT\s+.*?\W)CAST\((.*?)\s+AS\s+integer\)(.*?\s+FROM)|is',$sql)) {
       $sql = preg_replace('|^(\s*SELECT\s+.*?\W)CAST\((.*?)\s+AS\s+integer\)(.*?\s+FROM)|is','$1CAST($2 AS unsigned integer)$3',$sql);    
     }
@@ -84,12 +84,12 @@ class Database_mysqli extends Database implements iDBDriver {
     return mysqli_error($this->link);
   }
   
-/*  function explain($sql) {
+  function explain($sql) {
     if (preg_match('/^\s*SELECT/is',$sql)) {
       $sql2 = "EXPLAIN $sql";
-      $res2 = mysqli_query($sql2,$this->link);
+      $res2 = mysqli_query($this->link,$sql2);
       $buffer='<table style="width: 100%" style="border: #888 1px solid"><tr>';
-      for ($i=0; $i<mysqli_num_fields($res2); $i++) $buffer.='<td><b>'.mysqli_field_name($res2,$i).'</b>';
+      // for ($i=0; $i<mysqli_num_fields($res2); $i++) $buffer.='<td><b>'.mysqli_field_name($res2,$i).'</b>';
       while ($row=mysqli_fetch_row($res2)) {
         $buffer.='<tr>';
         foreach ($row as $column) $buffer.='<td>'.$column.'</td>';
@@ -100,10 +100,10 @@ class Database_mysqli extends Database implements iDBDriver {
     }
     else $buffer='';
     return $buffer;
-  }*/
+  }
 
 /** Fetches associative array from query result.
-*    @param resource $res Query result returned by query.
+*    @param resource|Mysqli_result $res Query result returned by query.
 *    @return array Hash of fields from current row.
 **/
   function fetch_array(&$res) {
@@ -111,7 +111,7 @@ class Database_mysqli extends Database implements iDBDriver {
   }
 
 /** Fetches array from query result.
-*    @param resource $res Query result returned by query.
+*    @param resource|Mysqli_result $res Query result returned by query.
 *    @return array Array of fields from current row.
 **/
   function fetch_row(&$res) {
@@ -119,7 +119,7 @@ class Database_mysqli extends Database implements iDBDriver {
   }
 
 /** Frees the query result.
-*    @param resource $res Query result returned by query.
+*    @param resource|Mysqli_result $res Query result returned by query.
 **/
   function free_res(&$res) {
     return mysqli_free_result($res);
@@ -128,7 +128,7 @@ class Database_mysqli extends Database implements iDBDriver {
 /** Converts INSERT operator into INSERT IGNORE. Database-specific, should be overriden in descendants.
 *  Called from store when $ignore is TRUE.
 *  @return string SQL with INSERT IGNORE
-*  @param string $data 
+*  @param array $data 
 **/
   function insert_ignore($table,$data) {
     $sqlarray1=array();

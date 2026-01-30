@@ -4,6 +4,150 @@
 //# sourceMappingURL=head.load.min.js.map
 */
 
+// FormStorage script for saving forms
+function FormStorage(form_element,storage_key,headers=null) {
+  var self=this;
+  if (!form_element instanceof HTMLFormElement) throw Error('Parameter form_element is not HTML form!');
+  self.form_element = form_element;
+  if (!storage_key instanceof String) throw Error('Parameter storage_key is not string!');
+  self.storage_key = storage_key;
+  form_element.addEventListener('submit',function (e) { self.processFormSubmit(e) });
+  self.headers = headers;
+  self.save_mode = null;  // we will enable it when some input occurs
+  form_element.addEventListener('input',function (e) { if (self.save_mode===null) self.save_mode = true; }); // enabling autosave on first input
+  window.addEventListener('pagehide',function (e) { self.save.call(self) }); // saving form when user goes away
+
+  self.getFormData = function() {
+    let data = {};
+    for (let i=0, count=self.form_element.elements.length; i<count; i++) {
+      let element = self.form_element.elements[i];
+      if (!element.name) continue; // skipping elements without name attribute
+      if (element.getAttribute('autocomplete')==='off') continue; // skipping elements with autocomplete="off" (i.e. CAPTCHA)
+      if (element.tagName==='SELECT') {
+        data[element.name]=new Array;
+        for (let j=0; j<element.selectedOptions.length; j++) data[element.name].push(element.selectedOptions.item(j).value);
+      }
+      else {
+        if (element.tagName!=='BUTTON' && element.type!=='password' && element.type!=='file' && element.type!=='checkbox' && element.type!=='radio') {
+          if (element.name.includes('[]')) {
+            if (!data.hasOwnProperty(element.name)) data[element.name]=new Array();
+            data[element.name].push(element.value);
+          }
+          else data[element.name]=element.value;
+        }
+        if (element.type==='checkbox') {
+          if (!data.hasOwnProperty(element.name)) data[element.name]=new Array();
+          if (element.checked) data[element.name].push(element.value);
+        }
+        if (element.type==='radio' && element.checked===true) data[element.name]=element.value; 
+      }
+    }
+    return data;
+  }
+
+  self.fillFormData = function(data) {
+    for (let field in data) {
+      let elements = self.form_element.querySelectorAll('[name="'+field+'"]');
+      for (var i=0; i<elements.length; i++) {
+        var element = elements[i];
+        if (element!==null) {
+          if (element.tagName==='SELECT') { // processing select tag
+            for (let j=0; j<element.options.length; j++) element.options.item(j).selected=data[field].includes(element.options.item(j).value);
+          }
+          else { 
+            if (element.tagName!=='BUTTON' && element.type!=='password' && element.type!=='file' && element.type!=='checkbox' && element.type!=='radio'  && element.type!=='submit' && element.type!=='button' && element.type!=='reset') { // common elements (like text, date, email and so on)
+              if (element.name.includes('[]')) {
+                element.value = data[element.name].shift();
+              }
+              else element.value=data[field];
+            }
+            if (element.type==='checkbox') { // checkboxes
+              element.checked=data[field].includes(element.value);
+            }
+            if (element.type==='radio') element.checked=(data[field]==element.value); 
+          }
+        }
+      }
+    }
+  }
+
+  self.processFormSubmit = function(e) {
+    document.body.classList.add('intb-loading-cursor');
+    self.onBeforeSubmit(self.form_element);
+    e.preventDefault();
+    var formData = new FormData(self.form_element);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', self.form_element.action, true);
+    for (const header in self.headers) xhr.setRequestHeader(header,self.headers[header]);
+    xhr.onload = function() {
+      if (xhr.status<400) { 
+        window.localStorage.removeItem(self.storage_key); // if status is not error, form is submitted successfully, so removing its data from localStorage
+        self.save_mode = false;
+      }
+      else self.save_mode =  true; // restoring form saving if submitting failed
+      self.onSubmitResult(xhr);
+      document.body.classList.remove('intb-loading-cursor');
+    };
+    xhr.send(formData); 
+  }
+
+  self.onBeforeSave = function () {}  
+  self.onBeforeSubmit = function () {}  
+  self.onSave = function (data) {}  
+  self.onLoad = function (data) {}
+  self.gotoUrl = function (url) {
+    console.log(url);
+    var new_url = new URL(url);
+    new_url.hash = '';
+    var old_url = new URL(window.location);
+    old_url.hash = '';
+    window.location.href=url;
+    if (new_url.href==old_url.href) {
+      window.location.reload(); // изменение только хеша не приводит к обновлению страницы, поэтому сделаем его принудительно
+    }
+  }
+  self.onSubmitResult = function (xhr) {
+    console.log(xhr);
+    if (xhr.status===200 || xhr.status===206 || xhr.status===204) {
+        self.gotoUrl(xhr.responseURL);
+    } 
+    else if (xhr.status===201 || xhr.status===302 || xhr.status===303) {
+      self.gotoUrl(xhr.getResponseHeader('Location'));
+    } 
+    else {
+      self.onSubmitError(xhr);
+    }
+  }
+  self.onSubmitError = function(xhr) {
+      console.log(xhr.response);
+  }
+  self.onDecodeError = function(data,error) {} 
+
+  self.save = function() {
+    self.onBeforeSave();
+    if (self.save_mode) {
+      var data = self.getFormData();
+      if (data) {
+        self.onSave(data);
+        window.localStorage.setItem(self.storage_key,JSON.stringify(data));
+      }
+    }
+  }
+
+  self.load = function () {
+    let data = window.localStorage.getItem(self.storage_key);
+    if (data===null) return; // if no stored data, then nothing to do, just exiting
+    try {
+      data = JSON.parse(data);
+      self.onLoad(data);
+      self.fillFormData(data);
+    }
+    catch (error) {
+      self.onDecodeError(data,error);
+    }
+  }
+}
+
 // Intellect Board Script
 
 function IntB_main(opts) {
@@ -59,38 +203,41 @@ function IntB_main(opts) {
     }
   });
   // отпрвка форм по Ctrl+Enter
-  $('textarea').keyup(function(e) { if (e.ctrlKey && e.keyCode==13) $(this).closest('form').submit(); });
+  $('textarea').keyup(function(e) { if (e.ctrlKey && e.keyCode==13) e.target.form.requestSubmit(); });
   // подтверждение опасных действий
   $('.confirm:not(.ajax)').click(function (e) {
       return (confirm('Вы действительно хотите выполнить это действие?'));
   });
 
   // действия по разворачиванию частей сообщений: цитат, блоков кода и спойлеров
-  $('blockquote, code').each(function (k,v) {
-    function setFolding() {
-      if (v.scrollHeight > v.clientHeight && !$('> .foldlink', v.parentNode).length) {
-        $('<a href="#" class="foldlink">Развернуть</a>').insertBefore(v).click(function (e) {
-	        e.preventDefault();
-	        $(v).toggleClass('unfolded');
-        });
-      }
+  $('blockquote').each(function (k,v) {
+    if (v.scrollHeight>v.clientHeight) {
+      $('<a href="#" class="foldlink">Развернуть</a>').insertBefore(v).click(function (e) {
+        e.preventDefault();
+        $(this).parent().find('blockquote').toggleClass('unfolded');
+      });
     }
-    setFolding();
-    $('img', v).on('load', setFolding);
   });
-
-  $('.ptext .cutlink').click(function (e){
+  $('code').each(function (k,v) {
+    if (v.scrollHeight > v.clientHeight) {
+      $('<a href="#" class="foldlink">Развернуть</a>').insertBefore(v).click(function (e) {
+        e.preventDefault();
+        $(this).parent().find('code').toggleClass('unfolded');
+      });
+    }
+  });
+  $('.posts').on('click','.ptext .cutlink',function (e) {
      e.preventDefault();
      $(e.target).next().show();
      $(e.target).hide();
   });
-  $('.ptext .spoiler').click(function (e){
+  $('.posts').on('click','.ptext .spoiler',function (e) {
      e.preventDefault();
      $(e.target).next().toggleClass('invis');
   });
 
   // пометка сообщений для последующего переноса или удаления без перезагрузки страницы
-  $('.postact .postmark').click(function(e){
+  $('.posts').on('click','.postact .postmark', function(e){
      var targ=e.target.tagName=="A" ? e.target : e.target.parentNode;
      jQuery.ajax(targ.href+'&ajax=1',{ complete: function(data,status,xhr) {
         if (data.responseJSON) {
@@ -130,25 +277,25 @@ function IntB_main(opts) {
   });
 
   // AJAX-рейтинг без обновления страницы
-  $('.prating a').click(function (e) {
+  $('.posts').on('click','.prating a',function (e) {
      var tg = e.target;
      if (e.target.tagName!='A') tg=e.target.parentNode;
      if (!$(tg).hasClass('norate')) {
-       jQuery.ajax(tg.href+'&ajax=1',{ complete: function(data,status,xhr) {
-         if (data.responseJSON) {
-           if (data.responseJSON.result=='done') {
-             $(tg).closest('.prating').find('.prvalue').text(data.responseJSON.value);
-             $(tg).closest('.prating').find('a').attr('href','#');
-           }
-           $(tg).closest('.prating').find('a').attr('title',data.responseJSON.message);
-           $(tg).closest('.prating').find('a').addClass('norate');
-         }
-       }});
+       jQuery.ajax(tg.href+'&ajax=1',{ 
+        dataType: 'html',
+        success: function(data,status,xhr) {
+          var elm = jQuery(e.target).closest('.prating');
+          jQuery(elm).replaceWith(data);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.error('Error loading:', textStatus, errorThrown);
+        }
+       });
      }
      return false;
   });
   // удаление объекта со страницы, если есть класс confirm, то с подтверждением
-  $('.ajax').click(function (e) {
+  $('#ib_all').on('click','.ajax', function (e) {
     var target=e.target
     if (e.target.tagName!='A') target=$(target).parents('a')[0];
     var flag = true;
@@ -178,7 +325,7 @@ function IntB_main(opts) {
     }
   );
 
-  self.load_more = function (e) {
+  $('.posts').on('click','.load_more',function (e) {
     var url =e.target.href;
     if (url.indexOf('#')>0) url=url.replace('#','&ajax=1#');
     else url=url+'&ajax=1';
@@ -186,11 +333,9 @@ function IntB_main(opts) {
       $(e.target).hide();
       jQuery(e.target).after(data.responseText);
       history.pushState(null, null, url.replace('&ajax=1',''));
-      $('.load_more').click(self.load_more);      
     }});
     return false;
-  };
-  $('.load_more').click(self.load_more);
+  });
 
   //обработка различных классов, требующих подгрузки специальных скриптов
   // визуальный редактор для HTML
@@ -212,9 +357,65 @@ function IntB_main(opts) {
       });
     });
   }
+
   // визуальный редактор для bbcode
   var bbcode_nodes=$('.bbcode');
-  if (opts.draft && opts.draft_reset && typeof(Storage)!=="undefined") localStorage.setItem('IntB_'+opts.draft,null); // сброс черновика, если предыдущее сообщение было успешно отправлено
+
+  // автосохранение форм
+  var postform = document.querySelector('form.postform');
+  if (!postform) postform = document.querySelector('form.miniform');
+  if (postform) {
+    var fstor = new FormStorage(postform,'IntB_'+opts.draft,{ 'Accept' : 'application/json' });
+    self.fstor = fstor;
+    fstor.onDecodeError = function(text,error) {
+      var data = { 'post[text]': text };
+      if (error instanceof SyntaxError) this.fillFormData(data); // для сохранения обратной совместимости, если в хранилище лежит только текст сообщения
+    }
+    fstor.onBeforeSave = function(data) {
+      bbcode_nodes.sceditor('instance').updateOriginal();
+    }
+    fstor.putErrorMessage = function(msg,level) {
+      var msg_container=document.getElementById('messages_container');
+      if (msg_container) {
+        var new_elm=document.createElement('div');
+        if (!level) level=3;
+        else level=parseInt(level);
+        var cls = ['msg_ok','msg_warn','msg_error'][level-1];
+        new_elm.className=cls;
+        new_elm.innerText=msg;
+        msg_container.appendChild(new_elm);
+      }
+      else alert(msg);
+    }
+    fstor.onSubmitError = function (xhr) {
+      try {
+        var msg_container=document.getElementById('messages_container');
+        msg_container.scrollIntoView(true);
+        if (msg_container) msg_container.innerHTML=''; // удаляем старые сообщения об ошибках
+        var errors = JSON.parse(xhr.response);
+        if (errors.errors_list instanceof Array) {
+          for (var i=0; i<errors.errors_list.length; i++) fstor.putErrorMessage(errors.errors_list[i]['text'],errors.errors_list[i]['level']);
+        }
+        else if (errors.error_description) {
+          fstor.putErrorMessage(errors.error_description,3);
+        }
+      }
+      catch (e) {
+        console.log(e);
+        fstor.putErrorMessage('При отправке возникла ошибка: '+xhr.responseText);
+      }
+    }
+
+    document.addEventListener('IntBLoaded',function () { // это нужно запускать в самом конце, когда уже всё загрузилось, и основные скрипты выполнены
+      setTimeout(function () { // пустой таймаут, чтобы избежать состояния гонок с другими обработчиками IntBLoaded
+      if (!opts.draft.startsWith('post') || (window.localStorage.getItem('IntB_'+opts.draft)!=null && confirm('Восстановить отредактированный вариант сообщения из автосохранения?')===true)) {      
+        fstor.load.call(fstor);
+      }
+      setInterval(fstor.save.bind(fstor),10000); // автосохранение каждые 10 секунд          
+      },0);
+    });
+  }
+
   if (opts.wysiwyg && opts.wysiwyg!='0' && bbcode_nodes.length) {
     head.load([scepath+'minified/themes/default.min.css',scepath+'minified/jquery.sceditor.min.js',
       opts.basedir+'js/sceditor/minified/formats/bbcode.js',scepath+'languages/ru.js'],function() {
@@ -237,18 +438,10 @@ function IntB_main(opts) {
       bbcode_nodes.sceditor('instance').keyDown(function(e) {        
           if (e.ctrlKey && e.keyCode==13) {
             bbcode_nodes.sceditor('instance').updateOriginal();
-            $(e.target).closest('form').submit();
+            e.target.form.requestSubmit();
           }
       });
-      if (typeof(Storage)!=="undefined" && opts.draft) {
-        $('.bbcode').val(localStorage.getItem("IntB_"+opts.draft));
-        bbcode_nodes.sceditor('instance').blur(function(){
-          localStorage.setItem('IntB_'+opts.draft,$('.bbcode').sceditor('instance').val());
-        });
-        setInterval(function () {
-          localStorage.setItem('IntB_'+opts.draft,$('.bbcode').sceditor('instance').val());
-        },15000);
-      }
+
       var mini_nodes=$('.miniform');
       if (mini_nodes.length) {
          mini_nodes.find('.sceditor-toolbar').hide();
@@ -262,26 +455,9 @@ function IntB_main(opts) {
            mini_nodes.find('.user_field').slideDown();
          });
       }
-//      $('#ib_all div.sceditor-container').show();
     });
   }
 
-  // восстановление сохраненных данных и организация автосохранения, если виз. редактор выключен
-  if (bbcode_nodes.length && typeof(Storage)!=="undefined" && (!opts.wysiwyg || opts.wysiwyg=='0')) {
-    this.paste_quoted(localStorage.getItem("IntB_"+opts.draft));
-    setInterval(function () {
-      localStorage.setItem('IntB_'+opts.draft,bbcode_nodes.val());
-    },15000);
-    bbcode_nodes.change(function (e) {
-      localStorage.setItem('IntB_'+opts.draft,bbcode_nodes.val());
-    });
-  }
-  // сброс сохраненного черновика при отправке формы
-  if (bbcode_nodes.length && typeof(Storage)!=="undefined") {
-    bbcode_nodes.parents('form').submit(function (e) {
-      localStorage.removeItem('IntB_'+opts.draft);
-    });
-  }
   var mini_bbcode_nodes=$('.mini_bbcode');
 
   var date_nodes = $('.date');
@@ -378,13 +554,68 @@ function IntB_main(opts) {
     frm.action="preview.htm";
     frm.enctype="application/x-www-form-urlencoded";
     frm.elements['authkey'].setAttribute('name', 'disabled_authkey'); // убираем ключ из формы, так как он не для preview, а для другого action
-    bbcode_nodes.sceditor('instance').updateOriginal();
+    if (bbcode_nodes.sceditor!==undefined) bbcode_nodes.sceditor('instance').updateOriginal();
     frm.submit();
     frm.elements['disabled_authkey'].setAttribute('name', 'authkey');
     frm.target=old_target;
     frm.action=old_action;
     frm.enctype=old_enctype;
   });
+
+  jQuery('input.user_finder').each(function (i,el) {
+    let list_id = el.getAttribute('list');
+    let list_elm = document.getElementById(list_id);
+    if (!list_elm) return;
+    let prev_timer = null;
+    el.addEventListener('input', function (e) {
+      if (e.inputType !== undefined) {
+        if (prev_timer!=null) clearTimeout(prev_timer);
+        prev_timer = setTimeout(function() {
+          jQuery.get(opts.basedir+'search/complete_user.htm','q='+el.value,function(users) {
+            var opts = users.map(function (item) { let elm = document.createElement('option'); elm.value=item; return elm });
+            list_elm.replaceChildren(...opts);
+          },'json');
+        },800);
+      }
+    });
+  });
+
+  jQuery('input.tag_finder').each(function (i,el) {
+    let list_id = el.getAttribute('list');
+    let list_elm = document.getElementById(list_id);
+    if (!list_elm) return;
+    let prev_timer = null;
+    el.addEventListener('input', function (e) {
+      if (e.inputType !== undefined) {
+        if (prev_timer!=null) clearTimeout(prev_timer);
+        prev_timer = setTimeout(function() {
+          jQuery.get(opts.basedir+'search/complete_tag.htm','q='+el.value,function(users) {
+            var opts = users.map(function (item) { let elm = document.createElement('option'); elm.value=item; return elm });
+            list_elm.replaceChildren(...opts);
+          },'json');
+        },800);
+      }
+    });
+  });  
+
+  jQuery('input.topic_id_finder').each(function (i,el) {
+    let list_id = el.getAttribute('list');
+    let list_elm = document.getElementById(list_id);
+    if (!list_elm) return;
+    let prev_timer = null;
+    el.addEventListener('input', function (e) {
+      if (e.inputType !== undefined) {
+        if (prev_timer!=null) clearTimeout(prev_timer);
+        if (el.value.match(/^\d+$/)!==null) return;
+        prev_timer = setTimeout(function() {
+          jQuery.get(opts.basedir+'search/complete_topic.htm','q='+el.value,function(users) {
+            var opts = users.map(function (item) { let elm = document.createElement('option'); elm.value=item.id; elm.label=item.title; return elm });
+            list_elm.replaceChildren(...opts);
+          },'json');
+        },800);
+      }
+    });
+  });    
 
   var sandwich_main = document.getElementById('intb_sandwich_main');
   if (sandwich_main) {
@@ -427,6 +658,18 @@ function IntB_main(opts) {
     }
   });
 
+  window.addEventListener('online', function (e) {
+    $('.prating a').removeClass('unclickable');
+    console.log('Going online');
+    $('.submit button').attr('disabled',false);
+  });
+
+  window.addEventListener('offline', function (e) {
+    $('.prating a').addClass('unclickable');
+    console.log('Going offline');
+    $('.submit button').attr('disabled',true);
+  });  
+
   if (!navigator.canShare) $('#quotemenu_share').addClass('invis');
   if ($('form.postform').find('textarea[name="post[text]"]').length == 0) $('#quotemenu_quote').addClass('invis');
 
@@ -437,22 +680,25 @@ function IntB_main(opts) {
     }
   });
 
-  document.getElementById('quotemenu_quote').addEventListener("click", function(e) {
-    self.paste_quoted('[quote=' + self.stored_user + ']' + self.stored_quote + '[/quote]');
-    $('#quotemenu').addClass('invis');
-  });
-  document.getElementById('quotemenu_copy').addEventListener("click", async function (e) {
-    if (navigator.clipboard) navigator.clipboard.writeText(self.stored_quote + "\nИсточник: " +document.location.href);
-    $('#quotemenu').addClass('invis');
-  });
-  document.getElementById('quotemenu_share').addEventListener("click", async function (e) {
-    if (navigator.canShare && navigator.canShare(self.stored_quote)) await navigator.share(self.stored_quote);
-    $('#quotemenu').addClass('invis');
-  });
-  document.getElementById('quotemenu_vk').addEventListener("click", async function (e) {
-    window.open('https://vk.com/share.php?url=' + encodeURIComponent(document.location.href) + '&comment=' + encodeURIComponent(self.stored_quote))
-    $('#quotemenu').addClass('invis');
-  });  
+  var quote_menu_elm = document.getElementById('quotemenu_quote');
+  if (quote_menu_elm) {
+    document.getElementById('quotemenu_quote').addEventListener("click", function(e) {
+      self.paste_quoted('[quote=' + self.stored_user + ']' + self.stored_quote + '[/quote]');
+      $('#quotemenu').addClass('invis');
+    });
+    document.getElementById('quotemenu_copy').addEventListener("click", async function (e) {
+      if (navigator.clipboard) navigator.clipboard.writeText(self.stored_quote + "\nИсточник: " +document.location.href);
+      $('#quotemenu').addClass('invis');
+    });
+    document.getElementById('quotemenu_share').addEventListener("click", async function (e) {
+      if (navigator.canShare && navigator.canShare(self.stored_quote)) await navigator.share(self.stored_quote);
+      $('#quotemenu').addClass('invis');
+    });
+    document.getElementById('quotemenu_vk').addEventListener("click", async function (e) {
+      window.open('https://vk.com/share.php?url=' + encodeURIComponent(document.location.href) + '&comment=' + encodeURIComponent(self.stored_quote))
+      $('#quotemenu').addClass('invis');
+    });
+  }
 
   var mathtex = $('.mathtex');
   var asciimath = $('.asciimath');
@@ -471,9 +717,38 @@ function IntB_main(opts) {
     head.load(["https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"]);
   }
 
-  document.dispatchEvent(new CustomEvent("IntBLoaded"));
+  var event = new CustomEvent("IntBLoaded");
+  event.intb_loader = self;
+  document.dispatchEvent(event);
 }
+
+/* function IntB_registerPeriodicSync(sync_name) {
+  navigator.serviceWorker.ready.then(function registration() {
+    // Check if periodicSync is supported
+    if ('periodicSync' in registration) {
+      // Request permission
+      navigator.permissions.query({ name: sync_name }).then(
+        function(status) {
+          if (status.state === 'granted') {
+            try {
+              // Register new sync every 24 hours
+              registration.periodicSync.register(sync_name, { minInterval: 24 * 60 * 60 * 1000 }).then(
+                ()=>console.log('Periodic background sync registered!')
+              );
+            } catch(e) {
+              console.error(`Periodic background sync failed:\nx${e}`);
+            }
+          } else {
+            console.info('Periodic background sync is not granted.');
+          }
+      });
+    } else {
+      console.log('Periodic background sync is not supported.');
+    }
+  });
+} */
 
 head.load(window.IntB_params.jquery_cdn, function() {
   intb_loader = new IntB_main(window.IntB_params);
 });
+           

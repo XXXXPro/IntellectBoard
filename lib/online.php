@@ -20,21 +20,21 @@ class Library_online extends Library {
  * @return <type>
  */
   function get_online_users($mode=2) {
-    $fid =  !empty(Library::$app->forum['id']) ? Library::$app->forum['id'] : false;
-    $tid =  !empty(Library::$app->topic['id']) ? Library::$app->topic['id'] : false;
+    $fid =  !empty($this->app()->forum['id']) ? $this->app()->forum['id'] : false;
+    $tid =  !empty($this->app()->topic['id']) ? $this->app()->topic['id'] : false;
     $result = array('online'=>array('team'=>array(),'users'=>array(),'bots'=>array(),'guests'=>array(),'hidden'=>array()),
       'today'=>array('team'=>array(),'users'=>array(),'bots'=>array(),'guests'=>array(),'hidden'=>array()));
     if ($tid && $mode==2) $result['online_header']='Присутствующие в теме участники';
     elseif ($fid && $mode>=1) $result['online_header']='Присутствующие в разделе участники';
     else $result['online_header']='Присутствующие на форуме участники';    
-    $this->online_time = Library::$app->get_opt('online_time'); // количество миут, в течение которых пользователь считается присутстующим на форуме
-    $user_id = Library::$app->get_uid();
+    $this->online_time = $this->app()->get_opt('online_time'); // количество миут, в течение которых пользователь считается присутстующим на форуме
+    $user_id = $this->app()->get_uid();
     if ($this->online_time) { // если время присутствия не равно нулю, значит, отслеживание пользователей включено
-      $timezone=Library::$app->get_opt('timezone','user');
+      $timezone=$this->app()->get_opt('timezone','user');
       $start_time = mktime(0,0,-$timezone); // время начала суток с поправкой на часовой пояс пользователя
-      if (Library::$app->time-$start_time > 24*60*60) $start_time+=24*60*60;
-      elseif ($start_time>Library::$app->time) $start_time-=24*60*60;
-      $limit_time = Library::$app->time - $this->online_time*60;
+      if ($this->app()->time-$start_time > 24*60*60) $start_time+=24*60*60;
+      elseif ($start_time>$this->app()->time) $start_time-=24*60*60;
+      $limit_time = $this->app()->time - $this->online_time*60;
       $sql = 'SELECT uid, visittime, type, b.bot_name, '.
       'u.login, u.display_name '.
       'FROM '.DB_prefix.'online o '.
@@ -44,7 +44,7 @@ class Library_online extends Library {
       if ($tid && $mode==2) $sql.=' AND o.tid='.intval($tid);
       if ($fid && $mode>=1) $sql.=' AND o.fid='.intval($fid);
       $sql.=' ORDER BY visittime DESC'; // TODO: добавить получение темы и имени бота
-      $online = Library::$app->db->select_all($sql);
+      $online = $this->app()->db->select_all($sql);
 
       foreach ($online as $curitem) {
         if ($curitem['type']==-2) $result['today']['team'][]=$curitem;
@@ -59,7 +59,7 @@ class Library_online extends Library {
           elseif ($curitem['type']==-128) $result['online']['hidden'][]=$curitem;
           else $result['online']['guests'][]=$curitem;
         }
-        if ($curitem['uid']!=$user_id || $user_id <= AUTH_SYSTEM_USERS) Library::$app->set_lastmod($curitem['visittime']); // меняем время последней модификации страницы в соответствии со временем визита пользователя, если этот пользователь — не мы
+        if ($curitem['uid']!=$user_id || $user_id <= AUTH_SYSTEM_USERS) $this->app()->set_lastmod($curitem['visittime']); // меняем время последней модификации страницы в соответствии со временем визита пользователя, если этот пользователь — не мы
       }
     }
     $result['total'] = array_merge($result['today']['team'],$result['today']['users']);

@@ -9,10 +9,13 @@
  *  Скрипт выполнения задач по таймеру
  *  ================================ */
 
+define('IntB_Crontab_mode',true); // для проверок, что работаем в Cron-режиме 
+
 
 class Application_Crontab extends Application {
   function init() {
     $this->init_db();
+    $this->init_lib_loader();
     $this->time=time();
     Library::init($this);
     chdir(dirname(__FILE__).'/../www'); // так как при запуске через cron текущий каталог не выставляется автоматически, что может порождать ошибки
@@ -36,7 +39,9 @@ class Application_Crontab extends Application {
         $this->db->unlock_tables(DB_prefix.'crontab');
 
         for ($i=0,$count=count($jobs);$i<$count;$i++) {
-          if ($module=$this->load_lib($jobs[$i]['library'],false)) {
+          $classname = 'Library_'.$jobs[$i]['library'];
+          if (class_exists($classname)) {
+            $module=new $classname;
             if (method_exists($module,'cron_'.$jobs[$i]['proc'])) call_user_func(array($module,'cron_'.$jobs[$i]['proc']),$jobs[$i]['params']);
             else $this->log_entry('crontab',2,'modules/'.$jobs[$i]['library'].'.php','Не найдена процедура cron_'.$jobs[$i]['proc']);
           }
@@ -65,14 +70,16 @@ class Application_Crontab extends Application {
           $result = -1;          
           if (microtime(true) - $start_time < $max_time*1000000 - 5000000) { // если есть достаточный запас времени для выполнения
             try {
-              if ($module=$this->load_lib($tasks[$i]['library'],false)) {
+              $classname = 'Library_'.$tasks[$i]['library'];
+              if (class_exists($classname)) {
+                $module=new $classname;
                 if (method_exists($module,'task_'.$tasks[$i]['proc'])) {
                   $params = unserialize($tasks[$i]['params']);
                   $result = call_user_func(array($module,'task_'.$tasks[$i]['proc']),$params);
                 }
-                else $this->log_entry('tasks',2,'modules/'.$tasks[$i]['library'].'.php','Не найдена процедура task_'.$tasks[$i]['proc']);
+                else $this->log_entry('tasks',2,'lib/'.$tasks[$i]['library'].'.php','Не найдена процедура task_'.$tasks[$i]['proc']);
               }
-              else $this->log_entry('tasks',1,'crontab.php','Не найден модуль '.$task[$i]['module']);
+              else $this->log_entry('tasks',1,'crontab.php','Не найдена библиотека '.$tasks[$i]['library']);
             }
             catch (Exception $e) {
               $result=-2;
@@ -87,7 +94,6 @@ class Application_Crontab extends Application {
             $sql = 'UPDATE '.DB_prefix.'task SET nextrun=?, errors=errors+1 WHERE id=?';
             $this->db->query($sql,true,array($this->time+60*($tasks[$i]['errors']+1),$tasks[$i]['id']));
           }
-
         }
 
         $this->shutdown();

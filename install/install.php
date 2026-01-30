@@ -522,6 +522,12 @@ ESCRIPT;
          echo tag('div','Копирование файла www/robots.def в www/robots.txt: '.cond($result,'Ok','Ошибка!'));
        }
        else echo tag('div','Файл www/robots.txt уже существует, оставляем без изменений.');
+
+       if (!file_exists(BASEDIR.'etc/tags.txt')) {
+         $buffer = file_get_contents(BASEDIR.'etc/tags.def');
+         $result = file_put_contents(BASEDIR.'etc/tags.txt',$buffer);
+         echo tag('div','Копирование файла со списком разрешённых тегов etc/tags.def в etc/tags.txt: '.cond($result,'Ok','Ошибка!'));
+       }
      }
      elseif ($this->mode==2) {
        @include(BASEDIR.'etc/ib_config.def');
@@ -539,10 +545,17 @@ ESCRIPT;
        if (!file_exists(BASEDIR.'etc/routes.txt')) {
          $buffer = file_get_contents(BASEDIR.'etc/routes.def');
          file_put_contents(BASEDIR.'etc/routes.txt',$buffer);
-         echo tag('div','Копирование файла перенаправления запросов etc/routes.def в etc/.routes.txt: '.cond($result,'Ok','Ошибка!'));
+         echo tag('div','Копирование файла перенаправления запросов etc/routes.def в etc/routes.txt: '.cond($result,'Ok','Ошибка!'));
        }
-       else echo tag('div','Файл etc/routes.txt уже существует, оставляем без изменений.');      
+       else echo tag('div','Файл etc/routes.txt уже существует, оставляем без изменений.');
        
+       if (!file_exists(BASEDIR.'etc/tags.txt')) {
+         $buffer = file_get_contents(BASEDIR.'etc/tags.def');
+         $result = file_put_contents(BASEDIR.'etc/tags.txt',$buffer);
+         echo tag('div','Копирование файла со списком разрешённых тегов etc/tags.def в etc/tags.txt: '.cond($result,'Ok','Ошибка!'));
+       }          
+       else echo tag('div','Файл etc/tags.txt уже существует, оставляем без изменений.');
+
        if (empty($params['DB_structure_version'])) $params['DB_structure_version']=100;
        $version = $params['DB_structure_version']+1;
        if ($params['DB_structure_version']==IntB_db_version) {
@@ -619,7 +632,7 @@ ESCRIPT;
     }
     $userdata['display_name']=$userdata['login'];
     $userdata['pass_crypt']=5;
-    $userdata['rnd']=mt_rand(0,0x7FFFFFFF);
+    $userdata['rnd']=hexdec(bin2hex(random_bytes(4))) & 0x7FFFFFFF;
     $userdata['password']=hash('sha256',$userdata['password'].$userdata['rnd']);
     $userdata['canonical']=$this->canonize_name($userdata['display_name']);
     $userdata['location']='';
@@ -654,7 +667,7 @@ ESCRIPT;
     $settings['CONFIG_email']=$userdata['email'];
     $settings['CONFIG_email_from']=$userdata['email'];
     $settings['CONFIG_email_return']=$userdata['email'];
-    $settings['CONFIG_site_secret']=substr(hash('sha256',mt_rand(1,mt_getrandmax())),0,16);
+    $settings['CONFIG_site_secret']=bin2hex(random_bytes(8));
     $this->save_config($settings, $params);
     echo tag('div','Сохранение начальных настроек форума: Ok');
    }
@@ -666,7 +679,7 @@ ESCRIPT;
        $this->allow_next=false;
        return;
      }
-     $new_rnd=mt_rand(0,0xFFFFFFFF);
+     $new_rnd=hexdec(bin2hex(random_bytes(4))) & 0x7FFFFFFF;
      $new_pass=hash('sha256',$_POST['user']['password'].$new_rnd);    
      $sql = 'UPDATE '.DB_prefix.'user SET password="'.$this->db->slashes($new_pass).'", rnd='.intval($new_rnd).', '.
      'pass_crypt="5", email="'.$this->db->slashes($_POST['user']['email']).'" WHERE id='.intval($userdata['id']);
@@ -701,13 +714,13 @@ ESCRIPT;
   function gen_long_key($userdata, $session_name=false) {
     if (!$session_name)  $session_name = CONFIG_session;
     // TODO: возможно, доделать добавку очищенного User Agent
-    return $userdata['id'].'-'.md5($userdata['id'].$userdata['password'].$userdata['rnd'].$userdata['pass_crypt'].$session_name);
+    return $userdata['id'].'-'.hash('sha256',$userdata['id'].$userdata['password'].$userdata['rnd'].$userdata['pass_crypt'].$session_name);
   }
 
   function gen_admin_cookie($udata) {
     $agent = $_SERVER['HTTP_USER_AGENT'];
     $agent = preg_replace('|\d+|', '', $agent);
-    return md5($udata['id'].$udata['password'].$udata['rnd'].$agent.$_SERVER['REMOTE_ADDR']);
+    return hash('sha256',$udata['id'].$udata['password'].$udata['rnd'].$agent.$_SERVER['REMOTE_ADDR']);
   }
 
   /** Приведение имени пользователя к "каноническому" виду (замена похожих по начертанию букв и цифры) в целях недопущения регистрации пользователей с похожими именами **/

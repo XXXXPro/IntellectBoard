@@ -233,6 +233,10 @@ class users extends Application_Admin {
     'FROM '.DB_prefix.'moderator m,  '.DB_prefix.'user u '.
     'WHERE m.uid=u.id ORDER BY fid';
     $this->out->moderators = $this->db->select_super_hash($sql,'fid');
+    $sql = 'SELECT DISTINCT display_name '.
+    'FROM '.DB_prefix.'moderator m,  '.DB_prefix.'user u '.
+    'WHERE m.uid=u.id ORDER BY fid';
+    $this->out->moder_hints = $this->db->select_all_strings($sql);
     $sql = 'SELECT f.id, f.title FROM '.DB_prefix.'forum f ORDER BY f.sortfield';
     $this->out->forums = array('0'=>'Глобальные права на все разделы')+$this->db->select_simple_hash($sql);
     $sql = 'SELECT g.name, g.level FROM '.DB_prefix.'group g WHERE team=\'1\' ORDER BY level';
@@ -258,7 +262,7 @@ class users extends Application_Admin {
   function action_delete_mod_all() {
     if (empty($_POST['uname'])) $this->message('Не указано имя пользователя',3);
     else {
-      $userlib = $this->load_lib('userlib',true);
+      $userlib = new Library_userlib;
       $uid = $userlib->get_uid_by_name($_POST['uname']);
       if ($uid) {
         $sql = 'DELETE FROM '.DB_prefix.'moderator WHERE uid='.intval($uid);
@@ -272,21 +276,24 @@ class users extends Application_Admin {
   }
   
   function action_users() {
-    $userlib = $this->load_lib('userlib',true);
-    /* @var $userlib Library_userlib */
+    $userlib = new Library_userlib;
     
     $this->out->letters1 = $userlib->get_letters(false,true); // true означает, что при составлении списка включаются также буквы, на которые начинаются имена неактивных пользователей
-    $this->out->start_letter = isset($_GET['letter']) ? $_GET['letter'] : $this->out->letters1[0]; // если первая буква не указана явно, берем перую из тех, что есть в списке
+    if (!empty($_GET['search'])) $this->out->start_letter = mb_strtolower(mb_substr($_GET['search'],0,1)); // в качестве выбранной буквы берём первую букву строки поиска
+    else $this->out->start_letter = isset($_GET['letter']) ? $_GET['letter'] : $this->out->letters1[0]; // если первая буква не указана явно, берем перую из тех, что есть в списке
+
     $this->out->letters2 = $userlib->get_letters($this->out->start_letter,true);
-    $this->out->start_letter2 = isset($_GET['letter2']) ? $_GET['letter2'] : $this->out->letters2[0]; // если вторая буква не указана явно, берем первую из тех, что есть в списке вторых букв
+    if (!empty($_GET['search']) && mb_strlen($_GET['search'])>1) $this->out->start_letter2 = mb_strtolower(mb_substr($_GET['search'],1,1)); // changing selected second letter to second letter of user name if any
+    else $this->out->start_letter2 = isset($_GET['letter2']) ? $_GET['letter2'] : $this->out->letters2[0]; // если вторая буква не указана явно, берем первую из тех, что есть в списке вторых букв
     if (!empty($_GET['show'])) $this->out->show=$_GET['show'];
     
     if (empty($_GET['show']) && empty($_GET['search'])) { // если не указан вывод пользователей по определенному признаку и не делался поиск
       $cond = array('status'=>'all','letter'=>$this->out->start_letter.$this->out->start_letter2,'all_data'=>true);
+      $this->out->search = $this->out->start_letter.$this->out->start_letter2;
     }
     elseif (!empty($_GET['search'])) {
       $this->out->search = $_GET['search'];
-      $cond = array('status'=>'all','search'=>$this->out->start_letter.$this->out->start_letter2);
+      $cond = array('status'=>'all','letter'=>$_GET['search']);      
     }
     elseif ($_GET['show']==='banned') {
       $this->out->show='banned';
@@ -316,7 +323,7 @@ class users extends Application_Admin {
   }
   
   function action_user_view() {
-    $userlib=$this->load_lib('userlib',true);
+    $userlib=new Library_userlib;
     /* @var $userlib Library_userlib */
     if (!isset($_REQUEST['uid']) || !is_numeric($_REQUEST['uid'])) $this->output_404('Некорректно указан идентификатор пользователя!');
     $uid=intval($_REQUEST['uid']);
@@ -337,14 +344,14 @@ class users extends Application_Admin {
     $this->out->ban_key = $this->gen_auth_key(false,'user_ban');
     $this->out->activate_key = $this->gen_auth_key(false,'user_activate');
     
-    $pmlib = $this->load_lib('privmsg',false);
+    $pmlib = class_exists('Library_privmsg') ? new Library_privmsg : false;
     /* @var $pmlib Library_privmsg */
     if ($pmlib) {
       $this->out->pm_total = $pmlib->count_threads(array('uid'=>$uid));
       $this->out->pm_lastday = $pmlib->count_threads(array('uid'=>$uid,'lasttime'=>$this->time-24*60*60));
     }
     
-    $warnlib = $this->load_lib('warning',false);
+    $warnlib = class_exists('Library_warning') ? new Library_warning : false;
     /* @var $warnlib Library_warning */
     if ($warnlib) {
       $cond['moderator']=true;
@@ -353,7 +360,7 @@ class users extends Application_Admin {
       $this->out->warnings = $warnlib->list_warnings($uid,$cond);
       $this->out->warn_key = $this->gen_auth_key(false,'user_delete_warning');
     }
-    $forumlib = $this->load_lib('forums',false);
+    $forumlib = class_exists('Library_forums') ? new Library_forums : false;;
     /* @var $forumlib Library_forums */
     if ($forumlib) {
       $this->out->personal_forums = $forumlib->list_forums(array('owner'=>$uid));
@@ -364,7 +371,7 @@ class users extends Application_Admin {
   function action_user_delete_warning() {
     if (empty($_REQUEST['authkey'])) $this->output_403('Некорректный ключ аутентификации');
     if (empty($_REQUEST['uid']) || empty($_REQUEST['warn_id'])) $this->output_403('Некорректный идентфиикатор пользователя или предупржедения'); 
-    $warnlib = $this->load_lib('warning',true);
+    $warnlib = new Library_warning;
     /* @var $warnlib Library_warning */
     $warnlib->delete_warnings($_REQUEST['uid'], array($_REQUEST['warn_id']));
     $this->message('Предупреждение удалено!',1);
@@ -372,7 +379,7 @@ class users extends Application_Admin {
   }
   
   function action_user_change_group() {
-    $userlib=$this->load_lib('userlib',true);
+    $userlib=new Library_userlib;
     if (!isset($_REQUEST['uid']) || !is_numeric($_REQUEST['uid'])) $this->output_404('Некорректно указан идентификатор пользователя!');
     $uid=intval($_REQUEST['uid']);
     
@@ -416,7 +423,7 @@ class users extends Application_Admin {
     $this->out->udata = $this->load_user($uid,0);    
     if ($this->is_post()) {
       if ($this->out->udata['display_name']===$_POST['confirm_name']) {
-        $dellib = $this->load_lib('delete',true);
+        $dellib = new Library_delete;
         /** @var Library_delete $dellib */
         $dellib->delete_users(array($uid));
         if ($this->get_opt('userlib_logs')>1) $this->log_entry('user',14,'admin/users.php','Пользователь '.$this->get_userlogin().' удалил пользователя '.$this->out->udata['display_name'].'.');    
@@ -432,7 +439,7 @@ class users extends Application_Admin {
     if (!isset($_REQUEST['uid']) || !is_numeric($_REQUEST['uid'])) $this->output_404('Некорректно указан идентификатор пользователя!');
     $uid=intval($_REQUEST['uid']);
     
-    $userlib=$this->load_lib('userlib',true);
+    $userlib=new Library_userlib;
     $udata=$this->load_user($uid,2);
     if (empty($udata) || empty($udata['basic'])) $this->output_404('Пользователя с таким идентификатором не существует!');
     if (!$this->is_admin(true) && $udata['ext_data']['founder']) $this->output_403('Нельзя изгнать пользователя со статусом "Основатель".');
@@ -464,10 +471,10 @@ class users extends Application_Admin {
   function action_user_edit() {
     if (!isset($_REQUEST['uid']) || !is_numeric($_REQUEST['uid'])) $this->output_404('Некорректно указан идентификатор пользователя!');
     $uid=intval($_REQUEST['uid']);
-    $userlib=$this->load_lib('userlib',true);    
+    $userlib=new Library_userlib;    
     $this->out->allow_template = true; // при редактировании из админки можно редактировать все
 
-    $templatelib = $this->load_lib('template',false);
+    $templatelib = class_exists('Library_template') ? new Library_template : false;
     if ($templatelib) $this->out->user_templates = array(''=>'Стиль сайта по умолчанию')+$templatelib->get_list($this->is_admin()); // если пользователь -- админ, он может выбрать любой шаблон, иначе -- только незаблокированные
 
     if ($this->is_post()) {
@@ -531,7 +538,7 @@ class users extends Application_Admin {
     if (!isset($_REQUEST['uid']) || !is_numeric($_REQUEST['uid'])) $this->output_404('Некорректно указан идентификатор пользователя!');
     $uid=intval($_REQUEST['uid']);    
     if ($this->is_post()) {
-      $misclib = $this->load_lib('misc',true);
+      $misclib = new Library_misc;
       /* @var $misclib Library_misc */
       $misclib->save_text($_POST['text'], $uid, 33); // 33 -- текст с описанием роли пользователя
       $this->message('Описание роли пользователя сохранено!',1);

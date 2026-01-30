@@ -16,7 +16,7 @@
 #ib_all .post .postsys { text-align: center; padding: 8px }
 #ib_all .post .offtopic { font-size: 90%; color: #666 }
 #ib_all .post .offtopic:before { content: 'Оффтопик: '; color: #999 }
-#ib_all .post code { display: block; white-space: pre; line-height: 100%; border: #A3CEFF 1px solid; padding: 10px; max-height: 20em; overflow: auto; margin: 5px 20px; background: #eee; font-size: 125%; max-height: 15em; overflow: auto }
+#ib_all .post p.intb_wrap_code { display: block; white-space: pre; line-height: 100%; border: #A3CEFF 1px solid; padding: 10px; max-height: 20em; overflow: auto; margin: 5px 20px; background: #eee; font-size: 125%; max-height: 15em; overflow: auto }
 #ib_all .post pre { display: block; white-space: pre; overflow: auto }
 #ib_all .post blockquote { border: #ddd 1px solid; font-size: 90%; background: #f4f4ff; padding: 4px; overflow: auto; max-height: 7em; margin: 5px 20px }
 #ib_all .post .ptext { font-size: 110%; line-height: 133%; overflow: hidden; }
@@ -34,9 +34,10 @@ color: #fff; font-weight: bold; text-decoration: none; margin-bottom: -1.3em;  }
 #ib_all .post .ptext .ib_outer_table { table-layout: fixed; width: 100% }
 #ib_all .post .ptext .ib_outer_table td { padding: 0; overflow: auto }
 
-#ib_all .post .pu a.male:after { content: 'М'; color: #003; padding: 5px; font-size: 80%; font-weight: normal }
-#ib_all .post .pu a.female:after { content: 'Ж'; color: #FCC; padding: 5px; font-size: 80%; font-weight: normal}
-#ib_all .post .pu .prating { padding-top: 5px }
+#ib_all .post .pu a.male:after {content: 'М'; color: #003; padding: 5px; font-size: 80%; font-weight: normal}
+#ib_all .post .pu a.female:after {content: 'Ж'; color: #FCC; padding: 5px; font-size: 80%; font-weight: normal}
+#ib_all .post .pu .prating {padding-top: 5px}
+#ib_all .post .pu .prating.unclickable a {pointer-events: none; color: inherit; opacity: 0.33}
 
 #ib_all .post a.blocklink { padding: 9px; border: #dcddde 1px solid; display: block; text-decoration: none; max-width: 480px; margin: 6px 0; }
 #ib_all .post a.blocklink b { display: block; font-size: 120%; border-bottom: #dcddde 1px solid; padding: 0 6px 6px 6px; color: #0101C4; margin-bottom: 10px; }

@@ -18,8 +18,8 @@
 <li><a class="postmark" href="{{ url('moderate/'~topic.full_hurl~'mark_post.htm?id='~post.id) }}" title="Пометить для модераторских дейсвтий"><i class="far fa-plus-square"></i></a></li>
 {% endif %}{% endif %}
 
-<li><a class="postdelete ajax" href="{{ url('moderate/'~topic.full_hurl~'delete_post.htm?id='~post.id~'&authkey='~delete_key) }}" title="Удалить"><i class="far fa-trash-alt"></i></a></li>
 {% endif %}
+{% if post.deletable %}<li><a class="postdelete ajax" href="{{ url('moderate/'~topic.full_hurl~'delete_post.htm?id='~post.id~'&authkey='~delete_key) }}" title="Удалить"><i class="far fa-trash-alt"></i></a></li>{% endif %}
 
 {% endif %}
 </ul>

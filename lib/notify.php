@@ -24,21 +24,21 @@ class Library_notify extends Library implements iNotifier {
       '(lv.oid='.intval($forum['id']).' AND lv.type=\'forum\') OR '.
       '(lv.oid=0 AND lv.type=\'forum\')) '.
       'AND lv.uid=u.id AND u.status=\'0\' AND  lv.subscribe=\'1\' AND us.subscribe_mode=\'1\' '.
-      'AND u.id!='.intval(Library::$app->get_uid()).' AND u.id>'.intval(AUTH_SYSTEM_USERS).
+      'AND u.id!='.intval($this->app()->get_uid()).' AND u.id>'.intval(AUTH_SYSTEM_USERS).
       ' GROUP BY u.id, u.email, u.display_name, us.email_fulltext, lv.type, lv.oid, ue.group_id';
-    $users = Library::$app->db->select_all($sql);
-    $parents = Library::$app->get_parent_forums($forum['id']);
-    $userlib = Library::$app->load_lib('userlib',false);
+    $users = $this->app()->db->select_all($sql);
+    $parents = $this->app()->get_parent_forums($forum['id']);
+    $userlib = class_exists('Library_userlib') ? new Library_userlib : false;
     if (!$userlib) return; // если библиотека не загрузилась, то никакой рассылки, так как нельзя проверить права доступа   
     
     for ($i=0, $count=count($users);$i<$count;$i++) {
       $mdata['user']=$users[$i];
       $has_access = $userlib->ext_check_access($parents,$users[$i]['group_id'],'read');
       if ($has_access) { // отправляем письмо только в том случае, если права на чтение есть
-        $mdata['unsubscribe_key']=Library::$app->gen_auth_key($users[$i]['id'],'unsubscr',Library::$app->url('bookmark/'));
-        $mdata['unsubscribe_key2']=Library::$app->gen_auth_key($users[$i]['id'],'unsubscribe_all',Library::$app->url('user/'));;
-        Library::$app->mail(array('to'=>$users[$i]['email'],'to_name'=>$users[$i]['display_name'],
-          'subj'=>'Уведомление о новом сообщении в теме "'.$topic['title'].'"','unsubscribe'=>$unsubscribe,
+        $mdata['unsubscribe_key']=$this->app()->gen_auth_key($users[$i]['id'],'unsubscr',$this->app()->url('bookmark/'));
+        $mdata['unsubscribe_key2']=$this->app()->gen_auth_key($users[$i]['id'],'unsubscribe_all',$this->app()->url('user/'));;
+        $this->app()->mail(array('to'=>$users[$i]['email'],'to_name'=>$users[$i]['display_name'],
+          'subj'=>'Уведомление о новом сообщении в теме "'.$topic['title'].'"','unsubscribe'=>$mdata['unsubscribe_key'],
           'template'=>$template,'data'=>$mdata,'html'=>true,'list-id'=>'Topic notification <topic.'.intval($topic['id']).'.'.$_SERVER['HTTP_HOST'].'>'));
       }
     }
@@ -48,12 +48,12 @@ class Library_notify extends Library implements iNotifier {
   function new_post($post,$topic,$forum,$parsed) {
     $this->send_post_notification($post, $topic, $forum, $parsed,'stdforum/mail_newpost.tpl');
     /** @var Library_forums */
-    $forumlib = Library::$app->load_lib('forums', false);
+    $forumlib = class_exists('Library_forums') ? new Library_forums : false;
     if ($forumlib) {
-      $fdata = $forumlib->get_forum(Library::$app->forum['id'], true); // нам нужны расширенные данные форума
+      $fdata = $forumlib->get_forum($this->app()->forum['id'], true); // нам нужны расширенные данные форума
       if (!empty($fdata['extdata']['telegram_id']) && !empty($fdata['extdata']['telegram_key'])) {
         if (!empty($fdata['extdata']['telegram_mode'])) {
-          $full_hurl = Library::$app->http(Library::$app->url($topic['full_hurl'].'post-'.$post['id'].'.htm')); // ссылаемся не просто на тему, а на конкретное сообщение
+          $full_hurl = $this->app()->http($this->app()->url($topic['full_hurl'].'post-'.$post['id'].'.htm')); // ссылаемся не просто на тему, а на конкретное сообщение
           if ($fdata['extdata']['telegram_mode'] == 3) {
             $text = '<b>'.$post['author']."</b> ответил в теме: \r\n<a href=\"".$full_hurl."\">".$topic['title'].'</a>';
             $this->notify_tg($fdata['extdata']['telegram_key'],$text, $fdata['extdata']['telegram_id']);
@@ -78,12 +78,12 @@ class Library_notify extends Library implements iNotifier {
   function new_topic($post,$topic,$forum,$parsed) {
     $this->send_post_notification($post, $topic, $forum, $parsed, 'stdforum/mail_newtopic.tpl');
     /** @var Library_forums */
-    $forumlib = Library::$app->load_lib('forums',false);
+    $forumlib = class_exists('Library_forums') ? new Library_forums : false;
     if ($forumlib) {
-      $fdata=$forumlib->get_forum(Library::$app->forum['id'],true); // нам нужны расширенные данные форума
+      $fdata=$forumlib->get_forum($this->app()->forum['id'],true); // нам нужны расширенные данные форума
       if (!empty($fdata['extdata']['telegram_id']) && empty($_POST['no_export'])) {
         if (!empty($fdata['extdata']['telegram_mode']) && !empty($fdata['extdata']['telegram_key'])) {
-          $full_hurl = Library::$app->http(Library::$app->url($topic['full_hurl']));
+          $full_hurl = $this->app()->http($this->app()->url($topic['full_hurl']));
           if ($fdata['extdata']['telegram_mode']==1 || $fdata['extdata']['telegram_mode']==3) {
             $text = '<b>'.$post['author']."</b> создал новую тему: \r\n<a href=\"".$full_hurl."\">".$topic['title'].'</a>';
             $this->notify_tg($text, $fdata['extdata']);
@@ -120,15 +120,15 @@ class Library_notify extends Library implements iNotifier {
         'FROM '.DB_prefix.'privmsg_thread_user thu, '.DB_prefix.'user u '.
         'LEFT JOIN '.DB_prefix.'user_settings us ON (u.id=us.id) '.
         'WHERE thu.pm_thread='.intval($thread['id']).' AND thu.uid=u.id AND us.email_pm=\'1\' '.
-        'AND u.id!='.intval(Library::$app->get_uid()).' AND u.id>'.intval(AUTH_SYSTEM_USERS);
-    $users = Library::$app->db->select_all($sql);
+        'AND u.id!='.intval($this->app()->get_uid()).' AND u.id>'.intval(AUTH_SYSTEM_USERS);
+    $users = $this->app()->db->select_all($sql);
     $mdata['sender']=$sender;
     $mdata['parsed']=$parsed;
     $mdata['thread']=$thread;
     $mdata['pm']=$pm;
     for ($i=0, $count=count($users);$i<$count;$i++) {
       $mdata['user']=$users[$i];
-      Library::$app->mail(array('to'=>$users[$i]['email'],'to_name'=>$users[$i]['display_name'],
+      $this->app()->mail(array('to'=>$users[$i]['email'],'to_name'=>$users[$i]['display_name'],
           'subj'=>$thread['title'],'from_name'=>$sender,'reply'=>$reply_mail,
           'template'=>'privmsg/mail_notify.tpl','data'=>$mdata,'html'=>true,'list-id'=>'PM Notify <pm.'.$_SERVER['HTTP_HOST'].'>'));
     }
@@ -137,27 +137,26 @@ class Library_notify extends Library implements iNotifier {
   /** Уведомление о регистрации нового пользователя. 
    * В качестве адреса для ответа указываем Email отправителя, чтобы пользователь мог ответить через кнопку Reply в почтовом клиенте **/
   function new_user($udata,$activate_mode) {
-    $userlib = Library::$app->load_lib('userlib');
+    $userlib = new Library_userlib;
     $admins=$userlib->get_admins();
     $udata['activate_mode'] = $activate_mode;
     for ($i=0,$count=count($admins);$i<$count;$i++) {
       $udata['admin_name'] = $admins[$i]['login'];
-      Library::$app->mail(array('to'=>$admins[$i]['email'],'subj'=>'Новый пользователь на форуме '.Library::$app->get_opt('site_title'),
+      $this->app()->mail(array('to'=>$admins[$i]['email'],'subj'=>'Новый пользователь на форуме '.$this->app()->get_opt('site_title'),
           'to_name'=>$admins[$i]['login'],'template'=>'user/mail_newuser.tpl','data'=>$udata,'html'=>true,'list-id'=>'New user <newuser.'.$_SERVER['HTTP_HOST'].'>'));
     }    
   }
   
   /* Экспорт записи в ЖЖ (пока используется только модулем blog) */
   function notify_lj($parsed,$topic,$ljdata,$tags=false) {
-       if ($tags) $parsed="lj-tags: ".$tags."\n\n".$parsed;
        if (!empty($ljdata['lj_text'])) {
           $ljtext=$ljdata['lj_text'];
           if (strpos($ljtext,'{{')!==false) {
-            $ljtext = str_replace('{{','<a href="'.Library::$app->http(Library::$app->url(Library::$app->topic['full_hurl'])).'">',$ljtext);
+            $ljtext = str_replace('{{','<a href="'.$this->app()->http($this->app()->url($this->app()->topic['full_hurl'])).'">',$ljtext);
             $ljtext = str_replace('}}','</a>',$ljtext);
           }
           else {
-            $ljtext = '<a href="'.Library::$app->http(Library::$app->url($topic['full_hurl'])).'">'.$ljtext.'</a>';
+            $ljtext = '<a href="'.$this->app()->http($this->app()->url($topic['full_hurl'])).'">'.$ljtext.'</a>';
           }
           $parsed.="\n".$ljtext;
        }
@@ -165,9 +164,31 @@ class Library_notify extends Library implements iNotifier {
         $parsed = str_replace($match[0],'<lj-cut>',$parsed);
         $parsed.='</lj-cut>';
        }
-       Library::$app->mail(array('to'=>$ljdata['lj_login'].'+'.$ljdata['lj_pin'].'@post.livejournal.com','to_name'=>$ljdata['lj_login'],
+       if (!empty($ljdata['lj_passhash']) && function_exists('curl_init')) {
+        if (!empty($_POST['post']['postdate'])) $time=strtotime($_POST['post']['postdate']); 
+        else $time = $this->app()->time;
+        $export_data = array(
+          'mode'=>'postevent','ver'=>'1','security'=>'public','year'=>date('Y',$time),'mon'=>date('m',$time),'day'=>date('d',$time),'hour'=>date('H',$time),'min'=>date('i',$time),
+          'subject'=>$topic['title'],'user'=>$ljdata['lj_login'],'hpassword'=>$ljdata['lj_passhash'],'event'=>$parsed);
+        if (!empty($_POST['tagline'])) $export_data['prop_taglist']=$_POST['tagline']; // tags
+        $req_body = http_build_query($export_data);
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, 'https://www.livejournal.com/interface/flat');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION,true);
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS,$req_body);
+
+        $result = curl_exec($curl);
+        $req_info = curl_getinfo($curl);
+       }
+       else {
+        if ($tags) $parsed="lj-tags: ".$tags."\n\n".$parsed;
+        $this->app()->mail(array('to'=>$ljdata['lj_login'].'+'.$ljdata['lj_pin'].'@post.livejournal.com','to_name'=>$ljdata['lj_login'],
           'subj'=>$topic['title'],
           'template'=>'blog/ljmail.tpl','data'=>array('text'=>$parsed),'html'=>true));   
+       }
   }
 
   function notify_vk($parsed,$topic,$vkdata,$tags=false) {
@@ -175,7 +196,7 @@ class Library_notify extends Library implements iNotifier {
       if ($tags) {
         $text.="\n#".join(' #',array_map('trim',explode(',',$tags)));
       }
-      $topic_url = Library::$app->http(Library::$app->url($topic['full_hurl']));      
+      $topic_url = $this->app()->http($this->app()->url($topic['full_hurl']));      
       if (strpos($parsed,'<code')!==false || strpos($parsed,'<pre')!==false) {
         $text = $topic['title']." \r\n".$topic['descr']." \r\n".$topic_url;
       }
@@ -195,12 +216,12 @@ class Library_notify extends Library implements iNotifier {
               'access_token' => $vkdata['vk_token'],
               'v' => '5.85',
               'copyright' => $topic_url,
-              'guid' => Library::$app->topic['full_hurl']
+              'guid' => $this->app()->topic['full_hurl']
           ]
       ]);
       curl_exec($curl);
       $req_info = curl_getinfo($curl);
-      if ($req_info['http_code']!=200) Library::$app->log_entry('vk',E_USER_ERROR,__FILE__,print_r($req_info,true)); // логгируем ошибки для упрощения отладки
+      if ($req_info['http_code']!=200) $this->app()->log_entry('vk',E_USER_ERROR,__FILE__,print_r($req_info,true)); // логгируем ошибки для упрощения отладки
   }
 
   /** Отправка уведомления в Telgram-канал. Telegram API key берётся из telegram_key в глобальных настройках. 
@@ -209,7 +230,7 @@ class Library_notify extends Library implements iNotifier {
   function notify_tg($text,$tg_data) {
     $api_key = $tg_data['telegram_key'];
     if ($api_key) {
-      $params['text']=strip_tags($text, '<a><b><strong><i><em><u><ins><s><strike><del><code><pre>');
+      $params['text']=html_entity_decode(strip_tags($text, '<a><b><strong><i><em><u><ins><s><strike><del><code><pre>'),ENT_SUBSTITUTE,'UTF-8');
       $params['chat_id']=$tg_data['telegram_id'];
       $params['parse_mode'] = 'HTML';
       $params['disable_web_page_preview']=1;
@@ -221,7 +242,7 @@ class Library_notify extends Library implements iNotifier {
       curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
       curl_exec($ch);
       $req_info = curl_getinfo($ch);
-      if ($req_info['http_code'] != 200) Library::$app->log_entry('telegram', E_USER_ERROR, __FILE__, print_r($req_info, true)); // логгируем ошибки для упрощения отладки
+      if ($req_info['http_code'] != 200) $this->app()->log_entry('telegram', E_USER_ERROR, __FILE__, print_r($req_info, true)); // логгируем ошибки для упрощения отладки
     }
   }
 }

@@ -28,24 +28,28 @@ class blog extends stdforum {
     if ($this->forum['tags']) $cond['tags']=true;
     $this->out->topics=$this->view_forum_get_topics($cond,$tperpage);
 
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $this->out->topics = $tlib->get_first_posts($this->out->topics,array('ratings'=>$this->forum['rate'],'attach'=>true)); // получаем тексты сообщений для всех выводимых тем
 
+    $short_post_len = $this->get_opt('post_shortlength'); // длина, меньше которой сообщение считается коротким (к нему применяется дополнительный класс short_post)    
     // обработка сообщений для вывода
     for ($i=0, $count=count($this->out->topics); $i<$count; $i++) {
       $this->out->topics[$i]['post']['norate']=$this->check_rateable($this->out->topics[$i]['post']); // проверка возможности рейтинговать запись
       $this->out->topics[$i]['post']['text']=$this->blog_preprocess($this->out->topics[$i]['post'],$this->out->topics[$i],false); // выполняем предобработку сообщения
+      if (!empty($short_post_len) && mb_strlen($this->out->topics[$i]['post']['text'])<=$short_post_len) $this->out->topics[$i]['post']['short_post']=true;
     }
 
     $this->view_forum_misc();
     if (!empty($this->out->moderator)) $this->view_forum_moderator();
     $this->fix_view(); // фиксируем просмотр раздела
+
+    if ($this->get_opt('blog_noindex')) $this->meta('robots','noindex, follow'); // запрещаем индексирование страницы с тизерами, если это включено в настройках
   }
 
   function action_newtopic($anonym=false) {
     $template=parent::action_newtopic($anonym);
     $this->out->editpost['topmsg']='Новая запись в блог';
-    return $template;
+    return 'blog/newtopic.tpl';
   }
   
   function view_topic_get_posts($cond) {
@@ -94,8 +98,12 @@ class blog extends stdforum {
     $this->out->comments_remain=min($perpage,$this->topic['post_count']-count($this->out->posts)-1); 
     if (isset($_REQUEST['more']) && $this->get_request_type()==1) $this->out->comments_remain=$this->topic['post_count']-intval($_REQUEST['more'])-$perpage-1;
     if (empty($this->topic['descr'])) {
-      $descr = substr($this->out->article['text'],0,strpos($this->out->article['text'],'.')+1);
-      $this->meta('description',$descr);
+      $descr_len = $this->get_opt('blog_maxdescr');
+      $descr_min_len = $this->get_opt('blog_mindescr');
+      if (empty($descr_len)) $descr_len = 200; // подставляем значение по умолчанию
+      if (empty($descr_min_len)) $descr_len = 70; // подставляем значение по умолчанию
+      $descr = $this->get_teaser($this->out->article['text'],$descr_len,$descr_min_len);
+      $this->meta('description',strip_tags($descr));
     }
   }
 
@@ -122,7 +130,7 @@ class blog extends stdforum {
   }
 
   function action_rss() {
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $cond['topics']=true;
     $cond['noflood']=true;
     $cond['sort']='DESC';
@@ -137,7 +145,7 @@ class blog extends stdforum {
     $cond['perpage']=$limit; //
 
     /* @var Library_bbcode */
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
 
     $this->out->intb->link=$this->http($this->url($this->forum['hurl'].'/'));
     $this->out->intb->descr=$this->forum['descr'];
@@ -160,9 +168,18 @@ class blog extends stdforum {
     }
     $this->out->items=$data;
   }
+
+  // переопределим action_edit для того, чтобы для записи блога выводить другую форму редактирования
+  function action_edit() {
+    $result = parent::action_edit();    
+    if ($_REQUEST['id']==$this->topic['first_post_id']) {
+      $result = 'blog/newtopic.tpl';
+    }
+    return $result;    
+  }
   
   function action_turbo() {
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $cond['topics']=true;
     $cond['noflood']=true;
     $cond['sort']='DESC';
@@ -174,7 +191,7 @@ class blog extends stdforum {
     $cond['perpage']=500; // таков лимит Яндекса
 
     /* @var Library_bbcode */
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
 
     $this->out->intb->link=$this->http($this->url($this->forum['hurl'].'/'));
     $this->out->intb->descr=$this->forum['descr'];
@@ -226,11 +243,22 @@ class blog extends stdforum {
       $post['text']=preg_replace('|\[teaserbreak(=[^\]]*?)?\]|','<a name="readmore"></a>',$post['text']);
     }
     else {
+      $nexttext='Читать далее…';      
       $pos=strpos($post['text'],'[teaserbreak');
       if ($pos!==false) {
         if (preg_match('|\[teaserbreak=([^\]]*)\]|',$post['text'],$matches)) $nexttext = str_replace('&quot;','',$matches[1]);
-        else $nexttext='Читать далее…';
-        $post['text']=substr($post['text'],0,$pos).' <a href="'.$topic['t_hurl'].'#readmore">'.$nexttext.'</a>';
+        $post['text']=substr($post['text'],0,$pos).'<br /><a href="'.$topic['t_hurl'].'#readmore">'.$nexttext.'</a>';
+      }
+      else { 
+        $maxteaser = $this->get_opt('blog_maxteaser');
+        if (empty($maxteaser)) $teaser = $post['text']; // если длина тизера не задана, выводим текст целиком без обработки (как в старых версиях IntB)
+        else {
+          $minteaser = $this->get_opt('blog_minteaser'); 
+          if (empty($minteaser)) $minteaser = 140; // по умолчанию минимальная длина тизера равна 140 символам
+          // TODO: длина тизера в extra-данных раздела может переопределять длину по умолчанию
+          $teaser = $this->get_teaser($post['text'],$maxteaser,$minteaser);
+          if ($teaser!==$post['text']) $post['text']=$teaser.'<br /><a href="'.$topic['t_hurl'].'#readmore">'.$nexttext.'</a>';
+        }
       }
     }
     $post['text'] = preg_replace('|</li>\s*<br />|is','</li>',$post['text']);
@@ -246,12 +274,12 @@ class blog extends stdforum {
 
   function update_extdata() {
      /* @var Library_topic */
-     $tlib = $this->load_lib('topic',false);
+     $tlib = class_exists('Library_topic') ? new Library_topic : false;
      if (!$tlib) return false; // если библиотеку тем загрузить не удалось, выходим, не отображая ничего
 
      $cond['fid']=$this->forum['id'];
      $cond['first']=true;
-     $forumlib = $this->load_lib('forums',false);
+     $forumlib = class_exists('Library_forums') ? new Library_forums : false;;
      if ($forumlib) $forum = $forumlib->get_forum($this->forum['id'],true);
      else $forum=$this->forum;
      
@@ -259,27 +287,35 @@ class blog extends stdforum {
      $cond['order']='first_post_date';
      $topics = $tlib->list_topics($cond);
 
-     $flib = $this->load_lib('forums',false);
+     $flib = class_exists('Library_forums') ? new Library_forums : false;;
      if ($flib) $flib->update_forum($this->forum['id'],array('last_topics'=>$topics));
   }
    
   function post_redirect($pid) {
     $tid=$this->topic['id'];
     $cond['tid']=$tid;
-    if ($pid==$this->topic['first_post_id']) $this->redirect($this->http($this->url($this->topic['full_hurl']))); // если запросили саму статью, то редирект на обычный URL
-    if ($pid==$this->topic['last_post_id']) $this->redirect($this->http($this->url($this->topic['full_hurl'].'#p'.intval($pid)))); // если запросили последнее сообщение, то тоже редирект сразу, так как оно видно всегда
+    print "Request type: ".$this->get_request_type();
+    if ($pid==$this->topic['first_post_id']) $redirect_url = $this->http($this->url($this->topic['full_hurl'])); // если запросили саму статью, то редирект на обычный URL
+    elseif ($pid==$this->topic['last_post_id']) $redirect_url = $this->http($this->url($this->topic['full_hurl'].'#p'.intval($pid))); // если запросили последнее сообщение, то тоже редирект сразу, так как оно видно всегда
+    else {
+      list($need_count,$perpage,$sort)=$this->view_topic_params($tid);
+      $total = $this->topic['post_count']-1; // общее количество сообщений без текста статьи
+      $tlib=new Library_topic; // ошибка загрузки библиотеки является критичной, без нее перехода не получится
+      $more = 0;
+      
+      $cond['after_pid']=$pid;  
+      $count = $tlib->count_posts($cond)+1;
+      $more = $count - $perpage;
 
-    list($need_count,$perpage,$sort)=$this->view_topic_params($tid);
-    $total = $this->topic['post_count']-1; // общее количество сообщений без текста статьи
-    $tlib=$this->load_lib('topic',true); // ошибка загрузки библиотеки является критичной, без нее перехода не получится
-    $more = 0;
-    
-    $cond['after_pid']=$pid;  
-    $count = $tlib->count_posts($cond)+1;
-    $more = $count - $perpage;
-
-    if ($more>0) $this->redirect($this->http($this->url($this->topic['full_hurl'].'?more='.intval($more).'#p'.$pid)));
-    else $this->redirect($this->http($this->url($this->topic['full_hurl'].'#p'.$pid)));    
+      if ($more>0) $redirect_url = $this->http($this->url($this->topic['full_hurl'].'?more='.intval($more).'#p'.$pid));
+      else $redirect_url = $this->http($this->url($this->topic['full_hurl'].'#p'.$pid));
+    }
+    if ($this->get_request_type()==4) { // если запрос через API, выдаём статус 201 и Location новой темы
+      header($_SERVER['SERVER_PROTOCOL'].' 201 Created');
+      header('Location: '.$redirect_url);
+      exit();
+    }
+    else $this->redirect($redirect_url);
   }  
 
   function set_form_fields($perms,$action,$topic=false) {
@@ -343,13 +379,13 @@ class blog extends stdforum {
   }
   
   /* Переопределяем get_request_type для действия turbo, в котором выводится XML с Турбо-страницей для Яндекса. */
-  function get_request_type() {
+  function get_request_type():int {
     if ($this->action=='turbo') return 4;
     elseif ($this->action=='micropub') return 4;
     else return parent::get_request_type();
   }
 
-  function get_mime() {
+  function get_mime():string {
     if ($this->action=='turbo') return 'application/xml; charset=utf-8';
     else return parent::get_mime();
   }

@@ -72,7 +72,7 @@ class settings extends Application_Admin {
         
     $this->out->status=$data;
     
-    $tlib = $this->load_lib('topic',false);
+    $tlib = class_exists('Library_topic') ? new Library_topic : false;
     if ($tlib) {
       $this->out->post_active = $tlib->count_posts(array('all'=>false));
       $this->out->post_premod = $tlib->count_posts(array('premod'=>true));
@@ -82,7 +82,7 @@ class settings extends Application_Admin {
       $this->out->topic_premod = $tlib->count_topics(array('premod'=>true));      
     }
     
-    $userlib = $this->load_lib('userlib',false);    
+    $userlib = class_exists('Library_userlib') ? new Library_userlib : false;    
     if ($userlib) {
       $this->out->users_active = $userlib->count_users(array('status'=>0));
       $this->out->users_inactive = $userlib->count_users(array('status'=>1));
@@ -108,7 +108,7 @@ class settings extends Application_Admin {
   
   function action_edit_rules() {
     if ($this->is_post()) {
-      $misclib = $this->load_lib('misc',true);
+      $misclib = new Library_misc;
       $misclib -> save_text($_POST['text'],0,0); // текст 0 типа для объекта с номером 0 -- это правила форума 
       $this->message('Правила сохранены!',1);
     }
@@ -117,7 +117,7 @@ class settings extends Application_Admin {
   
   function action_edit_foreword() {
     if ($this->is_post()) {
-      $misclib = $this->load_lib('misc',true);
+      $misclib = new Library_misc;
       $misclib -> save_text($_POST['text'],0,2); // текст 1 типа для объекта с номером 0 -- это вводное слово форума целиком
       $this->message('Вводный текст сохранен!',1);
     }
@@ -127,7 +127,7 @@ class settings extends Application_Admin {
   function action_announce() {
     $fid = isset($_REQUEST['fid']) ? intval($_REQUEST['fid']) : 0;
     if ($this->is_post()) {
-      $misclib = $this->load_lib('misc',true);      
+      $misclib = new Library_misc;      
       if (!empty($_POST['text'])) {
         $misclib->save_text($_POST['text'],$fid,1); // текст 0 типа для объекта с номером 0 -- это правила форума
         $this->message('Текст объявления сохранен!',1);
@@ -144,7 +144,7 @@ class settings extends Application_Admin {
   
   function action_settings() {
     if ($this->is_post()) {
-      $misclib = $this->load_lib('misc',true);
+      $misclib = new Library_misc;
       /** @var Library_misc $misclib **/
       $misclib->save_config($_POST['config']);
       $this->message('Настройки сохранены',1);
@@ -154,7 +154,7 @@ class settings extends Application_Admin {
     foreach ($const['user'] as $item=>$value) if (strpos($item,'CONFIG_')===0) $data[substr($item,7)]=constant($item);
     $this->out->config = $data;
     // получаем список доступных шаблонов
-    $templatelib = $this->load_lib('template',false);
+    $templatelib = class_exists('Library_template') ? new Library_template : false;
     /* @var $templatelib Library_template */
     $this->out->templates = $templatelib->get_list();
   }
@@ -349,7 +349,7 @@ class settings extends Application_Admin {
       $this->out->style = $style;
       $this->out->locked_style = file_exists($dirname.'/locked.txt');
       
-      $templatelib = $this->load_lib('template');
+      $templatelib = new Library_template;
       /* @var $templatelib Library_template */
       if ($templatelib) $this->out->templates=$templatelib->get_list(true); // получаем список всех стилей, включая скрытые
       

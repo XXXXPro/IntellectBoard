@@ -518,7 +518,7 @@ form span { width: 40%; text-align: right; display: inline-block }
         FROM  '.$this->old_db.'.'.$this->old_prefix.'User
         WHERE (u_avatartype!=0 OR u__photo_id!=0) AND u_id>3';
     $users = $this->db->select_all($sql);
-    $imglib = $this->load_lib('image',false);
+    $imglib = new Library_image;
     /* @var $imglib Library_image */
     for ($i=0, $count=count($users); $i<$count;$i++) {
       if ($users[$i]['u_avatartype']==1) $oldname=$this->old_dir.'/avatars/'.$users[$i]['u__avatar'];

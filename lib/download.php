@@ -25,7 +25,7 @@ class Library_download extends Library {
       curl_setopt($curl, CURLOPT_POST, false);
       $file_data = curl_exec($curl);
       $req_info = curl_getinfo($curl);
-      if ($req_info['http_code'] != 200) Library::$app->log_entry('download', E_USER_ERROR, __FILE__, print_r($req_info, true)); // логгируем ошибки для упрощения отладки
+      if ($req_info['http_code'] != 200) $this->app()->log_entry('download', E_USER_ERROR, __FILE__, print_r($req_info, true)); // логгируем ошибки для упрощения отладки
       if (curl_errno($curl)!=0) return false; // если при скачивании возникла ошибка, возвращаем код -2
       curl_close($curl);    
       $fh = fopen($local,'wb+');

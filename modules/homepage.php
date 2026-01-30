@@ -22,7 +22,7 @@
   function action_edit() {
     if (!$this->is_moderator()) $this->output_403('У вас нет прав для редактирования этого раздела!');
     if ($this->is_post()) {
-      $misclib = $this->load_lib('misc',true);
+      $misclib = new Library_misc;
       $text = $_POST['text'];
       if (trim(strip_tags($text))==='') $text='';
       $misclib->save_text($text,$this->forum['id'],2);
@@ -34,7 +34,7 @@
     $this->out->authkey=$this->gen_auth_key();
   }
 
-  function  get_action_name() {
+  function  get_action_name():string {
     if ($this->action=='view') $result='Просматривает страницу &laquo;%s&raquo;';
     else $result=parent::get_action_name();
     return $result;

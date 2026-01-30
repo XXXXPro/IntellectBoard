@@ -19,7 +19,7 @@ class anon extends stdforum {
 
   function view_forum_misc() {
     $pids = array();
-    $tlib = $this->load_lib('topic',true);
+    $tlib = new Library_topic;
     $this->out->topics = $tlib->get_first_posts($this->out->topics,array('ratings'=>false,'attach'=>true)); // получаем первые сообщения (вопросы) для всех выводимых тем
     $this->out->start_text = $this->get_text($this->forum['id'],2);  // текст с типом 2 -- вводный
     $this->out->mod_no_marks = true; // запрещаем помечать сообщения при просмотре в разделе
@@ -32,8 +32,7 @@ class anon extends stdforum {
     $this->out->editpost['topic']['title']='Тема '.$this->long_date($this->time);
 
     if ($this->is_guest() && $this->get_opt('captcha')) {
-      $antibot = $this->load_lib('antibot');
-      /* @var $antibot Library_antibot */
+      $antibot = new Library_antibot; 
       if ($antibot) $antibot->captcha_generate();
     }
 
@@ -43,6 +42,7 @@ class anon extends stdforum {
     $this->out->editpost['action']='newtopic.htm';
     $this->out->editpost['topmsg']='Задать вопрос';
     $this->out->authkey = $this->gen_auth_key(false,'newtopic'); // аутентификационный ключ нужен для того, чтобы если пользователя разлогинит по таймауту, его сообщение все равно бы отправилось
+    $this->out->draft_name = 'newtopic'.$this->forum['id'];
   }
 
   function action_newtopic($anonym=false) {

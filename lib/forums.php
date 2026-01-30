@@ -17,7 +17,7 @@ class Library_forums extends Library {
     $sql.='FROM ' . DB_prefix . 'category ';
     if ($category) $sql.='WHERE id=' . $category . ' ';
     $sql.='ORDER BY sortfield';
-    return Library::$app->db->select_hash($sql,'id');
+    return $this->app()->db->select_hash($sql,'id');
   }
 
   /** Получение информации об отдельно взятом форуме **/
@@ -27,7 +27,7 @@ class Library_forums extends Library {
     $sql.='FROM '.DB_prefix.'forum f ';
     if ($extdata) $sql.='LEFT JOIN '.DB_prefix.'text tx ON (tx.id=f.id AND tx.type=3) ';
     $sql.='WHERE f.id='.intval($id);
-    $result=Library::$app->db->select_row($sql);
+    $result=$this->app()->db->select_row($sql);
     if ($extdata && !empty($result['extdata'])) $result['extdata']=unserialize($result['extdata']);
     return $result;
   }
@@ -71,7 +71,7 @@ class Library_forums extends Library {
     if (!empty($cond['typeinfo']) || !empty($cond['allow_mass'])) $sql.='LEFT JOIN '.DB_prefix.'forum_type ft ON (f.module=ft.module) ';
     $sql.='WHERE '.$where.' ORDER BY f.sortfield';
 
-    $result = Library::$app->db->select_all($sql);
+    $result = $this->app()->db->select_all($sql);
 
     if (!empty($cond['extdata'])) // десериализуем расширенные данные раздела, если таковые имеются
       for ($i=0, $count=count($result);$i<$count; $i++)
@@ -85,9 +85,9 @@ class Library_forums extends Library {
     if (empty($data['title'])) $result[]=array('text'=>'Не задано название раздела!','level'=>3);
     if (!preg_match('|^[A-Za-z0-9_\-/\.]+$|',$data['hurl'])) $result[]=array('text'=>'Некорректный URL форума','level'=>3);
     // проверяем, что такого HURL нет у других разделов
-    $sql = 'SELECT COUNT(id) FROM '.DB_prefix.'forum WHERE hurl=\''.Library::$app->db->slashes($data['hurl']).'\'';
+    $sql = 'SELECT COUNT(id) FROM '.DB_prefix.'forum WHERE hurl=\''.$this->app()->db->slashes($data['hurl']).'\'';
     if (!empty($data['id'])) $sql.=' AND id!='.intval($data['id']);
-    $count = Library::$app->db->select_int($sql);
+    $count = $this->app()->db->select_int($sql);
     if ($count>0) $result[]=array('text'=>'Такой URL уже используется!','level'=>3);
     return $result;
   }
@@ -105,16 +105,16 @@ class Library_forums extends Library {
   function create_forum($data,$extdata,$type,$owner=0) {
     $data['module']=$type;
     $data['owner']=$owner;
-    $data['lastmod']=Library::$app->time; // время последней модификации раздела меняем на текущее, чтобы не выдавались версии страниц из кеша со старыми настройками
-    Library::$app->db->insert(DB_prefix.'forum', $data);
-    $id=Library::$app->db->insert_id();
+    $data['lastmod']=$this->app()->time; // время последней модификации раздела меняем на текущее, чтобы не выдавались версии страниц из кеша со старыми настройками
+    $this->app()->db->insert(DB_prefix.'forum', $data);
+    $id=$this->app()->db->insert_id();
     if ($id && !empty($extdata)) {
-      $sql = 'INSERT INTO '.DB_prefix.'text (data,id,type) VALUES (\''.Library::$app->db->slashes(serialize($extdata)).'\', '.intval($id).', 3)';
-      Library::$app->db->query($sql);
+      $sql = 'INSERT INTO '.DB_prefix.'text (data,id,type) VALUES (\''.$this->app()->db->slashes(serialize($extdata)).'\', '.intval($id).', 3)';
+      $this->app()->db->query($sql);
     }
     if ($data['parent_id']!=0) {
-      $sql ='UPDATE '.DB_prefix.'forum SET lastmod='.intval(Library::$app->time).' WHERE id='.intval($data['parent_id']);
-      Library::$app->db->query($sql);
+      $sql ='UPDATE '.DB_prefix.'forum SET lastmod='.intval($this->app()->time).' WHERE id='.intval($data['parent_id']);
+      $this->app()->db->query($sql);
     }
     return $id;
   }
@@ -132,22 +132,22 @@ class Library_forums extends Library {
       $data = array('id'=>intval($data));
     }
     else $id=$data['id'];
-    $oldtext = Library::$app->get_text($id, 3); // 3 -- сериализованные данные раздела
+    $oldtext = $this->app()->get_text($id, 3); // 3 -- сериализованные данные раздела
     if ($oldtext) {
       $olddata = unserialize($oldtext);
       $extdata = array_merge($olddata,$extdata);
     }
-    $data['lastmod']=Library::$app->time; // время последней модификации раздела меняем на текущее, чтобы не выдавались версии страниц из кеша
-    if (!is_numeric($data)) Library::$app->db->update(DB_prefix.'forum', $data, 'id='.intval($id));
+    $data['lastmod']=$this->app()->time; // время последней модификации раздела меняем на текущее, чтобы не выдавались версии страниц из кеша
+    if (!is_numeric($data)) $this->app()->db->update(DB_prefix.'forum', $data, 'id='.intval($id));
     $sql = 'DELETE FROM '.DB_prefix.'text WHERE id='.intval($id).' AND type=3';
-    Library::$app->db->query($sql);
+    $this->app()->db->query($sql);
     if (!empty($extdata)) {
-      $sql = 'INSERT INTO '.DB_prefix.'text (data,id,type) VALUES (\''.Library::$app->db->slashes(serialize($extdata)).'\', '.intval($id).', 3)';
-      Library::$app->db->query($sql);
+      $sql = 'INSERT INTO '.DB_prefix.'text (data,id,type) VALUES (\''.$this->app()->db->slashes(serialize($extdata)).'\', '.intval($id).', 3)';
+      $this->app()->db->query($sql);
     }
     if ($data['parent_id']!=0) { // обновляем Lastmod у родительского форума, чтобы раздел стал видимым сразу
-      $sql ='UPDATE '.DB_prefix.'forum SET lastmod='.intval(Library::$app->time).' WHERE id='.intval($data['parent_id']);
-      Library::$app->db->query($sql);
+      $sql ='UPDATE '.DB_prefix.'forum SET lastmod='.intval($this->app()->time).' WHERE id='.intval($data['parent_id']);
+      $this->app()->db->query($sql);
     }
   }
 
@@ -165,20 +165,20 @@ class Library_forums extends Library {
   function build_routes() {
     $sql = 'SELECT f.id, f.title, f.hurl, ft.route FROM '.DB_prefix.'forum f, '.DB_prefix.'forum_type ft '.
         'WHERE f.module=ft.module ORDER BY f.sortfield';
-    $forums = Library::$app->db->select_all($sql);
+    $forums = $this->app()->db->select_all($sql);
     $buffer = '';    
     $routes = file_get_contents(BASEDIR.'etc/routes.txt')."\n";
     for ($i=0, $count=count($forums);$i<$count;$i++) {
       $tmp2 = $forums[$i]['route'];
       if ($forums[$i]['hurl']==='/') $forums[$i]['hurl']=''; // необходимо для корректной обработки корневого раздела
       unset($forums[$i]['route']); // убираем поле route из тех же соображений
-      foreach ($forums[$i] as $key=>$value) $tmp = str_replace('<<<'.$key.'>>>',$value,$tmp);
-      $buffer.=$tmp;
+      foreach ($forums[$i] as $key=>$value) $tmp = str_replace('<<<'.$key.'>>>',$value,$tmp2);
+      $buffer.=$tmp2;
       $buffer = str_replace('RewriteRule ^/','RewriteRule ^',$buffer); // для корректной обработки корневого раздела
       foreach ($forums[$i] as $key=>$value) $tmp2 = str_replace('<<<'.$key.'>>>',$value,$tmp2);
       $routes.=$tmp2."\n";
     }
-    if ($mainpage=Library::$app->get_opt('forum_mainpage')) {
+    if ($mainpage=$this->app()->get_opt('forum_mainpage')) {
       $route_index_data = '^'.$mainpage.'$ mainpage.php'; 
     }
     else $route_index_data = '^$ mainpage.php'; 

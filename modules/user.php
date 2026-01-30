@@ -11,7 +11,8 @@
 class user extends Application {
   function action_register() {
     if ($ext_lib_name = $this->get_opt('user_external_lib')) { // если задана библиотека внешней авторизации в настройках
-       $ext_lib = $this->load_lib($ext_lib_name,false); // загружаем ее
+       $ext_lib_name = 'Library_'.$ext_lib_name;
+       $ext_lib = class_exists($ext_lib_name) ? new $ext_lib_name : false; // загружаем ее
        if ($ext_lib && !$ext_lib->allow_register()) $this->output_403('Прямая регистрация через форум запрещена. Зарегистрируйтесь через основной сайт.');
     }
     if (!isset($_REQUEST['accepted']) || $_REQUEST['accepted']!=1) { // если пользователь не принял правила, выводим их ему
@@ -19,8 +20,8 @@ class user extends Application {
       $this->out->referer = $this->referer();
       return 'user/rules.tpl';
     }
-    $userlib = $this->load_lib('userlib',true);
-    if ($this->get_opt('captcha')) $antibot = $this->load_lib('antibot');
+    $userlib = new Library_userlib;
+    if ($this->get_opt('captcha')) $antibot = new Library_antibot;
     if ($this->is_post()) {
       $data=$_POST;
       if (empty($data['basic']['display_name'])) $data['basic']['display_name']=$data['basic']['login'];
@@ -70,7 +71,7 @@ class user extends Application {
 
   function action_login() {
     if ($this->is_post()) {
-      $userlib = $this->load_lib('userlib',true);
+      $userlib = new Library_userlib;
       $long = isset($_POST['long']) ? 90 : 0; // если пользователь выбрал "запомнить", запоминаем его на 90 дней
       if ($userlib->do_login($_POST['login'],$_POST['password'],$long)) {
         $referer = $this->referer();
@@ -85,7 +86,8 @@ class user extends Application {
   function action_social_login() {
     $libname = $this->get_opt('site_social_lib');
     if (!$libname) $this->output_403('На данном сайте выключен или не настроен вход через социальные сети',true);
-    $soclib = $this->load_lib($libname,true);
+    $libname = 'Library_'.$libname;
+    $soclib = new $libname;
     $this->lastmod=$this->time;
     $userdata = $soclib->social_login();
     if (empty($userdata) || !empty($userdata['error']) || empty($userdata['contact_type'])) {
@@ -112,7 +114,7 @@ class user extends Application {
       $this->redirect($this->http($this->url('user/social_register.htm?referer='.urlencode($this->referer()))));
     }
     else {
-      $userlib = $this->load_lib('userlib',true);
+      $userlib = new Library_userlib;
       $userlib->force_login($uid);
       $this->message('Вы успешно вошли на форум!',1);
       $this->redirect($this->referer());
@@ -122,13 +124,14 @@ class user extends Application {
   function action_social_register() {
     $this->session();
     if ($ext_lib_name = $this->get_opt('user_external_lib')) { // если задана библиотека внешней авторизации в настройках
-      $ext_lib = $this->load_lib($ext_lib_name,false); // загружаем ее
+       $ext_lib_name = 'Library_'.$ext_lib_name;
+       $ext_lib = class_exists($ext_lib_name) ? new $ext_lib_name : false; // загружаем ее
     }
     else $ext_lib=false;
     if ($ext_lib && !$ext_lib->allow_register()) $this->output_403('Прямая регистрация через форум запрещена. Зарегистрируйтесь через основной сайт.');
     if (empty($_SESSION['social_data'])) $this->output_403('Отсутствуют данные социальной авторизации! Попробуйте авторизоваться еще раз или воспользуйтесь обычной регистрацией.',true);
 
-    $userlib = $this->load_lib('userlib',true);
+    $userlib = new Library_userlib;
     $errors = $userlib->validate_user($_SESSION['social_data']['basic'],true); // true означает валидацию с учетом специфики социальных сетей, в частности, отсутствие проверки на пустой пароль
     if (!empty($errors)) {
       $this->message($errors);
@@ -139,8 +142,8 @@ class user extends Application {
       $result = $userlib->register_user($_SESSION['social_data']['basic'],array(),$_SESSION['social_data']['contacts'],true,$_SESSION['social_data']['confirmed']);
       if ($result) {
         // подгрузка аватара
-        $misclib = $this->load_lib('misc',false);
-        $imglib = $this->load_lib('image',false);
+        $misclib = class_exists('Library_misc') ? new Library_misc : false;
+        $imglib = class_exists('Library_image') ? new Library_image : false;
         if ($_SESSION['social_data']['avatar_url'] && $misclib && $imglib) {
           $avatar_local = BASEDIR.'www/f/av/'.$_SESSION['social_data']['basic']['id'];
           $test = $misclib->download_file($_SESSION['social_data']['avatar_url'],$avatar_local.'.tmp');
@@ -194,7 +197,7 @@ class user extends Application {
   }
 
   function action_logout() {
-    $userlib = $this->load_lib('userlib');
+    $userlib = new Library_userlib;
     $userlib->do_logout();
     $this->output_msg($this->referer(),'Вы вышли с форума!','Вернуться к предыдущей странице');
   }
@@ -202,13 +205,14 @@ class user extends Application {
   function action_update() {
     if ($this->get_uid()<=AUTH_SYSTEM_USERS) $this->output_403('Нельзя редактировать профили гостя или служебных пользователей!',true);
     if ($ext_lib_name = $this->get_opt('user_external_lib')) { // если задана библиотека внешней авторизации в настройках
-      $ext_lib = $this->load_lib($ext_lib_name,false); // загружаем ее
+       $ext_lib_name = 'Library_'.$ext_lib_name;
+       $ext_lib = class_exists($ext_lib_name) ? new $ext_lib_name : false; // загружаем ее
       if ($ext_lib && !$ext_lib->allow_update()) $this->output_403('Прямое редактирование профиля через форум запрещено!');
     }
-    $userlib = $this->load_lib('userlib');
+    $userlib = new Library_userlib;
     $this->out->allow_template = $this->get_opt('userlib_allow_template');
     if ($this->out->allow_template) {
-      $templatelib = $this->load_lib('template');
+      $templatelib = new Library_template;
       /* @var $templatelib Library_template */
       if ($templatelib) $this->out->user_templates = array(''=>'Стиль сайта по умолчанию')+$templatelib->get_list($this->is_admin()); // если пользователь -- админ, он может выбрать любой шаблон, иначе -- только незаблокированные
     }
@@ -258,7 +262,7 @@ class user extends Application {
 
 /** Активация пользователя по ссылке, отправленной на EMail **/
   function action_activate() {
-    $userlib = $this->load_lib('userlib');
+    $userlib = new Library_userlib;
     if (!isset($_REQUEST['authkey'])) {
       $this->output_403('Смена пароля может осуществляться только по ключу, присланному в письме!');
     }
@@ -287,8 +291,8 @@ class user extends Application {
   }
 
   function action_forgot() {
-    $userlib = $this->load_lib('userlib');
-    $antibot = $this->load_lib('antibot');
+    $userlib = new Library_userlib;
+    $antibot = new Library_antibot;
     if ($this->is_post()) {
       if ($antibot && $antibot->captcha_check()) { // если проверка CAPTCHA прошла нормально
       if ($_POST['login']) $uid = $userlib->get_uid_by_name($_POST['login'],false);
@@ -327,7 +331,7 @@ class user extends Application {
 /** Действие по изменению пароля по ссылке в письме, отправляемом при действии "забытый пароль"
  * */
   function action_change() {
-    $userlib = $this->load_lib('userlib');
+    $userlib = new Library_userlib;
 
     if (!isset($_REQUEST['authkey'])) {
       $this->output_403('Смена пароля может осуществляться только по ключу, присланному в письме!');
@@ -354,8 +358,8 @@ class user extends Application {
   }
 
   function action_change_email() {
-    $userlib = $this->load_lib('userlib');
-    if ($this->get_opt('captcha')) $antibot = $this->load_lib('antibot');
+    $userlib = new Library_userlib;
+    if ($this->get_opt('captcha')) $antibot = new Library_antibot;
     else $antibot = false;
 
     if ($this->is_post()) {
@@ -391,7 +395,7 @@ class user extends Application {
   /** Вывод алфавитного списка и формы поиска пользователей */
   function action_view() {
     /** @var Library_userlib $userlib */
-    $userlib = $this->load_lib('userlib',true);
+    $userlib = new Library_userlib;
     $this->out->letters = $userlib->get_letters();
     $this->out->groups = $userlib->list_groups(array('usercount'=>true,'nonzero'=>true));
     $this->out->last_users = $userlib->list_users(array('order'=>'reg_date','ext_data'=>true,'perpage'=>20,'sort'=>'DESC'));
@@ -399,7 +403,7 @@ class user extends Application {
     $sql = 'SELECT COUNT(*) FROM '.DB_prefix.'user WHERE id>'.AUTH_SYSTEM_USERS.' AND status=0';
      $this->out->total_users = $this->db->select_int($sql);
 
-    $taglib = $this->load_lib('tags',false);
+    $taglib = class_exists('Library_tags') ? new Library_tags : false;
     if ($taglib) {
       $this->out->tags = $taglib->get_all_tags(1,20);
       $max=0; // считаем максимальный вес для тега для расчета коэффициента
@@ -409,7 +413,7 @@ class user extends Application {
   }
 
   function action_all_tags() {
-    $taglib = $this->load_lib('tags',false);
+    $taglib = class_exists('Library_tags') ? new Library_tags : false;
     if ($taglib) {
       $this->out->tags = $taglib->get_all_tags(1);
       $max=0; // считаем максимальный вес для тега для расчета коэффициента
@@ -420,7 +424,7 @@ class user extends Application {
 
   /** Вывод профиля конкретного пользователя **/
   function action_view_user() {
-    $userlib = $this->load_lib('userlib',true);
+    $userlib = new Library_userlib;
     if (!isset($_REQUEST['uid']) || !is_numeric($_REQUEST['uid'])) $this->output_404('Некорректно указан идентификатор пользователя!');
     $uid = intval($_REQUEST['uid']);
 
@@ -460,7 +464,7 @@ class user extends Application {
       $this->out->friend_list = $userlib->list_users(array('gender'=>true,'friends_list'=>$uid));
       $this->out->add_key=$this->gen_auth_key(false,'add',$this->url('address_book/'));
     }
-    $bbcode = $this->load_lib('bbcode',false);
+    $bbcode = class_exists('Library_bbcode') ? new Library_bbcode : false;;
     if ($bbcode) $this->out->userdata['basic']['signature']=$bbcode->parse_sig($udata['basic']['signature'],$udata['ext_data']['links_mode']);
 
     $forums = $this->get_forum_list('read');
@@ -497,7 +501,7 @@ class user extends Application {
     $cond['last_visit']=true;
     $cond['contacts']=true;
 
-    $userlib = $this->load_lib('userlib',true);
+    $userlib = new Library_userlib;
     /* @var $userlib Library_userlib */
     $total = $userlib->count_users($cond);
     $perpage = $this->get_opt('posts_per_page','user');
@@ -529,11 +533,11 @@ class user extends Application {
     $this->out->username = $udata['display_name'];
     if ($this->is_post()) {
       $data = $_POST['warn'];
-      $warnlib = $this->load_lib('warning',true);
+      $warnlib = new Library_warning;
       /* @var $warnlib Library_warning */
       if ($warnlib->make_warning($uid, $_POST['warn'])) {
         $this->message('Автору сообщения вынесено предупреждение!',2);
-        $pmlib = $this->load_lib('privmsg',false);
+        $pmlib = class_exists('Library_privmsg') ? new Library_privmsg : false;
         /* @var $pmlib Library_privmsg */
         if ($pmlib) {
           $pmdata['thread']['title']='Предупреждение за нарушение правил форума';
@@ -542,7 +546,7 @@ class user extends Application {
           list($pm_thread,$pm_id)=$pmlib->save_message($pmdata);
           $pmdata['thread']['id']=$pm_thread;
           $pmdata['post']['id']=$pm_id;
-          $notify_lib = $this->load_lib('notify',false);
+          $notify_lib = class_exists('Library_notify') ? new Library_notify : false;
           if ($notify_lib) {
             $userdata = $this->load_user($this->get_uid(),0);
             $notify_lib->new_pm($pmdata['thread'],$pmdata['post'],$pmdata['post']['text'],$this->get_username(),$userdata['email']);
@@ -559,7 +563,7 @@ class user extends Application {
     if (!isset($_REQUEST['authkey'])) $this->output_403('Быстрая отписка может осуществляться только по ключу, присланному в письме!');
     $uid=$this->get_uid();
     if ($uid<=AUTH_SYSTEM_USERS) $this->output_403('Быстрая отписка невозможна для гостей или системных пользователей. Отредактируйте профиль пользователя!');
-    $userlib = $this->load_lib('userlib',true);
+    $userlib = new Library_userlib;
     $userlib->unsubscribe($uid,1);
     $this->output_msg(false,'Вы отписаны!','Вы отписаны от администраторской рассылки форума.');
   }
@@ -569,14 +573,14 @@ class user extends Application {
     if (!isset($_REQUEST['authkey'])) $this->output_403('Быстрая отписка может осуществляться только по ключу, присланному в письме!');
     $uid=$this->get_uid();
     if ($uid<=AUTH_SYSTEM_USERS) $this->output_403('Быстрая отписка невозможна для гостей или системных пользователей. Отредактируйте профиль пользователя!');
-    $userlib = $this->load_lib('userlib',true);
+    $userlib = new Library_userlib;
     $userlib->unsubscribe($uid,0);
     $this->output_msg(false,'Вы отписаны!','Вы отписаны от всех рассылок форума.');
   }
 
   /** Функция для проверки допустимости логина через AJAX **/
   function action_check_login() {
-    $userlib = $this->load_lib('userlib',true);
+    $userlib = new Library_userlib;
     /* @var $userlib Library_userlib */
     if (empty($_GET['login'])) $this->output_403('Не указан логин для проверки!');
     $data['id']=false; // проверка вызывается только при регистрации новых пользователей

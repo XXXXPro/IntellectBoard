@@ -15,7 +15,7 @@ class Library_privmsg extends Library {
     if (!empty($cond['uid'])) $where.=' AND uid='.intval($cond['uid']);
     if (!empty($cond['lasttime'])) $where.= ' AND last_post_date>'.intval($cond['lasttime']);
     $sql = 'SELECT COUNT(*) FROM '.DB_prefix.'privmsg_thread_user WHERE '.$where; // получаем общее количество тем
-    return Library::$app->db->select_int($sql);    
+    return $this->app()->db->select_int($sql);    
   }
   
   /** Получение списка цепочек сообщений
@@ -40,7 +40,7 @@ class Library_privmsg extends Library {
     
     if (empty($cond['start'])) $cond['start']=false;
     if (empty($cond['perpage'])) $cond['perpage']=false;
-    $threads = Library::$app->db->select_all($sql,$cond['start'],$cond['perpage']);
+    $threads = $this->app()->db->select_all($sql,$cond['start'],$cond['perpage']);
     
     if (!empty($cond['users'])) { // если запрошено извлечение данных о пользователях
       $ids =array(); // выбираем все ID цепочек сообщений
@@ -54,7 +54,7 @@ class Library_privmsg extends Library {
         $sql.='FROM '.DB_prefix.'privmsg_thread_user pu, '.DB_prefix.'user u ';
         if (!empty($cond['relations'])) $sql.='LEFT JOIN '.DB_prefix.'relation ur ON (u.id=ur.from_ AND ur.to_='.intval($cond['uid']).') ';
         $sql.='WHERE pm_thread IN ('.join(',',$ids).') AND pu.uid=u.id';
-        $udata = Library::$app->db->select_super_hash($sql,'pm_thread');
+        $udata = $this->app()->db->select_super_hash($sql,'pm_thread');
         for ($i=0, $count=count($threads); $i<$count; $i++) {
           $threads[$i]['users']=$udata[$threads[$i]['id']];
         }
@@ -84,75 +84,75 @@ class Library_privmsg extends Library {
     if (empty($cond['start'])) $cond['start']=false;
     if (empty($cond['perpage'])) $cond['perpage']=false;
     
-    $pm = Library::$app->db->select_all($sql,$cond['start'],$cond['perpage']);
+    $pm = $this->app()->db->select_all($sql,$cond['start'],$cond['perpage']);
     return $pm; 
   }
   
   function save_message($data,$override=false) {
-    //Library::$app->db->begin();
+    //$this->app()->db->begin();
     $newtopic = false;    
     if (empty($data['post']['pm_thread'])) { // если для сообщения еще не создана еще цепочка сообщений
       $newtopic= true;
       // создаем цепочку (thread)
       $thdata['title']=$data['thread']['title'];
-      Library::$app->db->insert(DB_prefix.'privmsg_thread',$thdata);
-      $data['post']['pm_thread']=Library::$app->db->insert_id();
+      $this->app()->db->insert(DB_prefix.'privmsg_thread',$thdata);
+      $data['post']['pm_thread']=$this->app()->db->insert_id();
 
       $thudata['pm_thread']=$data['post']['pm_thread'];
       // сохраняем привязку thread к пользователям и задаем начальные данные о количестве сообщений
       for ($i=0, $count=count($data['uids']); $i<$count; $i++) {
         $thudata['uid']=$data['uids'][$i];
-        Library::$app->db->insert(DB_prefix.'privmsg_thread_user',$thudata);
+        $this->app()->db->insert(DB_prefix.'privmsg_thread_user',$thudata);
       }
     }
 
     // TODO: добавить фильтр
-    if (!$override || empty($data['post']['postdate'])) $data['post']['postdate']=Library::$app->time;
-    if (!$override || empty($data['post']['uid'])) $data['post']['uid']=Library::$app->get_uid();
-    Library::$app->db->insert(DB_prefix.'privmsg_post',$data['post']); // сохраняем собственно сообщение
+    if (!$override || empty($data['post']['postdate'])) $data['post']['postdate']=$this->app()->time;
+    if (!$override || empty($data['post']['uid'])) $data['post']['uid']=$this->app()->get_uid();
+    $this->app()->db->insert(DB_prefix.'privmsg_post',$data['post']); // сохраняем собственно сообщение
 
-    $thldata['pm_id']=Library::$app->db->insert_id();
+    $thldata['pm_id']=$this->app()->db->insert_id();
     for ($i=0, $count=count($data['uids']); $i<$count; $i++) {
       $thldata['uid']=$data['uids'][$i];
-      Library::$app->db->insert(DB_prefix.'privmsg_link',$thldata);
+      $this->app()->db->insert(DB_prefix.'privmsg_link',$thldata);
     }
     
     $sql = 'UPDATE '.DB_prefix.'privmsg_thread_user SET '.
-      'total=total+1, unread=CASE WHEN uid='.intval(Library::$app->get_uid()).' THEN unread ELSE unread+1 END, last_post_date='.intval(Library::$app->time).' '.
-      'WHERE pm_thread='.intval($data['post']['pm_thread']).' AND '.Library::$app->db->array_to_sql($data['uids'],'uid');
-    Library::$app->db->query($sql);
+      'total=total+1, unread=CASE WHEN uid='.intval($this->app()->get_uid()).' THEN unread ELSE unread+1 END, last_post_date='.intval($this->app()->time).' '.
+      'WHERE pm_thread='.intval($data['post']['pm_thread']).' AND '.$this->app()->db->array_to_sql($data['uids'],'uid');
+    $this->app()->db->query($sql);
        
     return array($data['post']['pm_thread'],$thldata['pm_id']); // возвращаем массив из номера темы и номера добавленного сообщения
     
-    //Library::$app->db->commit();  
+    //$this->app()->db->commit();  
   }  
   
   /** Отписывание пользователя от темы с удалением ссылок на его сообщения в ней **/
   function unsubscribe($thread,$uid) {
     $sql = 'SELECT id FROM '.DB_prefix.'privmsg_post WHERE pm_thread='.intval($thread);
-    $ids = Library::$app->db->select_all_numbers($sql);   
+    $ids = $this->app()->db->select_all_numbers($sql);   
     if (!empty($ids)) {
-      $sql = 'DELETE FROM '.DB_prefix.'privmsg_link WHERE '.Library::$app->db->array_to_sql($ids,'pm_id').' AND uid='.intval($uid);
-      Library::$app->db->query($sql);
+      $sql = 'DELETE FROM '.DB_prefix.'privmsg_link WHERE '.$this->app()->db->array_to_sql($ids,'pm_id').' AND uid='.intval($uid);
+      $this->app()->db->query($sql);
     }
     $sql = 'DELETE FROM '.DB_prefix.'privmsg_thread_user WHERE pm_thread='.intval($thread).' AND uid='.intval($uid);
-    Library::$app->db->query($sql);
+    $this->app()->db->query($sql);
     $this->clear_unused($thread); // если в результате остались бесхозные сообщения, или даже тема целиком, подчищаем их
   }
   
   /** Выборочное удаление нескольких сообщений без отписывания от темы **/
   function delete($thread,$ids,$uid) {
-    $sql = 'SELECT id FROM '.DB_prefix.'privmsg_post WHERE pm_thread='.intval($thread).' AND '.Library::$app->db->array_to_sql($ids,'id');
-    $trust_ids = Library::$app->db->select_all_numbers($sql);
+    $sql = 'SELECT id FROM '.DB_prefix.'privmsg_post WHERE pm_thread='.intval($thread).' AND '.$this->app()->db->array_to_sql($ids,'id');
+    $trust_ids = $this->app()->db->select_all_numbers($sql);
     if (!empty($trust_ids)) {
-      $sql = 'DELETE FROM '.DB_prefix.'privmsg_link WHERE '.Library::$app->db->array_to_sql($trust_ids,'pm_id').' AND uid='.intval($uid);
-      Library::$app->db->query($sql);
+      $sql = 'DELETE FROM '.DB_prefix.'privmsg_link WHERE '.$this->app()->db->array_to_sql($trust_ids,'pm_id').' AND uid='.intval($uid);
+      $this->app()->db->query($sql);
       $this->clear_unused($thread); // если в результате остались бесхозные сообщения, подчищаем их
       $sql = 'SELECT COUNT(*) AS total, MAX(postdate) AS last FROM '.DB_prefix.'privmsg_link pl, '.DB_prefix.'privmsg_post pp '.
       'WHERE pl.pm_id = pp.id AND pp.pm_thread='.intval($thread).' AND pl.uid='.intval($uid);
-      $update = Library::$app->db->select_row($sql);
+      $update = $this->app()->db->select_row($sql);
       $sql = 'UPDATE '.DB_prefix.'privmsg_thread_user SET total='.intval($update['total']).', unread=0, last_post_date='.intval($update['last']).' WHERE pm_thread='.intval($thread).' AND uid='.intval($uid);
-      Library::$app->db->query($sql);
+      $this->app()->db->query($sql);
     }
   }
   
@@ -162,16 +162,16 @@ class Library_privmsg extends Library {
     ' LEFT JOIN '.DB_prefix.'privmsg_link pl ON (pl.pm_id=pp.id) '.
     ' WHERE pp.pm_thread='.intval($thread).' '.
     ' GROUP BY pp.id HAVING COUNT(pl.pm_id)=0';
-    $ids = Library::$app->db->select_all_numbers($sql);
+    $ids = $this->app()->db->select_all_numbers($sql);
     if (is_array($ids) && count($ids)>0) {
-      $sql = 'DELETE FROM '.DB_prefix.'privmsg_post WHERE '.Library::$app->db->array_to_sql($ids,'id');
-      Library::$app->db->query($sql);
+      $sql = 'DELETE FROM '.DB_prefix.'privmsg_post WHERE '.$this->app()->db->array_to_sql($ids,'id');
+      $this->app()->db->query($sql);
     }
     $sql = 'SELECT COUNT(*) FROM '.DB_prefix.'privmsg_thread_user WHERE pm_thread='.intval($thread);
-    $count = Library::$app->db->select_int($sql);
+    $count = $this->app()->db->select_int($sql);
     if ($count==0) {
       $sql = 'DELETE FROM '.DB_prefix.'privmsg_thread WHERE id='.intval($thread);
-      Library::$app->db->query($sql);
+      $this->app()->db->query($sql);
     }
   }
   
@@ -179,7 +179,7 @@ class Library_privmsg extends Library {
   function mark_read($uid,$thread=false) {
     $sql = 'UPDATE '.DB_prefix.'privmsg_thread_user SET unread=0 WHERE uid='.intval($uid);
     if ($thread) $sql.=' AND pm_thread='.intval($thread);
-    Library::$app->db->query($sql);    
+    $this->app()->db->query($sql);    
   }
     
   function get_permissions() {

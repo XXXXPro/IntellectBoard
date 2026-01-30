@@ -33,7 +33,7 @@ class misc extends Application {
   }
 
   function action_smiles() {
-    $bbcode = $this->load_lib('bbcode');
+    $bbcode = new Library_bbcode;
     if ($bbcode) $this->out->smiles = $bbcode->load_smiles_hash();
   }
   
@@ -125,6 +125,68 @@ class misc extends Application {
     $this->out->groups = $this->db->select_all($sql);
   }
 
+  function action_manifest() {
+    if (!$this->get_opt('pwa_enabled')) $this->output_404('Поддержка PWA на этом форуме выключена!');
+    $start_url = $this->url(''); // путь к корню форума
+    $short_name = $this->get_opt('pwa_short_name'); // короткое название для приложения
+    $full_name = $this->get_opt('site_title');
+    if (empty($short_name)) $short_name = $full_name;
+
+    $bg_color = $this->get_opt('pwa_background_color');
+    if (empty($bg_color)) $bg_color = '#fff';
+    $theme_color = $this->get_opt('pwa_theme_color');
+    if (empty($theme_color)) $theme_color = '#E5F1FF';
+
+    $icon512 = $this->get_opt('pwa_icon_512');
+    if (empty($icon512)) $icon512 = $this->url('s/def/icon512.png');
+    $icon192 = $this->get_opt('pwa_icon_192');
+    if (empty($icon192)) $icon192 = $this->url('s/def/icon192.png');
+
+    $filename = BASEDIR.'www/s/'.$this->template.'/sw.js'; // сначала пытаемся загрузить service worker из текущего стиля
+    if (!is_readable($filename)) $filename = BASEDIR.'www/s/def/sw.js'; // если он не существует или недоступен, загрузим из стиля по умолчанию
+
+    header('Content-Type: application/manifest+json');
+    $manifest = '
+{
+  "name": "'.addslashes($full_name).'",
+  "short_name": "'.addslashes($short_name).'",
+  "start_url": "'.$start_url.'",
+  "display": "standalone",
+  "scope" : "'.$start_url.'",
+
+  "description": "'.addslashes($this->get_opt('site_description')).'",
+  "lang": "ru",
+  "dir": "ltr",
+
+  "display_override": ["window-controls-overlay"],
+  "orientation": "portrait-primary",  
+
+  "background_color": "'.addslashes($bg_color).'",
+  "theme_color": "'.addslashes($theme_color).'",
+  "icons": [
+    {
+      "src": "'.addslashes($icon192).'",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "'.addslashes($icon512).'",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Последние сообщения",
+      "url": "'.$this->url('newtopics/').'"
+    }
+  ]
+}';  
+    return $manifest;
+  }
+
 
   function set_title() {
     $result=false;
@@ -177,6 +239,16 @@ class misc extends Application {
     elseif ($this->action==='smiles') $result='Изучает список смайликов';    
     else $result=parent::get_action_name();
      return $result;
-  }  
+  }
+
+  function get_request_type() {
+    if ($this->action==='manifest') return 4;
+    return parent::get_request_type();
+  }
+
+  function get_mime() {
+    if ($this->action==='manifest') return 'application/manifest+json';
+    return parent::get_mime();
+  }
   
 }

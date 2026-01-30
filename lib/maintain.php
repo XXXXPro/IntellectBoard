@@ -36,13 +36,13 @@
     function cron_search_results_clear($period) {
       $period=intval($period);
       if (!$period) return false;
-      $timelimit = Library::$app->time-$period*24*60*60;
+      $timelimit = $this->app()->time-$period*24*60*60;
       $sql = 'SELECT id FROM '.DB_prefix.'search WHERE time<'.intval($timelimit);
-      $ids = Library::$app->db->select_all_numbers($sql);
-      $sql = 'DELETE FROM '.DB_prefix.'search_result WHERE '.Library::$app->db->array_to_sql($ids, 'sid');
-      Library::$app->db->query($sql);
+      $ids = $this->app()->db->select_all_numbers($sql);
+      $sql = 'DELETE FROM '.DB_prefix.'search_result WHERE '.$this->app()->db->array_to_sql($ids, 'sid');
+      $this->app()->db->query($sql);
       $sql = 'DELETE FROM '.DB_prefix.'search WHERE time<'.intval($timelimit);
-      Library::$app->db->query($sql);
+      $this->app()->db->query($sql);
     }
     
     /** Очистка логов с действиями модераторов
@@ -51,9 +51,9 @@
     function cron_mod_logs_clear($period) {
       $period=intval($period);
       if (!$period) return false;
-      $timelimit = Library::$app->time-$period*24*60*60;
+      $timelimit = $this->app()->time-$period*24*60*60;
       $sql = 'DELETE FROM '.DB_prefix.'log_action WHERE time<'.intval($timelimit);
-      Library::$app->db->query($sql);
+      $this->app()->db->query($sql);
     }
     
     /** Очистка таблицы online
@@ -62,16 +62,16 @@
     function cron_online_clear($period=2) {
       $period=intval($period);
       if (!$period) return false;
-      $timelimit = Library::$app->time-$period*24*60*60;
+      $timelimit = $this->app()->time-$period*24*60*60;
       $sql = 'DELETE FROM '.DB_prefix.'online WHERE visittime<'.intval($timelimit);
-      Library::$app->db->query($sql);
+      $this->app()->db->query($sql);
     }    
 
     /** Малая оптимизация: только основные таблицы **/
     function cron_light_optimize($empty) {
       require_once BASEDIR.'db/'.DB_driver.'.ext.php';
       $classname = DB_driver.'_extender';
-      $extdb = new $classname(Library::$app->db);
+      $extdb = new $classname($this->app()->db);
       /* @var $extdb mysqli_extender */
       $extdb->optimize(array(DB_prefix.'text',DB_prefix.'topic',DB_prefix.'post',DB_prefix.'privmsg_post')); 
     }
@@ -79,7 +79,7 @@
     function cron_heavy_optimize($empty) {
       require_once BASEDIR.'db/'.DB_driver.'.ext.php';
       $classname = DB_driver.'_extender';
-      $extdb = new $classname(Library::$app->db);
+      $extdb = new $classname($this->app()->db);
       /* @var $extdb mysqli_extender */
       $tables = $extdb->get_tables();
       $extdb->optimize($tables);       
@@ -94,12 +94,12 @@
     function cron_update_mark_all($period) {
       $period=intval($period);
       if (!$period) return false;
-      $timelimit = Library::$app->time-$period*24*60*60;
+      $timelimit = $this->app()->time-$period*24*60*60;
       $sql = 'UPDATE '.DB_prefix.'mark_all SET mark_time='.intval($timelimit).' WHERE fid=0 AND mark_time<'.intval($timelimit);
-      Library::$app->db->query($sql);
+      $this->app()->db->query($sql);
       $sql = 'DELETE FROM '.DB_prefix.'mark_all WHERE mark_time<'.intval($timelimit);
-      Library::$app->db->query($sql);
+      $this->app()->db->query($sql);
       $sql = 'DELETE FROM '.DB_prefix.'last_visit WHERE visit2<'.intval($timelimit).' AND oid!=0 AND type=\'forum\' AND bookmark=\'0\' AND subscribe=\'0\' ';
-      Library::$app->db->query($sql);
+      $this->app()->db->query($sql);
     }
  }

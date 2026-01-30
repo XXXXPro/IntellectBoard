@@ -32,7 +32,7 @@
 {% endif %}
 
 {% for topic in topics %}
-<div class="blogpost h-entry" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+<div class="blogpost h-entry{% if topic.post.short_post %} short_post{% endif %}" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
 <h3><a class="p-name u-url u-uid" href="{{ topic.t_hurl }}">{{ topic.title }}</a></h3>
 <span class="h-card p-author">
 {% if topic.post.uid>3 %}<a href="{{ url(sprintf(get_opt('user_hurl'),topic.post.uid)) }}" class="avatar">{{ macros.avatar(topic.post.uid,topic.post.avatar,topic.post.author,"u-photo") }}</a>

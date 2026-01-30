@@ -23,8 +23,9 @@ table.design { padding: 0; margin: 0; border-spacing: 0; empty-cells: show; bord
 #ib_all .ibform .sceditor-button div { padding: 0; clear: none; }
 #ib_all .ibform div:nth-child(even) { background: #F6F6F6 }
 #ib_all .ibform div small { display: block; font-size: 80% }
-#ib_all .ibform span { display: block; width: 40%; text-align: right; padding: 2px 5px; float: left }
+#ib_all .ibform span { display: block; width: 40%; text-align: right; padding: 2px 5px; float: left; line-height: 1.6; }
 #ib_all .ibform .submit { padding-left: 40%; }
+#ib_all .ibform input[type="text"],#ib_all .ibform input[type="email"],#ib_all .ibform input[type="password"],#ib_all .ibform textarea, .ibform select {padding:5px 6px;border-radius:3px;border-style:solid;border-width:1px;margin-left:4px}
 #ib_all .ibform .submit button, #ib_all .postform .submit button { padding: 3px 11px; margin: 4px 9px 4px 0; text-decoration: none;
    background: #3d98ff; color: #fff;  font-weight: bold; margin-left: 9px; font-size: 133%; padding: 3px 10px; border: #A3CEFF 1px solid }
 #ib_all .postform .submit input[type="button"] { background: #fff; border: rgb(118,118,118) 1px solid; padding: 3px 11px; font-size: 133%; }
@@ -50,13 +51,13 @@ table.design { padding: 0; margin: 0; border-spacing: 0; empty-cells: show; bord
 #ib_all .ibtable { width: 100%; table-layout: fixed; border-collapse: collapse; border: #C1DEFF 2px solid }
 
 /* Сообщения */
-#ib_all div.msg_error, #ib_all div.msg_warn, #ib_all div.msg_ok { padding: 4px 10px; margin: 2px 0; border-width: 1px; border-style: solid }
-#ib_all div.msg_error { background: #FEE; border-color: #800 }
-#ib_all div.msg_warn { background: #FFE; border-color: #993 }
-#ib_all div.msg_ok { background: #EFE; border-color: #080 }
-#ib_all span.msg_error { color: #800 }
-#ib_all span.msg_warn { color: #993 }
-#ib_all span.msg_ok { color: #080 }
+#ib_all div.msg_error,#ib_all div.msg_warn,#ib_all div.msg_ok{padding:8px 10px;margin:4px 0;border-width:0 0 0 4px;border-style:solid;font-size:110%}
+#ib_all div.msg_error{background:#FEE;border-color:#800}
+#ib_all div.msg_error::before{content:'⮿';font-size:200%;padding-right:10px;line-height:100%;vertical-align:middle;color:#e00}
+#ib_all div.msg_warn{background:#FFE;border-color:#993}
+#ib_all div.msg_warn::before{content:'⚠';font-size:120%;padding-right:10px;line-height:100%;vertical-align:middle;color:#dd4}
+#ib_all div.msg_ok{background:#EFE;border-color:#080}
+#ib_all div.msg_ok::before{content:'✔';font-size:120%;padding-right:10px;line-height:100%;vertical-align:middle;color:#0e0}
 
 #ib_all address.copyright { text-align: center; font-size: 90%; font-style: normal; margin: 10px }
 
@@ -120,9 +121,11 @@ padding: 5px 10px; margin: 10px 0 }
 #ib_all .actionbtn, #ib_all a.actionbtn { display: inline-block; border: #A3CEFF 2px solid; padding: 3px 11px; margin: 4px 5px 4px 0; background: none;
 text-decoration: none; font-size: 110%; color: #0101C4 }
 #ib_all .mainbtn, #ib_all .actionbtn.mainbtn { background: #1482ff; color: #fff; font-weight: bold; border: #1482ff 2px solid }
+#ib_all a.actionicon { padding: 6px; margin: 0 0 0 12px; font-size: 140%; line-height: 1; vertical-align: middle; color: #0101C4 }
 #ib_all a.minbtn { border: 0 }
 #ib_all .warnbtn { border-color: #600; color: #a00 }
 #ib_all .bad_link { color: #600; padding: 0 5px }
+#ib_all a.unclickable {pointer-events: none; color: inherit; opacity: 0.33}
 
 #ib_all .location_path a { color: #2524b0 }
 #ib_all .postact a { font-size: 100%; padding: 5px }
@@ -132,7 +135,13 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
 #ib_all a.small_link  { text-decoration: none; font-size: 90%; color: #000def }
 #ib_all .fa-rss-square { color:#f26522; font-size: 200%; margin-top: -8px }
 #ib_all .post.marked { border: #A00 5px solid }
+#ib_all .post .offtopic { font-size: 90%; color: #666 }
+#ib_all .post .offtopic:before { content: 'Оффтопик: '; color: #999 }
 #ib_all blockquote{border:#dcddde 1px solid;font-size:90%;background:#eaecef;padding:4px;overflow:auto;max-height:7em;margin:5px 20px}
+#ib_all details.inline[open] summary { display: none;}
+#ib_all details.inline summary { text-decoration: underline dotted #3c5cc0; cursor: pointer; }
+#ib_all details.inline summary::marker { content: ""; }
+#ib_all details.inline { display: inline-block }
 #ib_all a.rules { display: block }
 
 #ib_all .postform{border:#dcddde 1px solid;box-sizing:initial;border-radius:3px}
@@ -184,12 +193,57 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
 #ib_all .attach audio, #ib_all .attach video, #ib_all .attach img { max-width: 280px; vertical-align: middle; display: block;  }
 #ib_all .attach i.fa-file-alt { font-size: 54px;  display: block;  }
 
+#ib_all .video_embed { width: 100%; height: auto; border: 0; background: url('../../i/video-bg.svg'); background-repeat: no-repeat; background-position: center; background-size: contain; aspect-ratio: 16 / 9; }
+#ib_all video { width: 100%; height: auto; }
+
+#ib_all .ql-align-left { text-align: left }
+#ib_all .ql-align-center { text-align: center }
+#ib_all .ql-align-justify { text-align: justify }
+#ib_all .ql-align-right { text-align: right }
+#ib_all .post-content img { max-width: 100%; vertical-align: middle; }
+#ib_all .ql-indent-1:not(.ql-direction-rtl) {padding-left: 3em}
+#ib_all li.ql-indent-1:not(.ql-direction-rtl) {padding-left: 4.5em}
+#ib_all .ql-indent-1.ql-direction-rtl.ql-align-right {padding-right: 3em}
+#ib_all li.ql-indent-1.ql-direction-rtl.ql-align-right {padding-right: 4.5em}
+#ib_all .ql-indent-2:not(.ql-direction-rtl) {padding-left: 6em}
+#ib_all li.ql-indent-2:not(.ql-direction-rtl) {padding-left: 7.5em}
+#ib_all .ql-indent-2.ql-direction-rtl.ql-align-right {padding-right: 6em}
+#ib_all li.ql-indent-2.ql-direction-rtl.ql-align-right {padding-right: 7.5em}
+#ib_all .ql-indent-3:not(.ql-direction-rtl) {padding-left: 9em}
+#ib_all li.ql-indent-3:not(.ql-direction-rtl) {padding-left: 10.5em}
+#ib_all .ql-indent-3.ql-direction-rtl.ql-align-right {padding-right: 9em}
+#ib_all li.ql-indent-3.ql-direction-rtl.ql-align-right {padding-right: 10.5em}
+#ib_all .ql-indent-4:not(.ql-direction-rtl) {padding-left: 12em}
+#ib_all li.ql-indent-4:not(.ql-direction-rtl) {padding-left: 13.5em}
+#ib_all .ql-indent-4.ql-direction-rtl.ql-align-right {padding-right: 12em}
+#ib_all li.ql-indent-4.ql-direction-rtl.ql-align-right {padding-right: 13.5em}
+#ib_all .ql-indent-5:not(.ql-direction-rtl) {padding-left: 15em}
+#ib_all li.ql-indent-5:not(.ql-direction-rtl) {padding-left: 16.5em}
+#ib_all .ql-indent-5.ql-direction-rtl.ql-align-right {padding-right: 15em}
+#ib_all li.ql-indent-5.ql-direction-rtl.ql-align-right {padding-right: 16.5em}
+#ib_all .ql-indent-6:not(.ql-direction-rtl) {padding-left: 18em}
+#ib_all li.ql-indent-6:not(.ql-direction-rtl) {padding-left: 19.5em}
+#ib_all .ql-indent-6.ql-direction-rtl.ql-align-right {padding-right: 18em}
+#ib_all li.ql-indent-6.ql-direction-rtl.ql-align-right {padding-right: 19.5em}
+#ib_all .ql-indent-7:not(.ql-direction-rtl) {padding-left: 21em}
+#ib_all li.ql-indent-7:not(.ql-direction-rtl) {padding-left: 22.5em}
+#ib_all .ql-indent-7.ql-direction-rtl.ql-align-right {padding-right: 21em}
+#ib_all li.ql-indent-7.ql-direction-rtl.ql-align-right {padding-right: 22.5em}
+#ib_all .ql-indent-8:not(.ql-direction-rtl) {padding-left: 24em}
+#ib_all li.ql-indent-8:not(.ql-direction-rtl) {padding-left: 25.5em}
+#ib_all .ql-indent-8.ql-direction-rtl.ql-align-right {padding-right: 24em}
+#ib_all li.ql-indent-8.ql-direction-rtl.ql-align-right {padding-right: 25.5em}
+#ib_all .ql-indent-9:not(.ql-direction-rtl) {padding-left: 27em}
+#ib_all li.ql-indent-9:not(.ql-direction-rtl) {padding-left: 28.5em}
+#ib_all .ql-indent-9.ql-direction-rtl.ql-align-right {padding-right: 27em}
+#ib_all li.ql-indent-9.ql-direction-rtl.ql-align-right {padding-right: 28.5em}
+
 #quotemenu { position: absolute; z-index: 1011; background: #fff; font-size: 15px; border: #A3CEFF 2px solid; 
   list-style: none; margin: 4px 0; user-select: none; padding: 0}
 #quotemenu li { margin: 4px; padding: 0 6px; line-height: 200%; cursor: pointer;}
 #quotemenu li:hover { background: #EDF5FF; }
 #quotemenu li i { padding: 0 6px }
-
+.intb-loading-cursor { cursor: wait; }
 
 @media screen and (max-width: 980px) {
   body { font-size: 0.64em }
@@ -232,6 +286,9 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
   #ib_all .main_menu { padding: 0 }
   #ib_all .postform input[type=text] { width: 98% }
   #ib_all .postform .postboxes label { flex-basis: 50% }
+  #ib_all a.actionicon { padding: 4px; margin: 0 0 0 8px; }
+  #ib_all .topic_start { margin-bottom: 0 }
+  #ib_all .pages.right { float: none; text-align: right; margin: 6px 0; }  
 }
 
 @media print {

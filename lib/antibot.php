@@ -24,11 +24,11 @@
        $keystring.=substr($this->allowed_symbols,mt_rand(0,$symbols_length-1),1);
      }
      $key = substr(hash('sha256',microtime().$_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT'].rand()),0,32); // генерируем уникальный ключ-идентификатор CAPTCHA
-     if (Library::$app->db->insert(DB_prefix.'captcha',array('hash'=>$key,
-       'code'=>$keystring,'active'=>'1','lastmod'=>Library::$app->time,'ip'=>ip2long($_SERVER['REMOTE_ADDR'])))!==false) {
+     if ($this->app()->db->insert(DB_prefix.'captcha',array('hash'=>$key,
+       'code'=>$keystring,'active'=>'1','lastmod'=>$this->app()->time,'ip'=>ip2long($_SERVER['REMOTE_ADDR'])))!==false) {
        $this->captcha_create_image($keystring,$key);
-       Library::$app->out->captcha_key = $key;
-       Library::$app->out->captcha_code = Library::$app->time % 10000;
+       $this->app()->out->captcha_key = $key;
+       $this->app()->out->captcha_code = $this->app()->time % 10000;
      }
      else return false;
    }
@@ -223,7 +223,7 @@
     stream_filter_append($stream, 'convert.base64-encode', STREAM_FILTER_WRITE); // сразу преобразуем в base64-encoded через фильтр, так как с бинарной строкой работа бывает некорректной
     imagejpeg($img2, $stream, $jpeg_quality); // собственно, вывод
     rewind($stream);
-    Library::$app->out->captcha_data = stream_get_contents($stream);
+    $this->app()->out->captcha_data = stream_get_contents($stream);
     fclose($stream);    
    }
 
@@ -231,25 +231,26 @@
     *
     */
   function captcha_check($deactivate=true) {
-    if (Library::$app->get_opt('captcha')==1) { // проверка обычной KCAPTCHA через запись в таблице captcha
+    if ($this->app()->get_opt('captcha')==1) { // проверка обычной KCAPTCHA через запись в таблице captcha
       $key = isset($_POST['captcha_key']) ? $_POST['captcha_key'] : '';
       $value = isset($_POST['captcha_value']) ? $_POST['captcha_value'] : '';
       $time1 = $_POST['captcha_timecode'];
-      $time2 = Library::$app->time % 10000;
+      $time2 = $this->app()->time % 10000;      
 
-      $sql = 'SELECT code FROM '.DB_prefix.'captcha WHERE hash=\''.Library::$app->db->slashes($key).'\' AND active=\'1\'';
-      $code = trim(Library::$app->db->select_str($sql));
+      $sql = 'SELECT code FROM '.DB_prefix.'captcha WHERE hash=\''.$this->app()->db->slashes($key).'\' AND active=\'1\'';
+      $code = trim($this->app()->db->select_str($sql));
+
       if ((($time2-$time1) % 10000)<3 || $time1>10000) return false; // если с момента генерации CAPTCHA до ее ввода прошло меньше трех секунд, то это, скорее всего, бот
-      if ($code!=false && $code==$value) { // если код, введенный пользователем и сохраненный в базе совпадают, и при этом не пустые
+      if ($code!=false && $code===$value) { // если код, введенный пользователем и сохраненный в базе совпадают, и при этом не пустые
         if ($deactivate) {
-          $sql = 'UPDATE '.DB_prefix.'captcha SET active=\'0\' WHERE hash=\''.Library::$app->db->slashes($key).'\'';
-          Library::$app->db->query($sql);
+          $sql = 'UPDATE '.DB_prefix.'captcha SET active=\'0\' WHERE hash=\''.$this->app()->db->slashes($key).'\'';
+          $this->app()->db->query($sql);
         }
         return true;
       }
       else return false;
-    } elseif (Library::$app->get_opt('captcha')==2) { // проверка ReCAPTCHA от Google
-      $postdata = http_build_query(array('secret' => Library::$app->get_opt('captcha_secret_key'),'response' => $_POST['g-recaptcha-response']));
+    } elseif ($this->app()->get_opt('captcha')==2) { // проверка ReCAPTCHA от Google
+      $postdata = http_build_query(array('secret' => $this->app()->get_opt('captcha_secret_key'),'response' => $_POST['g-recaptcha-response']));
       $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
       if (!function_exists('curl_init')) {
         $opts = array('http' =>
@@ -280,6 +281,16 @@
     else return true; // если CAPTCHA выключена вообще, считаем, что она пройдена
   }
 
+  /** Деактивирует значение CAPTCHA, хеш которого передан в $_POST['captcha_key']. 
+   * Имеет смысл использовать в том случае, если проверка captcha_check была выполнена с $deactivate=false (актуально для форм отправки сообщения) 
+   **/
+  function deactivate_captcha() {
+    if (!empty($_POST['captcha_key'])) {
+      $sql = 'UPDATE '.DB_prefix.'captcha SET active=\'0\' WHERE hash=\''.$this->app()->db->slashes($_POST['captcha_key']).'\'';
+      $this->app()->db->query($sql);
+    }
+  }
+
    /** Функция подчистки таблицы CAPTCHA. Предполагается ее вызов через crontab
     *
     * @param int $interval интервал в часах, за который следует удалять данные.
@@ -287,12 +298,12 @@
   function cron_captcha_clear($interval=24) {
     $time = time()-$interval*60*60;
 
-    Library::$app->db->lock_tables(DB_prefix.'captcha',true); // блокируем таблицу на момент выборки
+    $this->app()->db->lock_tables(DB_prefix.'captcha',true); // блокируем таблицу на момент выборки
     $sql = 'SELECT hash FROM '.DB_prefix.'captcha WHERE lastmod<='.$time.' OR active=\'0\'';
-    $olds = Library::$app->db->select_all_strings($sql);
+    $olds = $this->app()->db->select_all_strings($sql);
     $sql = 'DELETE FROM '.DB_prefix.'captcha WHERE lastmod<='.$time.' OR active=\'0\'';
-    Library::$app->db->query($sql);
-    Library::$app->db->unlock_tables(DB_prefix.'captcha');
+    $this->app()->db->query($sql);
+    $this->app()->db->unlock_tables(DB_prefix.'captcha');
 
     for ($i=0, $count=count($olds); $i<$count; $i++) { // удаляем файлы CAPTCHA
       $filename=BASEDIR.'www/f/cap/'.$olds[$i].'.jpg';
@@ -309,19 +320,19 @@
     * Примечание: периодически (желательно два-три раза в сутки) следует производить подчистку через crontab.
     */
    function timeout_check($action,$delay) {
-     $uid = Library::$app->is_guest() ? 0 : Library::$app->get_uid(); // получаем UID пользователя или false, если это гость
+     $uid = $this->app()->is_guest() ? 0 : $this->app()->get_uid(); // получаем UID пользователя или false, если это гость
      $curtime = time();
      $lasttime = $curtime-$delay;
      $ip=ip2long($_SERVER['REMOTE_ADDR']); // получаем адрес пользователя и преобразуем его в цифровой вид
      if ($uid==false) {
-       $sql = 'SELECT time FROM '.DB_prefix.'timeout WHERE ip='.intval($ip).' AND time>='.intval($lasttime).' AND time<='.intval($curtime).' AND action=\''.Library::$app->db->slashes($action).'\'';
+       $sql = 'SELECT time FROM '.DB_prefix.'timeout WHERE ip='.intval($ip).' AND time>='.intval($lasttime).' AND time<='.intval($curtime).' AND action=\''.$this->app()->db->slashes($action).'\'';
      }
      else {
-       $sql = 'SELECT time FROM '.DB_prefix.'timeout WHERE uid='.intval($uid).' AND time>='.intval($lasttime).' AND time<='.intval($curtime).' AND action=\''.Library::$app->db->slashes($action).'\'';
+       $sql = 'SELECT time FROM '.DB_prefix.'timeout WHERE uid='.intval($uid).' AND time>='.intval($lasttime).' AND time<='.intval($curtime).' AND action=\''.$this->app()->db->slashes($action).'\'';
      }
-     $count=Library::$app->db->select_int($sql);
+     $count=$this->app()->db->select_int($sql);
      if ($count==0) {
-       Library::$app->db->insert(DB_prefix.'timeout',array('time'=>$curtime,'action'=>$action,'ip'=>$ip,'uid'=>$uid));
+       $this->app()->db->insert(DB_prefix.'timeout',array('time'=>$curtime,'action'=>$action,'ip'=>$ip,'uid'=>$uid));
        return true;
      }
      else return false;
@@ -335,6 +346,6 @@
      $curtime = time();
      $lasttime = $curtime-$interval*60*60;
      $sql = 'DELETE FROM '.DB_prefix.'timeout WHERE time<'.intval($lasttime);
-     Library::$app->db->query($sql);
+     $this->app()->db->query($sql);
    }
  }

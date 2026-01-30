@@ -37,8 +37,8 @@ endfor %}
 {% macro captcha(key,timecode,captcha_data) %}
 {% if get_opt('captcha')==1 %}
 <input type="text" name="captcha_value" size="8" autocomplete="off" />
-<input type="hidden" name="captcha_key" value="{{ key }}"/>
-<input type="hidden" name="captcha_timecode" value="{{ timecode }}"/>
+<input type="hidden" name="captcha_key" value="{{ key }}" autocomplete="off"/>
+<input type="hidden" name="captcha_timecode" value="{{ timecode }}" autocomplete="off"/>
 <img class="captcha" src="data:image/jpeg;base64,{{ captcha_data }}" alt="Включите графику, чтобы увидеть код!" />
 {% elseif get_opt('captcha')==2 %}
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>

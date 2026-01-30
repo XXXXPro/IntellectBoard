@@ -24,11 +24,11 @@
 
     /** Формирует путь к файлу в текущем стилевом каталоге. **/
     function style_path($filename) {
-      return Library::$app->url('s/'.$this->dir.'/'.$filename);
+      return $this->app()->url('s/'.$this->dir.'/'.$filename);
     }
 
     function get_cache_dir() {
-      $cachedir = Library::$app->get_opt('cache_template_dir');
+      $cachedir = $this->app()->get_opt('cache_template_dir');
       if (!$cachedir) $cachedir = BASEDIR.'tmp';
        return $cachedir;
     }
@@ -47,7 +47,7 @@
     function generate_html($data,$mail=false,$minify=false) {
       if (!class_exists('Twig_Autoloader')) require_once BASEDIR.'opt/autoload.php';
 
-      $mode = intval(Library::$app->get_opt('debug')) > 1;
+      $mode = intval($this->app()->get_opt('debug')) > 1;
 
       $result = '';
 
@@ -85,7 +85,7 @@
       }
       catch (Exception $e) {
         $result = 'Ошибка шаблонизатора: '.$e->getMessage();
-        if (!$mail && Library::$app->get_opt('debug')>=4) $result.='<h1>Содержимое буфера выводимых данных</h1><pre>'.print_r($data,true).'</pre><br />##DEBUG#';
+        if (!$mail && $this->app()->get_opt('debug')>=4) $result.='<h1>Содержимое буфера выводимых данных</h1><pre>'.print_r($data,true).'</pre><br />##DEBUG#';
         _dbg($result);
       }
 

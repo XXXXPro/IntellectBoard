@@ -13,6 +13,7 @@
   <div><label><span>Контактный Email администратора форума</span> {{ macros.input('config[email]',config.email,40) }}</label></div>
   <div><label><span>Email, с которого отправляются рассылки и уведомления</span> {{ macros.input('config[email_from]',config.email_from,40) }}</label></div>
   <div><label><span>Email для уведомлений об ошибках доставки почты<small>Рекомендуется указывать адрес, на котором вся почта автоматически удаляется</small></span> {{ macros.input('config[email_return]',config.email_return,40) }}</label></div>
+
 </fieldset><fieldset><legend>Режимы работы и служебные настройки</legend>
   <div><span>Показывать версию Intellect Board</span>{{ macros.radio('config[site_version]',{'1':'Да','0':'Нет'},config.site_version) }}</div>
   <div><label><span>Отладочный режим</span>{{ macros.select('config[debug]',config.debug,{'0':'Выключен',
@@ -29,11 +30,10 @@
   <div><span>Запуск планировщика заданий форума</span> {{ macros.radio('config[cron_img]', {'0':'Через системный cron','1':'Запуск через невидимый img'}, config.cron_img) }}</div>
   <div><span>Вывод "Вчера" и "Сегодня" в датах</span> {{ macros.radio('config[date_today]', {'0':'Выключено','1':'Включено'}, config.date_today) }}</div>
   <div><span>Вторая навигационная строка после сообщений в теме</span> {{ macros.radio('config[bottom_location]', {'0':'Выключена','1':'Включена'}, config.bottom_location) }}</div>
-  <div><label><span>Минимальная длина сообщения</span> {{ macros.input('config[post_minlength]',config.post_minlength,6) }} символов</label></div>
-  <div><label><span>Максимальная длина сообщения</span> {{ macros.input('config[post_maxlength]',config.post_maxlength,6) }} символов</label></div>
 {# <div><span>Использовать библиотеку социальных сетей</span> {{ macros.radio('config[javascript_share]', {'':'Не использовать','share42':'Share42'}, config.javascript_share) }}</div> #}
   <div><span>Относительный URL списка разделов<small>Оставьте пустым, чтобы список разделов был на главной</small></span> {{ macros.input('config[forum_mainpage]',config.forum_mainpage,30) }}</div>
   <div><span>Адрес форума всегда указывается с протоколом https<small>Включите эту опцию, если протокол определяется неправильно.</small></span> {{ macros.radio('config[force_https]', {'0':'Выключено','1':'Включено'}, config.force_https) }}</div>
+ 
 
 </fieldset><fieldset><legend>Функции форума и производительность</legend>
   <div><span>Поддержка разметки OpenGraph</span> {{ macros.radio('config[opengraph]', {'0':'Выключена','1':'Включена'}, config.opengraph) }}</div>
@@ -44,6 +44,28 @@
   <div><span>Статистика на главной странице</span> {{ macros.radio('config[mainpage_stats]', {'0':'Выключена','1':'Над списком разделов','2':'Под списком разделов'}, config.mainpage_stats) }}</div>
   <div><span>Макс. количество сообщений, выдаваемых в RSS</span> {{ macros.input('config[rss_max_items]',config.rss_max_items,5) }}</label></div>
 
+</fieldset><fieldset><legend>Настройки сообщений и блогов</legend>  
+  <div><label><span>Время редактирования сообщений<small>0 — если без ограничения</small></span> {{ macros.input('config[post_edittime]',config.post_edittime,6,8,'list="edittime_hints"') }} минуты</label>
+  <datalist id="edittime_hints">
+  <option value="60" label="1 час"></option>
+  <option value="120" label="2 часа"></option>
+  <option value="180" label="3 часа"></option>
+  <option value="360" label="6 часов"></option>
+  <option value="720" label="12 часов"></option>
+  <option value="1440" label="1 сутки"></option>
+  <option value="4320" label="3 суток"></option>
+  <option value="10080" label="1 неделя"></option>
+  </datalist>
+  </div>
+  <div><label><span>Минимальная длина сообщения</span> {{ macros.input('config[post_minlength]',config.post_minlength,6) }} символов</label></div>
+  <div><label><span>Максимальная длина сообщения</span> {{ macros.input('config[post_maxlength]',config.post_maxlength,6) }} символов</label></div>
+  <div><label><span>Применять особое оформление к сообщениям короче<small>К таким сообщениям будет применён CSS-класс short_post</small></span> {{ macros.input('config[post_shortlength]',config.post_shortlength,6) }} символов</label></div>
+  <div><label><span>Выводить для списка сообщений в блоге meta-тег noindex,follow</span> {{ macros.checkbox('config[blog_noindex]',1,config.blog_noindex) }}</label></div>
+  <div><label><span>Длина тизера в списке сообщений блога не менее</span> {{ macros.input('config[blog_minteaser]',config.blog_minteaser,6) }} символов</label></div>
+  <div><label><span>Максимальная длина тизера в списке сообщений блога<small>Ноль — выводить сообщение целиком</small></span> {{ macros.input('config[blog_maxteaser]',config.blog_maxteaser,6) }} символов</label></div>
+  <div><label><span>Длина meta-тега description в блоге не менее</span> {{ macros.input('config[blog_mindescr]',config.blog_mindescr,6) }} символов</label></div>
+  <div><label><span>Максимальная длина meta-тега description в блоге</span> {{ macros.input('config[blog_maxdescr]',config.blog_maxdescr,6) }} символов</label></div>
+  
 </fieldset><fieldset><legend>Настройки безопасности</legend>
   <div><span>Проверка поля Referer для POST-запросов</span> {{ macros.radio('config[check_referer]', {'0':'Выключена','1':'Включена (рекомендуется)'}, config.check_referer) }}</div>
   <div><span>Проверка неизменности User-Agent</span> {{ macros.radio('config[check_user_agent]', {'0':'Выключена','1':'Включена (рекомендуется)'}, config.check_user_agent) }}</div>
@@ -103,6 +125,15 @@
 <div><span>Авторизация через OAuth/IndieAuth</span> {{ macros.radio('config[oauth_server_enable]', {'0':'Выключена','1':'Включена'}, config.oauth_server_enable) }}</div>
 {# <div><label><span>Ключ бота Telegram</span> {{ macros.input('config[telegram_key]',config.telegram_key,50,50) }}</label></div> #}
 {#   <div><span>Поддержка взаимодействия с Fediverse</span> {{ macros.radio('config[fediverse_enable]', {'0':'Выключена','1':'Включена'}, config.fediverse_enable) }}</div>   #}
+
+</fieldset><fieldset><legend>PWA (Progressive Web Application)</legend>
+<div><label><span>Поддержка PWA включена</span> {{ macros.checkbox('config[pwa_enabled]',1,config.pwa_enabled) }}</label></div>
+<div><label><span>Краткое название приложения</span>{{ macros.input('config[pwa_short_name]',config.pwa_short_name,48,80) }}</label></div>
+<div><label><span>Цвет фона приложения</span><input type="color" name="config[pwa_background_color]" value="{{ config.pwa_background_color }}" /></label></div>
+<div><label><span>Цвет темы приложения</span><input type="color" name="config[pwa_theme_color]" value="{{ config.pwa_theme_color }}" /></label></div>
+<div><label><span>Значок 512x512</span>{{ macros.input('config[pwa_icon_512]',config.pwa_icon_512,32,80) }}</label></div>
+<div><label><span>Значок 192x192</span>{{ macros.input('config[pwa_icon_192]',config.pwa_icon_192,32,80) }}</label></div>
+
 
 <div class="submit"><button type="submit">Сохранить</button><input type="hidden" name="authkey" value="{{ authkey }}" /></div>
 </fieldset></form>

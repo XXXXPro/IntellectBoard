@@ -14,7 +14,7 @@
 *    @abstract
      **/
 
-class Database_sqlite extends Database implements iDBDriver {
+class Database_sqlite extends Database {
   private $link;
   private $errmsg;
   private $last_query;
@@ -40,9 +40,9 @@ class Database_sqlite extends Database implements iDBDriver {
   }
 
   function version() {
-    $ver = SQLite3::version();
-    return "SQLite ".$ver['versionString'];
+    return "SQLite ".SQLite3::version();
   }
+  
 
 /** Closes a connection to database server, opened with {@see function connect()}
 *  @return boolean
@@ -155,7 +155,7 @@ class Database_sqlite extends Database implements iDBDriver {
 /** Converts INSERT operator into INSERT IGNORE. Database-specific, should be overriden in descendants.
 *  Called from store when $ignore is TRUE.
 *  @return string SQL with INSERT IGNORE
-*  @param string $data
+*  @param array $data
 **/
   function insert_ignore($table,$data) {
     $sqlarray1=array();

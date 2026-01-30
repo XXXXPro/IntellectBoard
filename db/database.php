@@ -22,7 +22,7 @@ define('INTB_LOCK_WRITE',2);
 *    @abstract
      **/
 
-class Database {
+abstract class Database {
 /**  @access private
 *    @var resource
 *    Link for database connection
@@ -200,7 +200,7 @@ class Database {
     return $result;
   }
 
-/** Execute SELECT query for fetching integer value.
+/** Execute SELECT query for fetching single integer value.
 *  @return integer
 *  @param string $sql SQL query to execute.
 **/
@@ -213,8 +213,8 @@ class Database {
     return intval($result);
  }
 
-/** Execute SELECT query for fetching integer value.
-*  @return array
+/** Execute SELECT query for fetching string value.
+*  @return string
 *  @param string $sql SQL query to execute.
 **/
   function select_str($sql,$params=false) {
@@ -307,33 +307,32 @@ class Database {
     else $sqldata.=')';
     return $sqldata;
   }
-}
 
-interface iDBDriver {
-  function add_limiter($sql,$limit1=false,$limit2=false);
-  function connect($params);
-  function close();
-  function _query($sql);
-  function error_num($only_errors=false);
-  function insert_ignore($table,$data);
-  function error_str();
-//  function explain($sql);
-  function fetch_array(&$res);
-  function fetch_row(&$res);
-  function replace($table,$data,$condition);
-  function _num_rows(&$res);
-  function affected_rows();
-  function insert_id();
-  function begin();
-  function commit();
-  function rollback();
-  function full_match($column,$text);
-  function full_relevancy($column,$text);
-  function has_stored_proc();
-  function has_subqueries();
-  function has_transactions();
-  function has_fulltext();
-  function get_sql_file();
+  abstract function add_limiter($sql,$limit1=false,$limit2=false);
+  abstract function connect($params);
+  abstract function close();
+  abstract function _query($sql);
+  abstract function error_num($only_errors=false);
+  abstract function insert_ignore($table,$data);
+  abstract function error_str();
+  abstract function explain($sql);
+  abstract function fetch_array(&$res);
+  abstract function fetch_row(&$res);
+  abstract function replace($table,$data,$condition);
+  abstract function _num_rows(&$res);
+  abstract function affected_rows();
+  abstract function insert_id();
+  abstract function free_res(&$res);
+  abstract function begin();
+  abstract function commit();
+  abstract function rollback();
+  abstract function full_match($column,$text);
+  abstract function full_relevancy($column,$text);
+  abstract function has_stored_proc();
+  abstract function has_subqueries();
+  abstract function has_transactions();
+  abstract function has_fulltext();
+  abstract function get_sql_file();
 }
 
 /* Это будет интерфейс для редактирования таблиц при установке/удалении IntB
