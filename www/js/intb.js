@@ -435,11 +435,13 @@ function IntB_main(opts) {
         resizeEnabled : true
       });
       if (opts.wysiwyg==1) bbcode_nodes.sceditor('instance').sourceMode(true);
-      bbcode_nodes.sceditor('instance').keyDown(function(e) {        
+      bbcode_nodes.each(function (idx,node) {
+        jQuery(node).sceditor('instance').keyDown(function(e) {        
           if (e.ctrlKey && e.keyCode==13) {
             bbcode_nodes.sceditor('instance').updateOriginal();
-            e.target.form.requestSubmit();
+            node.form.requestSubmit();
           }
+        })
       });
 
       var mini_nodes=$('.miniform');
