@@ -718,6 +718,32 @@ function IntB_main(opts) {
   document.dispatchEvent(event);
 }
 
+/* function IntB_registerPeriodicSync(sync_name) {
+  navigator.serviceWorker.ready.then(function registration() {
+    // Check if periodicSync is supported
+    if ('periodicSync' in registration) {
+      // Request permission
+      navigator.permissions.query({ name: sync_name }).then(
+        function(status) {
+          if (status.state === 'granted') {
+            try {
+              // Register new sync every 24 hours
+              registration.periodicSync.register(sync_name, { minInterval: 24 * 60 * 60 * 1000 }).then(
+                ()=>console.log('Periodic background sync registered!')
+              );
+            } catch(e) {
+              console.error(`Periodic background sync failed:\nx${e}`);
+            }
+          } else {
+            console.info('Periodic background sync is not granted.');
+          }
+      });
+    } else {
+      console.log('Periodic background sync is not supported.');
+    }
+  });
+} */
+
 head.load(window.IntB_params.jquery_cdn, function() {
   intb_loader = new IntB_main(window.IntB_params);
 });

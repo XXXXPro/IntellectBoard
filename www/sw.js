@@ -278,3 +278,14 @@ self.addEventListener('fetch', evt => {
     evt.respondWith(self[result](evt.request));
   }
 });
+
+function showUnreadBadge() {
+  console.log('Doing app badge!');
+  navigator.setAppBadge(42);
+}
+
+self.addEventListener('periodicsync', event => {
+  if (event.tag === 'check-unread') {
+    event.waitUntil(showUnreadBadge());
+  }
+});

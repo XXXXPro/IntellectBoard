@@ -48,6 +48,7 @@
 Зарегистрируйтесь, чтобы иметь возможность отслеживать появление новых сообщений!
 {% else %}
 <a class="small_link" href="{{ url('mark_all.htm') }}">Отметить все как прочитанное</a>
+{# {% if get_opt('pwa_enabled') and not is_guest() %}<a class="small_link" href="javascript:IntB_registerPeriodicSync('check-unread')">Показывать количество непрочитанных сообщений на иконке</a>{% endif %} #}
 <i class="forum_icon far fa-comments"></i> В разделе нет новых сообщений<br />
 <i class="forum_icon fas fa-comments"></i> В разделе появились новые сообщения с момента вашего последнего визита
 {% endif %}</div>
