@@ -420,7 +420,7 @@ class Library_bbcode extends Library {
             if (strpos($str,':=')!==false) { // тег и его атрибуты разделяются строкой :=
               list($tag_name,$tag_attrs) = explode(':=',$str,2);
               $tag_attrs = explode(',',$tag_attrs);
-              array_all($tag_attrs,'trim'); // на всякий случай убираем пробелы 
+              $tag_attrs = array_map('trim',$tag_attrs); // на всякий случай убираем пробелы 
             }
             else { // если разделитель := не найден, то считаем всю строку именем тега, а список атрибутов — пустым
               $tag_name=trim($str);
