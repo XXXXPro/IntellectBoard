@@ -119,7 +119,7 @@
 <address class="copyright">&copy; {{ get_opt('site_copyright') }}<br />
 {# Внимание! Удаление или изменение ссылки в строке ниже будет нарушением Лицензионного Соглашения. Будьте достойными людьми и не трогайте ее!  #}
 Форум работает на <a href="https://intbpro.ru">Intellect Board Pro</a>
-{{ intb.intb_version }} &copy; 2013-2024, 4X_Pro.
+{{ intb.intb_version }} &copy; 2013-2026, 4X_Pro.
 </address>
 {% include 'counter_f.tpl' ignore missing %}
 {# Вывод пустого div для того, чтобы вызвать планировщик заданий на случай, если он не висит на системном cron #}

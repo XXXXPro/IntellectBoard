@@ -3,12 +3,12 @@
  *  @package IntBPro
  *  @author 4X_Pro <me@4xpro.ru>
  *  @version 3.06
- *  @copyright 2007, 2010, 2012-2025 4X_Pro, INTBPRO.RU
+ *  @copyright 2007, 2010, 2012-2026 4X_Pro, INTBPRO.RU
  *  @url https://intbpro.ru
  *  Основной модуль сайтового движка Intellect Board 3 Pro
  *  ================================ */
 define('AUTH_SYSTEM_USERS', 3);
-define('INTB_VERSION', '3.05 Rebuild 2');
+define('INTB_VERSION', '3.05 Rebuild');
 
 class Application {
 
