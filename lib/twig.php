@@ -52,6 +52,7 @@
       $result = '';
 
       try {
+        error_reporting(E_ALL & ~E_DEPRECATED); // чтобы не вылезала информация о том, что в Twig что-то устарело
         $cachedir = $this->get_cache_dir();
         $loader = new Twig_Loader_Filesystem(array(BASEDIR.'template/'.$this->dir, BASEDIR.'template/def'));
         $twig = new Twig_Environment($loader, array('cache'=>$cachedir,'auto_reload'=>$mode,'autoescape'=>'html','debug' => $mode));
