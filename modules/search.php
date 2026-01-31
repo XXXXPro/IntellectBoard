@@ -322,26 +322,18 @@ class search extends Application {
   }
 
   function action_complete_tag() {
-    if (empty($_GET['q'])) return '';
-    $query = $_GET['q'];
-    $pos = strrpos($query,',');
-    $len = strlen($query);
-    if ($pos!==false) {
-      while ($pos+1<$len && $query[$pos+1]===' ') $pos++;      
-      $prefix = substr($query,0,$pos+1);
-      $query = trim(substr($query,$pos+1));
-    }
-    else $prefix = '';
+    if (empty($_GET['term'])) return '';
+    $query = $_GET['term'];
+    $existing = !empty($_GET['existingTags']) ? $_GET['existingTags'] : array();
+    $result = array();
+
     if (!empty($query)) {
       $sql = 'SELECT tagname AS name FROM '.DB_prefix.'tagname '.
-      'WHERE type=\'0\' AND tagname LIKE \''.$this->db->slashes($query).'%\' ORDER BY count';
-      $users = $this->db->select_all_strings($sql,5);
-      for ($i=0, $count=count($users); $i<$count; $i++) {
-        $users[$i] = $prefix.$users[$i];
-      }
+      'WHERE type=\'0\' AND tagname LIKE \''.$this->db->slashes($query).'%\' AND NOT '.$this->db->array_to_sql($existing,'tagname').' ORDER BY count';
+      $tags = $this->db->select_all_strings($sql,7);
+      foreach ($tags as $tag) $result[] = array('tag'=>$tag);
     }
-    else $users = array();
-    return json_encode($users);
+    return json_encode(array('suggestions'=>$tags));
   }
 
   function action_complete_topic() {

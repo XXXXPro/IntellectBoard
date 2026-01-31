@@ -46,7 +46,7 @@
 {% endif %}
 <div class="postfields">
 {% if form_params.postdate %}<div><label class="backdate"><span>Время сообщения: </span>{{ macros.input('post[postdate]', editpost.post.postdate ? (editpost.post.postdate+get_opt('timezone','user'))|date('d.m.Y G:i') : '',20,20,'class="datetime"') }}</label></div>{% endif %}
-{% if form_params.tags %}<div><label class="tagline"><span>Теги: </span>{{ macros.input('tagline', editpost.tagline,40,255,'list="tag_search_list" class="tag_finder"' ) }}<datalist id="tag_search_list"></datalist></label></div>{% endif %}
+{% if form_params.tags %}<div><label class="tagline"><span>Теги: </span>{{ macros.input('tagline', editpost.tagline,40,255,'list="tag_search_list" class="tag_finder" placeholder="Теги через запятую"' ) }}</label></div>{% endif %}
 {% if form_params.value %}<div class="post_value"><span>Ценность сообщения: </span>
 {{ macros.radio('post[value]',{'0':'Обычное','1':'Ценное','-1':'Флуд'},editpost.post.value) }}</div>{% endif %}
 </div>

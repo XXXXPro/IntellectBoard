@@ -582,7 +582,7 @@ function IntB_main(opts) {
     });
   });
 
-  jQuery('input.tag_finder').each(function (i,el) {
+/*  jQuery('input.tag_finder').each(function (i,el) {
     let list_id = el.getAttribute('list');
     let list_elm = document.getElementById(list_id);
     if (!list_elm) return;
@@ -598,7 +598,20 @@ function IntB_main(opts) {
         },800);
       }
     });
-  });  
+  });  */
+
+  if (jQuery('input.tag_finder').length>0) {
+    console.log('Amsify loading!');
+    head.load([opts.basedir+'js/amsify/js/jquery.amsify.suggestags.js',opts.basedir+'js/amsify/css/amsify.suggestags.css'], function(){
+				jQuery('input.tag_finder').amsifySuggestags({
+					type : 'amsify',
+          delimiters: [','],
+					suggestionsAction : {
+						url : opts.basedir+'search/complete_tag.htm'
+					}
+				});
+    });
+  }
 
   jQuery('input.topic_id_finder').each(function (i,el) {
     let list_id = el.getAttribute('list');
