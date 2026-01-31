@@ -257,7 +257,7 @@ class blog extends stdforum {
           if (empty($minteaser)) $minteaser = 140; // по умолчанию минимальная длина тизера равна 140 символам
           // TODO: длина тизера в extra-данных раздела может переопределять длину по умолчанию
           $teaser = $this->get_teaser($post['text'],$maxteaser,$minteaser);
-          if ($teaser!==$post['text']) $post['text']=$teaser.'<br /><a href="'.$topic['t_hurl'].'#readmore">'.$nexttext.'</a>';
+          if (strlen($teaser)<strlen($post['text'])) $post['text']=$teaser.'<a href="'.$topic['t_hurl'].'#readmore">'.$nexttext.'</a>';
         }
       }
     }

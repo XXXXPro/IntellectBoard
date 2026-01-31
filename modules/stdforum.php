@@ -1575,6 +1575,7 @@ class stdforum extends Application_Forum {
     $teaser = preg_replace("|\n+|","<p>",$teaser);
     $teaser = nl2br($teaser);
     $teaser = str_replace('<p><br />','<p>',$teaser);
+    $teaser = Library_tagcloser::fix_unclosed($teaser);
     return $teaser;
   }
 
@@ -1593,7 +1594,7 @@ class stdforum extends Application_Forum {
      $parsed = preg_replace('|<video\W.*?</video>|is','',$parsed); // 
      $parsed = preg_replace('|<object\W.*?</object>|is','',$parsed); // 
 
-     $parsed = trim(strip_tags($parsed)); // TODO: возможно, разрешить теги u,i,b,em,strong?
+//     $parsed = trim(strip_tags($parsed)); // TODO: возможно, разрешить теги u,i,b,em,strong?
      $slen = mb_strlen($parsed);
 
      if ($slen<=$length) return $parsed; // если строка и так короче желаемой длины, просто ограничимся её очисткой
