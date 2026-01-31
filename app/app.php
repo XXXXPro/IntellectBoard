@@ -28,7 +28,7 @@ class Application {
   private array $mail = array();
 
   /** Время начала выполнения скрипта * */
-  private int $start_time = 0;
+  private float $start_time = 0;
 
   /** Время, переданное в заголовке If-Modified-Since, используется для проверки наличия изменений в выводимой странице по сравнению с прошлым обращением * */
   public int $if_modified_time = 0;
