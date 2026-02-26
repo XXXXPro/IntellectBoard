@@ -15,21 +15,55 @@ class Library_notify extends Library implements iNotifier {
     $mdata['forum']=$forum;
     $mdata['post']=$post;
     $mdata['parsed']=$parsed;
-    
-    $sql = 'SELECT u.id, u.email, u.display_name, us.email_fulltext, MAX(lv.type), lv.oid, ue.group_id '.
+  
+    // пользователи, подписанные именно на тему
+    $author_id = $this->app()->get_uid();
+    $sql = 'SELECT u.id, u.email, u.display_name, us.email_fulltext, lv.type, lv.oid, ue.group_id '.
       'FROM '.DB_prefix.'last_visit lv, '.DB_prefix.'user u '.
+      'LEFT JOIN '.DB_prefix.'relation r ON (r.to_='.intval($author_id).' AND r.from_=u.id) '.
       'LEFT JOIN '.DB_prefix.'user_settings us ON (u.id=us.id) '.
       'LEFT JOIN '.DB_prefix.'user_ext ue ON (u.id=ue.id) '.
-      'WHERE ((lv.oid='.intval($topic['id']).' AND lv.type=\'topic\') OR '.
-      '(lv.oid='.intval($forum['id']).' AND lv.type=\'forum\') OR '.
-      '(lv.oid=0 AND lv.type=\'forum\')) '.
+      'WHERE (lv.oid='.intval($topic['id']).' AND lv.type=\'topic\') '.
+      'AND (r.type!=\'ignore\' OR r.type IS NULL) '.
       'AND lv.uid=u.id AND u.status=\'0\' AND  lv.subscribe=\'1\' AND us.subscribe_mode=\'1\' '.
-      'AND u.id!='.intval($this->app()->get_uid()).' AND u.id>'.intval(AUTH_SYSTEM_USERS).
-      ' GROUP BY u.id, u.email, u.display_name, us.email_fulltext, lv.type, lv.oid, ue.group_id';
-    $users = $this->app()->db->select_all($sql);
-    $parents = $this->app()->get_parent_forums($forum['id']);
-    $userlib = class_exists('Library_userlib') ? new Library_userlib : false;
-    if (!$userlib) return; // если библиотека не загрузилась, то никакой рассылки, так как нельзя проверить права доступа   
+      'AND u.id!='.intval($author_id).' AND u.id>'.intval(AUTH_SYSTEM_USERS);
+    $topic_users = $this->app()->db->select_all($sql);
+
+    // пользователи, подписанные на раздел, кроме подписанных на тему или исключивших её явно
+    $sql = 'SELECT u.id, u.email, u.display_name, us.email_fulltext, lv.type, lv.oid, ue.group_id '.
+      'FROM '.DB_prefix.'last_visit lv, '.DB_prefix.'user u '.
+      'LEFT JOIN '.DB_prefix.'relation r ON (r.to_='.intval($author_id).' AND r.from_=u.id) '.      
+      'LEFT JOIN '.DB_prefix.'user_settings us ON (u.id=us.id) '.
+      'LEFT JOIN '.DB_prefix.'user_ext ue ON (u.id=ue.id) '.
+      'LEFT JOIN '.DB_prefix.'last_visit lv2 ON (lv2.uid=u.id AND lv2.type=\'topic\' AND lv2.oid='.intval($topic['id']).') '.
+      'WHERE lv.oid='.intval($forum['id']).' AND lv.type=\'forum\' '.
+      'AND (r.type!=\'ignore\' OR r.type IS NULL) '.      
+      'AND lv.uid=u.id AND u.status=\'0\' AND  lv.subscribe=\'1\' AND us.subscribe_mode=\'1\' '.
+      'AND (lv2.subscribe=0 OR lv2.subscribe IS NULL) '.
+      'AND u.id!='.intval($this->app()->get_uid()).' AND u.id>'.intval(AUTH_SYSTEM_USERS);
+    $forum_users = $this->app()->db->select_all($sql);
+
+    // пользователи, подписанные глобально, кроме подписанных на раздел, на тему или исключивших её явно
+    $sql = 'SELECT u.id, u.email, u.display_name, us.email_fulltext, lv.type, lv.oid, ue.group_id '.
+      'FROM '.DB_prefix.'last_visit lv, '.DB_prefix.'user u '.
+      'LEFT JOIN '.DB_prefix.'relation r ON (r.to_='.intval($author_id).' AND r.from_=u.id) '.      
+      'LEFT JOIN '.DB_prefix.'user_settings us ON (u.id=us.id) '.
+      'LEFT JOIN '.DB_prefix.'user_ext ue ON (u.id=ue.id) '.
+      'LEFT JOIN '.DB_prefix.'last_visit lv2 ON (lv2.uid=u.id AND lv2.type=\'topic\' AND lv2.oid='.intval($topic['id']).') '.
+      'LEFT JOIN '.DB_prefix.'last_visit lv3 ON (lv3.uid=u.id AND lv3.type=\'forum\' AND lv3.oid='.intval($forum['id']).') '.
+      'WHERE lv.oid=0 AND lv.type=\'forum\' '.
+      'AND (r.type!=\'ignore\' OR r.type IS NULL) '.      
+      'AND lv.uid=u.id AND u.status=\'0\' AND  lv.subscribe=\'1\' AND us.subscribe_mode=\'1\' '.
+      'AND (lv2.subscribe=0 OR lv2.subscribe IS NULL) '.
+      'AND (lv3.subscribe=0 OR lv3.subscribe IS NULL) '.
+      'AND u.id!='.intval($this->app()->get_uid()).' AND u.id>'.intval(AUTH_SYSTEM_USERS);
+    $global_users = $this->app()->db->select_all($sql);
+
+    $users = $topic_users + $forum_users + $global_users;
+
+    // проверяем, есть ли у пользователя права на тчение раздела
+    $parents = $this->app()->get_parent_forums($forum['id']);   
+    $userlib = new Library_userlib;
     
     for ($i=0, $count=count($users);$i<$count;$i++) {
       $mdata['user']=$users[$i];

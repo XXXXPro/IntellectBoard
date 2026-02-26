@@ -2,7 +2,7 @@
 {% import 'macro.tpl' as macros %}
 {% block css %}
 {% if not intb.is_ajax %}
-<link rel="preload" as="style" type="text/css" href="{{ style('post.css') }}" onload="this.rel='stylesheet'"/>
+<link rel="stylesheet" type="text/css" href="{{ style('post.css') }}" />
 {% endif %}
 {% endblock %}
 {% block content %}
@@ -43,8 +43,9 @@
 {% if perms.post %}<a class="actionbtn reply mainbtn" href="reply.htm"><i class="far fa-comment-alt"></i> Ответить</a>{% endif %}
 {% if perms.topic %}<a class="actionbtn newtopic" href="newtopic.htm"><i class="far fa-edit"></i> Новая тема</a>{% endif %}
 {% if not is_guest() %}{% if not topic.bookmark %}<a class="actionicon bookmark" href="change_mode.htm?mode=bookmark&amp;authkey={{ bookmark_key }}" title=" В закладки"><i class="far fa-bookmark"></i></a>{% endif %}
-{% if not topic.subscribe %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;authkey={{ bookmark_key }}" title="Подписаться на тему, чтобы получать уведомления о новых ответах в ней на EMail"><i class="far fa-envelope"></i></a>{%
-else %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;cancel=1&amp;authkey={{ bookmark_key }}" title="Отписаться"><i class="fa fa-minus-circle"></i></a>{% endif %}{% endif %}
+{% if (topic.subscribe==0 and not forum_subscription) or (topic.subscribe==-1) %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;authkey={{ bookmark_key }}" title="Подписаться на тему, чтобы получать уведомления о новых ответах в ней на EMail"><i class="far fa-envelope"></i></a>
+{% elseif forum_subscription %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;cancel=1&amp;authkey={{ bookmark_key }}" title="Исключить из подписок"><i class="fa fa-minus-circle"></i></a>
+{% else %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;cancel=1&amp;authkey={{ bookmark_key }}" title="Отписаться"><i class="fa fa-minus-circle"></i></a>{% endif %}{% endif %}
 <a class="actionicon print" href="javascript:window.print()" title="Распечатать"><i class="fa fa-print"></i></a>
 <!--/noindex-->
 <div class="posts h-feed">
@@ -64,8 +65,9 @@ else %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;
 {% if perms.post %}<a class="actionbtn reply mainbtn" href="reply.htm"><i class="far fa-comment-alt"></i> Ответить</a>{% endif %}
 {% if perms.topic %}<a class="actionbtn newtopic" href="newtopic.htm"><i class="far fa-edit"></i> Новая тема</a>{% endif %}
 {% if not is_guest() %}{% if not topic.bookmark %}<a class="actionicon bookmark" href="change_mode.htm?mode=bookmark&amp;authkey={{ bookmark_key }}" title=" В закладки"><i class="far fa-bookmark"></i></a>{% endif %}
-{% if not topic.subscribe %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;authkey={{ bookmark_key }}" title="Подписаться на тему, чтобы получать уведомления о новых ответах в ней на EMail"><i class="far fa-envelope"></i></a>{%
-else %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;cancel=1&amp;authkey={{ bookmark_key }}" title="Отписаться"><i class="fa fa-minus-circle"></i></a>{% endif %}{% endif %}
+{% if (topic.subscribe==0 and not forum_subscription) or (topic.subscribe==-1) %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;authkey={{ bookmark_key }}" title="Подписаться на тему, чтобы получать уведомления о новых ответах в ней на EMail"><i class="far fa-envelope"></i></a>
+{% elseif forum_subscription %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;cancel=1&amp;authkey={{ bookmark_key }}" title="Исключить из подписок"><i class="fa fa-minus-circle"></i></a>
+{% else %}<a class="actionicon subscribe" href="change_mode.htm?mode=subscribe&amp;cancel=1&amp;authkey={{ bookmark_key }}" title="Отписаться"><i class="fa fa-minus-circle"></i></a>{% endif %}{% endif %}
 <a class="actionicon print" href="javascript:window.print()" title="Распечатать"><i class="fa fa-print"></i></a>
 
 {% if forum.tags and tags|length>0%}

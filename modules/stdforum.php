@@ -365,7 +365,8 @@ class stdforum extends Application_Forum {
     }
     if ($this->forum['webmention']>0) $this->link($this->http($this->url($this->topic['full_hurl'].'webmention.htm')),'webmention');
     $pagelink = $this->out->pages['page'] > 1 ? $this->out->pages['page'] . '.htm' : '';
-    $this->link($this->http($this->url($this->topic['full_hurl'])) . $pagelink, 'canonical'); // выводим атрибут canonical    
+    $this->link($this->http($this->url($this->topic['full_hurl'])) . $pagelink, 'canonical'); // выводим атрибут canonical  
+    $this->out->forum_subscription = $this->has_forum_subscription(); // проверяем подписку на родительский раздел  
   }
 
   function view_topic_newpost() {
@@ -809,13 +810,27 @@ class stdforum extends Application_Forum {
       elseif ($mode=='bookmark') $msg='Тема добавлена в закладки!';
     }
     else {
-     $sql = 'UPDATE '.DB_prefix.'last_visit SET "'.$mode.'"=\'0\' '.
+     $value = 0;
+     if ($mode==='subscribe') { // проверку делаем только для подписок, а не закладок и прочего
+       if ($this->has_forum_subscription()) $value = -1; // если пользователь подписан на раздел или глобально, вносим тему в список игнорируемых, иначе -- просто отписываемся
+     }
+     $sql = 'UPDATE '.DB_prefix.'last_visit SET "'.$mode.'"=\''.$value.'\' '.
        'WHERE uid='.intval($this->get_uid()).' AND type=\'topic\' AND oid='.intval($this->topic['id']);
      if ($mode=='subscribe') $msg='Вы отписались от темы!';
      elseif ($mode=='bookmark') $msg='Тема удалена из закладок!';
     }
     if ($this->db->query($sql)) $this->message($msg,1);
     $this->redirect($this->referer());
+  }
+
+  /** Проверяет, подписан ли пользователь на текущий раздел или весь форум целиком
+   * @return boolean TRUE, если подписан
+   */
+  function has_forum_subscription() {
+    if ($this->is_guest()) return false; // гость не может быть подписан
+    $sql = 'SELECT COUNT(*) FROM '.DB_prefix.'last_visit WHERE uid='.intval($this->get_uid()).' AND "type"=\'forum\' AND oid IN (0,'.intval($this->forum['id']).') AND subscribe>0';
+    $number = $this->db->select_int($sql);
+    return $number>0; 
   }
 
   function action_newtopic($anonym=false) { // $anonym true -- для отправки сообщений от имени гостя, используется при вызове из классов-наследников
@@ -923,7 +938,7 @@ class stdforum extends Application_Forum {
     $oldpost = $oldposts[0];
 
     $post_edittime = $this->get_opt('post_edittime');
-    if (!empty($post_edittime)) {
+    if (!empty($post_edittime) && !$this->is_moderator(true)) {
       $diff = floor($post_edittime - ($this->time - $oldpost['postdate'])/60);
       if ($diff < 0) $this->output_403('Истекло время редактирования сообщения!');
       elseif ($diff == 0) $this->message('Идёт последняя минута для редактирования сообщения!',2);
@@ -1572,9 +1587,11 @@ class stdforum extends Application_Forum {
 
   function get_teaser($parsed,$length,$min_length=0) {
     $teaser = chop($this->get_teaser_preprocess($parsed,$length,$min_length));
-    $teaser = preg_replace("|\n+|","<p>",$teaser);
+    $teaser = preg_replace("|\n\n+|","<p>",$teaser);
+    $teaser = str_replace('<p class="intb_wrap_code">','',$teaser);
+    $teaser = preg_replace('|<p>\s*(<p>)+|','<p>',$teaser);
     $teaser = nl2br($teaser);
-    $teaser = str_replace('<p><br />','<p>',$teaser);
+    $teaser = preg_replace('|<p>(<br\s*/?>)+|','<p>',$teaser);
     $teaser = Library_tagcloser::fix_unclosed($teaser);
     return $teaser;
   }
@@ -1589,7 +1606,7 @@ class stdforum extends Application_Forum {
      $parsed = preg_replace('/\s*\n\*s/',"\n",$parsed); // убираем лишние пробелы рядом с переводами строк
      $parsed = preg_replace('|<table\W.*?</table>|is','',$parsed); // содержимое таблиц удаляется, так как его вывод в teaser всё равно бессмысленен
      $parsed = preg_replace('|<pre\W.*?</pre>|is','',$parsed); // из тех же соображений удаляем исходный код
-     $parsed = preg_replace('|<code\W.*?</code>|is','',$parsed); //
+     $parsed = preg_replace('|<code\W.+</code>|is','<code>См. код в полном сообщении.</code>',$parsed); //
      $parsed = preg_replace('|<audio\W.*?</audio>|is','',$parsed); // удаляем теги audio, video и object, так как внутри них может быть fallback-содержимое
      $parsed = preg_replace('|<video\W.*?</video>|is','',$parsed); // 
      $parsed = preg_replace('|<object\W.*?</object>|is','',$parsed); // 

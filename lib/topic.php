@@ -55,6 +55,8 @@ class Library_topic extends Library {
   * forums -- получать данные о разделах, в которых размещены темы
   * forumtype -- только разделы указанных типов
   * bookmark -- выдача только тем, которые есть в закладках у пользователя
+  * subscribed -- выдача только тем, на которые подписан пользователь
+  * subscribe_ignore -- выдача только тем-исключений, уведомления о которых не нужно отправлять пользователю
   * tags -- извлечь данные о тегах для каждой темы
   * create_time -- время создания темы должно быть меньше или равно указанному
   * after_time -- время последнего сообщения темы должно быть меньше или равно указанному
@@ -99,6 +101,7 @@ class Library_topic extends Library {
     if (!empty($cond['topic_title'])) $where.=' AND t.title LIKE \'%'.$this->app()->db->slashes($cond['topic_title']).'%\'';
     if (!empty($cond['bookmark'])) $where.=' AND lv.bookmark=\'1\'';
     if (!empty($cond['subscribed'])) $where.=' AND lv.subscribe=\'1\'';
+    if (!empty($cond['subscribe_ignore'])) $where.=' AND lv.subscribe=\'-1\'';
     if (!empty($cond['forums']) && !empty($cond['not_flood'])) $where.=' AND f.is_flood=\'0\'';
     if (!empty($cond['forums']) && !empty($cond['forumtype'])) {
       if (!is_array($cond['forumtype'])) $cond['forumtype']=array($cond['forumtype']);
@@ -136,7 +139,7 @@ class Library_topic extends Library {
 //    if (!empty($cond['first']) && !empty($cond['first_user'])) $sql.='LEFT JOIN '.DB_prefix.'user u2 ON (u2.id=p2.author) ';
     if (!empty($cond['forums'])) $sql.='LEFT JOIN '.DB_prefix.'forum f ON (t.fid=f.id) ';
     if (!empty($cond['subscr']) || !empty($cond['bookmark']) || !empty($cond['new_time'])
-       || !empty($cond['posted']) || !empty($cond['subscribed']) || !empty($cond['newposts'])) $sql.='LEFT JOIN '.DB_prefix.'last_visit lv ON (t.id=lv.oid AND lv.type=\'topic\' AND lv.uid='.intval($uid).') ';
+       || !empty($cond['posted']) || !empty($cond['subscribed']) || !empty($cond['newposts']) || !empty($cond['subscribe_ignore'])) $sql.='LEFT JOIN '.DB_prefix.'last_visit lv ON (t.id=lv.oid AND lv.type=\'topic\' AND lv.uid='.intval($uid).') ';
     if (!empty($cond['views'])) $sql.='LEFT JOIN '.DB_prefix.'views v ON (t.id=v.oid AND v.type=\'topic\') ';
     if (!empty($cond['polls'])) $sql.='LEFT JOIN '.DB_prefix.'poll pl ON (t.id=pl.id) ';
     if (!empty($cond['new_time']) && !empty($cond['forums'])) $sql.='LEFT JOIN '.DB_prefix.'mark_all ma ON (ma.fid=t.fid AND ma.uid='.intval($uid).') ';
@@ -179,6 +182,8 @@ class Library_topic extends Library {
   * unanswered -- выдача только тем с одним сообщением (т.е. неотвеченных)
   * flood_limit -- выдача только тем, соотношение флуда в которых меньше указанного (во flood_limit должен быть безразмерный коэффициент от 0 до 1)
   * posted -- выдача только тем, в которые писал текущий пользователь (имеет смысл только при subscr=true)
+  * subscribed -- подсчёт только тем, на которые подписан пользователь
+  * subscribe_ignore -- подсчёт только тем-исключений, уведомления о которых не нужно отправлять пользователю
   *
   * По умолчанию возвращаются только темы в нормальном состоянии, однако это можно изменить с помощью следующих параметров:
   * deleted -- возвращать только темы, помеченные к удалению
@@ -190,8 +195,7 @@ class Library_topic extends Library {
     $where = '1=1';
 
     if (!empty($cond['with_tags'])) {
-      /** @var Library_tags **/
-      $taglib = class_exists('Library_tags') ? new Library_tags : false;;
+      $taglib = class_exists('Library_tags') ? new Library_tags : false;
       $cond['id']=$taglib->get_ids_by_tags($cond['with_tags'],0);
     }
     if (!empty($cond['id'])) {
@@ -220,6 +224,7 @@ class Library_topic extends Library {
     if (!empty($cond['owner'])) $where.=' AND t.owner='.intval($cond['owner']);
     if (!empty($cond['bookmark'])) $where.=' AND lv.bookmark=\'1\'';
     if (!empty($cond['subscribed'])) $where.=' AND lv.subscribe=\'1\'';
+    if (!empty($cond['subscribe_ignore'])) $where.=' AND lv.subscribe=\'-1\'';
     if (!empty($cond['forums']) && !empty($cond['not_flood'])) $where.=' AND f.is_flood=\'0\'';
     if (!empty($cond['favorites'])) $where.=' AND t.favorites=\'1\'';
     if (!empty($cond['first']) && !empty($cond['starter_id'])) $where.=' AND p2.uid='.intval($cond['starter_id']);    
@@ -229,7 +234,7 @@ class Library_topic extends Library {
     $sql = 'SELECT COUNT(*) FROM '.DB_prefix.'topic t ';
     if (!empty($cond['forums'])) $sql.='LEFT JOIN '.DB_prefix.'forum f ON (t.fid=f.id) ';
     if (!empty($cond['subscr']) || !empty($cond['bookmark']) || !empty($cond['new_time'])
-       || !empty($cond['posted']) || !empty($cond['subscribed'])) $sql.='LEFT JOIN '.DB_prefix.'last_visit lv ON (t.id=lv.oid AND lv.type=\'topic\' AND lv.uid='.intval($uid).') ';
+       || !empty($cond['posted']) || !empty($cond['subscribed']) || !empty($cond['subscribe_ignore'])) $sql.='LEFT JOIN '.DB_prefix.'last_visit lv ON (t.id=lv.oid AND lv.type=\'topic\' AND lv.uid='.intval($uid).') ';
     if (!empty($cond['new_time']) && !empty($cond['forums'])) $sql.='LEFT JOIN '.DB_prefix.'mark_all ma ON (ma.fid=t.fid AND ma.uid='.intval($uid).') ';
     if (!empty($cond['first'])) $sql.='LEFT JOIN '.DB_prefix.'post p2 ON (t.first_post_id=p2.id) ';
     $sql.='WHERE '.$where;

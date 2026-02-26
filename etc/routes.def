@@ -17,7 +17,7 @@
 ^address_book/$ addrbook.php?a=view
 ^address_book/(\w+).htm addrbook.php?a=$1
 ^bookmark/(delete|mytopics|subscr|favorites)/(\d+\.htm)?$ bookmark.php?a=$1&page=$2
-^bookmark/((delete|unsubscr|subscr)\.htm)?$ bookmark.php?a=$2
+^bookmark/((delete|unsubscr|subscr|unignore)\.htm)?$ bookmark.php?a=$2
 ^newtopics/((\d+)\.htm)?$ bookmark.php?a=updated&page=$2
 ^newtopics/unread.htm$ bookmark.php?a=unread
 ^newtopics/unanswered.htm$ bookmark.php?a=unanswered

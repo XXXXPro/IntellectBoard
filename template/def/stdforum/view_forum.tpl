@@ -1,8 +1,8 @@
 {% extends 'main.tpl' %}
 {% import 'macro.tpl' as macros %}
 {% block css %}{% if subforums %}
-<link rel="preload" as="style" type="text/css" href="{{ style('forums.css') }}" onload="this.rel='stylesheet'"/>
-{% endif %}<link rel="preload" as="style" type="text/css" href="{{ style('topic.css') }}" onload="this.rel='stylesheet'"/>
+<link rel="stylesheet" type="text/css" href="{{ style('forums.css') }}" />
+{% endif %}<link rel="stylesheet" type="text/css" href="{{ style('topic.css') }}" />
 {% endblock %}
 {% block content %}
 <div id="stdforum_view_forum" class="forum{{ forum.id }}">

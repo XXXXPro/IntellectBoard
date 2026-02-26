@@ -15,9 +15,11 @@
 <p>Вы получили это сообщение потому что являетесь зарегистрированным пользователем форума «{{ get_opt('site_title') }}»
 {% if user.type=='forum' and user.oid!=0 %}
 и подписались в настройках на получение уведомлений о сообщениях в разделе «{{ forum.title }}». </p>
+<p><a href="{{ http(url('bookmark/unsubscr.htm?subscribe='~topic.id~'&authkey='~unsubscribe_key)) }}">Внести эту тему в список игнорируемых, чтобы больше не получать уведомлений о ней</a></p>
 <p><a href="{{ http(url('bookmark/unsubscr.htm?unsubscribe_forum='~user.oid~'&authkey='~unsubscribe_key)) }}">Отписаться от уведомлений о новых сообщениях в разделе</a></p>
 {% elseif user.type=='forum' and user.oid==0 %}
 и подписались в настройках на получение уведомлений о всех сообщениях на форуме. </p>
+<p><a href="{{ http(url('bookmark/unsubscr.htm?subscribe='~topic.id~'&authkey='~unsubscribe_key)) }}">Внести эту тему в список игнорируемых, чтобы больше не получать уведомлений о ней</a></p>
 <p><a href="{{ http(url('bookmark/unsubscr.htm?unsubscribe_forum='~user.oid~'&authkey='~unsubscribe_key)) }}">Отписаться от уведомлений о новых сообщениях на форуме</a></p>
 {% else %}  
 подписались на получение уведомлений в этой теме.</p>

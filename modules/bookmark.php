@@ -85,9 +85,10 @@ class bookmark extends Application {
     $cond['subscribed']=true;
     $this->get_data($cond);
 
-    $sql = 'SELECT f.id,f.title,f.hurl, lv.subscribe FROM '.DB_prefix.'forum f '.
+    $sql = 'SELECT ct.id AS ct_id, ct.title AS ct_title, f.id,f.title,f.hurl, lv.subscribe FROM '.DB_prefix.'forum f '.
+    'LEFT JOIN '.DB_prefix.'category ct ON (f.category_id=ct.id) '.
     'LEFT JOIN '.DB_prefix.'last_visit lv ON (lv.uid='.intval($uid).' AND lv.oid=f.id AND lv.type=\'forum\') '.
-    'ORDER BY sortfield';
+    'ORDER BY ct.sortfield, f.sortfield';
     $forums = $this->db->select_all($sql);
     $this->out->forums=array();
     for ($i=0, $count=count($forums); $i<$count; $i++) if ($this->check_access('view',$forums[$i]['id'])) $this->out->forums[]=$forums[$i];
@@ -95,7 +96,29 @@ class bookmark extends Application {
     $sql = 'SELECT lv.subscribe FROM '.DB_prefix.'last_visit lv WHERE lv.oid=\'0\' AND lv.type=\'forum\' AND lv.uid='.intval($uid);
     $this->out->subscribe_all=$this->db->select_int($sql);
 
+    $tlib = new Library_topic; 
+    $cond['fid'] = $this->get_forum_list('read');
+    $cond['forums']=true;
+    $cond['first']=true;
+    $cond['last']=true;
+    $cond['views']=true;
+    $cond['polls']=true;
+    unset($cond['subscribed']);
+    $cond['subscribe_ignore']=true;
+    $cond['new_time']=$this->db->select_int($sql);    
+
+    $ignored_total=$tlib->count_topics($cond);
+    if (empty($_GET['more_ignored'])) {
+      $cond['perpage'] = $this->get_opt('topics_per_page','user');
+      if (!$cond['perpage']) $cond['perpage'] = $this->get_opt('topics_per_page');
+      if (!$cond['perpage']) $cond['perpage'] = 10; // если ниоткуда не получилось взять кол-во тем на странице, берем жестко закодированное значение во избежание деления на ноль
+      if ($ignored_total>$cond['perpage']) $this->out->more_ignored = 1; // для вывода ссылки «показать ещё
+    }
+    else $this->out->only_ignored=1; // для сокрытия всего лишнего
+
+    $this->out->ignored_topics=$tlib->list_topics($cond);    
     $this->out->authkey=$this->gen_auth_key($uid,'unsubscr',$this->url('bookmark/'));
+    $this->out->authkey_unignore=$this->gen_auth_key($uid,'unignore',$this->url('bookmark/'));
   }
 
   function action_unsubscr() {
@@ -103,11 +126,29 @@ class bookmark extends Application {
     if (empty($_REQUEST['authkey'])) $this->output_403('Ошибка авторизации по ключу');
     $uid = $this->get_uid();
     if (!empty($_REQUEST['subscribe'])) {
+      $to_ignore = array();
+      $to_unsubscribe = array();
+      
+      foreach ($_REQUEST['subscribe'] as $tid) {
+        $sql = 'SELECT COUNT(*) FROM '.DB_prefix.'last_visit lv, '.DB_prefix.'topic t WHERE t.id='.intval($tid).' AND (t.fid=lv.oid OR lv.oid=0) AND uid='.intval($this->get_uid()).' AND "type"=\'forum\' AND subscribe>0';
+        $number = $this->db->select_int($sql);
+        if ($number>0) $to_ignore[]=$tid; // если пользователь подписан на раздел или весь форум, тема идёт в список игнорируемых, иначе — простая отписка в 0-состояние
+        else $to_unsubscribe[]=$tid;
+      }
+
+      // простая отписка от тем, которые не нужно вносить в ignore
       $sql = 'UPDATE '.DB_prefix.'last_visit SET subscribe=\'0\' WHERE uid='.intval($uid).
-      ' AND type=\'topic\' AND '.$this->db->array_to_sql($_REQUEST['subscribe'],'oid');
+      ' AND type=\'topic\' AND '.$this->db->array_to_sql($to_unsubscribe,'oid');
       $this->db->query($sql);
-      $rows = $this->db->affected_rows();
-      if ($rows) $this->message('Вы отписались от '.$this->incline($rows,'%d темы','%d тем','%d тем').'.',1);
+      $rows1 = $this->db->affected_rows();
+
+      // отписка с занесением в ignore тех тем, которые в подписанных разделах
+      $sql = 'UPDATE '.DB_prefix.'last_visit SET subscribe=\'-1\' WHERE uid='.intval($uid).
+      ' AND type=\'topic\' AND '.$this->db->array_to_sql($to_ignore,'oid');
+      $this->db->query($sql);
+      $rows2 = $this->db->affected_rows();
+
+      if ($rows1+$rows2) $this->message('Вы отписались от '.$this->incline($rows1+$rows2,'%d темы','%d тем','%d тем').'.',1);
     }
     if (isset($_REQUEST['unsubscribe_forum'])) {
       $sql = 'UPDATE '.DB_prefix.'last_visit SET subscribe=\'0\' WHERE uid='.intval($uid).
@@ -135,6 +176,21 @@ class bookmark extends Application {
       }
     }
     $this->redirect($this->referer());
+  }
+
+  function action_unignore() {
+    if ($this->is_guest()) $this->output_403('Гостям не разрешается использовать подписку!',true);
+    if (empty($_REQUEST['authkey'])) $this->output_403('Ошибка авторизации по ключу');
+    $uid = $this->get_uid();
+    if (!empty($_REQUEST['subscribe']) && is_array($_REQUEST['subscribe'])) {
+      $sql = 'UPDATE '.DB_prefix.'last_visit SET subscribe=\'0\' WHERE uid='.intval($uid).
+      ' AND type=\'topic\' AND '.$this->db->array_to_sql($_REQUEST['subscribe'],'oid');
+      $this->db->query($sql);
+      $rows = $this->db->affected_rows();
+    }
+    else $rows = 0;
+    $this->message($this->incline($rows,'%d тема была убрана','%d темы были убраны','%d тем было убрано').' из списка исключений.',1);
+    $this->redirect('bookmark/subscr/');
   }
 
 /* Просмотр обновившихся тем */
