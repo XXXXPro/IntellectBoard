@@ -77,7 +77,7 @@ RewriteRule ^sitemap\.(\d+)\.xml$ sitemap.php?file=$1 [L]
 ## Прикрепленные файлы
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^f/up/(\d+)/pr/(\d+)x(\d+)/(\d+\-\w+\.\w+)$ preview.php?dir=$1&x=$2&y=$3&filename=$4 [L]
-RewriteRule ^f/up/(\d+)/(\d+\-\w+)/(.*)$ f/up/$1/$2.dat [L]
+RewriteRule ^f/up/(\d+)/(\d+\-\w+)/([^/]+)$ f/up/$1/$2.dat [L]
 
 ## Защита от дублирования страниц
 RewriteRule ^(\w+)/(\w+)/[01]\.htm$ $1/$2/ [R=301,L,QSA]
