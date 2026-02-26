@@ -14,7 +14,6 @@
 <link rel="preload" href="{{ url('fa/webfonts/fa-regular-400.woff2') }}" as="font" crossorigin />
 <link rel="preload" href="{{ url('fa/webfonts/fa-solid-900.woff2') }}" as="font" crossorigin />
 {# <link rel="preload" href="{{ url('fa/webfonts/fa-brands-400.woff2') }}" as="font" crossorigin /> #}
-<link type="text/css" rel="preload" as="style" href="{{ url('fa/css/fontawesome.min.css') }}"  onload="this.rel='stylesheet'" />
 <link type="text/css" href="{{ style('s.css') }}" rel="stylesheet" />
 <link type="image/png" href="{{ style('favicon.png') }}" rel="icon" />
 {% for item,content in meta %}
@@ -126,6 +125,7 @@
 {% if get_opt('cron_img') %}<div style="height: 1px; width: 1px; background: url('{{ url('cron.php') }}')"></div>{% endif %}
 {{ macros.sub_block(IntB_subactions['footer']) }}
 </footer>
+<link type="text/css" rel="stylesheet" href="{{ url('fa/css/fontawesome.min.css') }}" />
 {% endblock %}
 
 <!--##DEBUG#-->
