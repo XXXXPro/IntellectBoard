@@ -31,8 +31,6 @@ color: #fff; font-weight: bold; text-decoration: none; margin-bottom: -1.3em;  }
 #ib_all .post .spoiler>div { border-top: #ddd 1px solid; padding: 5px }
 #ib_all .post img { max-width: 100%; }
 #ib_all .post .ptext h2.pt_title { font-size: 120%; margin-top: 0px }
-#ib_all .post .ptext .ib_outer_table { table-layout: fixed; width: 100% }
-#ib_all .post .ptext .ib_outer_table td { padding: 0; overflow: auto }
 
 #ib_all .post .pu a.male:after {content: 'М'; color: #003; padding: 5px; font-size: 80%; font-weight: normal}
 #ib_all .post .pu a.female:after {content: 'Ж'; color: #FCC; padding: 5px; font-size: 80%; font-weight: normal}

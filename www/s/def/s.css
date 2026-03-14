@@ -5,7 +5,7 @@ div { padding: 0; margin: 0 }
 img { border: 0; padding: 0; margin: 0; max-width: 100%; height: auto; }
 td { vertical-align: top; padding: 4px }
 form { padding: 0; margin: 0 }
-ul { padding: 0; margin: 0; vertical-align: top; list-style-position: inside }
+ul,ol { padding: 0; margin: 0; vertical-align: top; list-style-position: inside }
 li { padding: 0; margin: 0 }
 form { padding: 0; margin: 0 }
 fieldset { padding: 0; margin: 0 }
@@ -49,6 +49,10 @@ table.design { padding: 0; margin: 0; border-spacing: 0; empty-cells: show; bord
 
 /* Типовые таблицы */
 #ib_all .ibtable { width: 100%; table-layout: fixed; border-collapse: collapse; border: #C1DEFF 2px solid }
+#ib_all .post .ib_outer_table { table-layout: fixed; width: 100% }
+#ib_all .post .ib_outer_table>tbody>tr>td { padding: 0; overflow: auto }
+#ib_all .post .ib_user_table { table-layout: fixed; border-collapse: collapse; border: #C1DEFF 1px solid }
+#ib_all .post .ib_user_table td { border: #C1DEFF 1px solid; padding: 5px 8px }
 
 /* Сообщения */
 #ib_all div.msg_error,#ib_all div.msg_warn,#ib_all div.msg_ok{padding:8px 10px;margin:4px 0;border-width:0 0 0 4px;border-style:solid;font-size:110%}
@@ -137,6 +141,7 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
 #ib_all .post.marked { border: #A00 5px solid }
 #ib_all .post .offtopic { font-size: 90%; color: #666 }
 #ib_all .post .offtopic:before { content: 'Оффтопик: '; color: #999 }
+#ib_all .post ul, #ib_all .post ol { margin: 1.25em 2em; }
 #ib_all blockquote{border:#dcddde 1px solid;font-size:90%;background:#eaecef;padding:4px;overflow:auto;max-height:7em;margin:5px 20px}
 #ib_all details.inline[open] summary { display: none;}
 #ib_all details.inline summary { text-decoration: underline dotted #3c5cc0; cursor: pointer; }
@@ -152,18 +157,21 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
 #ib_all .postform div label span{display:block;width:18em;float:left}
 #ib_all .postform .sceditor-container div{padding:0}
 #ib_all .postform div.sceditor-dropdown{padding:10px}
+#ib_all .postform div.sceditor-group {padding:2px 8px}
+#ib_all .postform div.sceditor-group:first-child {padding-left: 0}
 #ib_all .postform fieldset div{padding:2px 5px}
-#ib_all .postform textarea{width:98%}
+#ib_all .postform textarea{width:100%; box-sizing: border-box; min-height: 25vh} 
 #ib_all .postform .extended{display:flex;flex-wrap:wrap}
 #ib_all .postform .postboxes{display:flex;flex-wrap:wrap;flex-basis:70%;flex-grow:1}
 #ib_all .postform .postboxes label{display:block;flex-basis:33%}
 #ib_all .postform .perms{font-size:80%;color:#666;flex-basis:25%}
 #ib_all .postform .submit{text-align:center;clear:both;background:#E0EFFF;line-height:250%}
 #ib_all .postform .attach span{display:inline-block;width:17.4em;text-align:right}
-#ib_all .postform div.sceditor-container{padding:0}
+#ib_all .postform div.sceditor-container{padding:0;margin-top:4px}
 #ib_all .postform .danger{color:#c00}
 #ib_all .postform .maintext{clear:both}
 #ib_all .postform .rules_reminder { float: right; color: #888; width: auto }
+#ib_all .postform .rules_reminder+br {clear: both;}
 #ib_all .postform .rules_reminder a { color: #888; }
 #ib_all .miniform legend{display:none}
 #ib_all .miniform fieldset{margin:0;padding:0}
@@ -281,8 +289,7 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
   #ib_all .ibform .submit { padding-left: 0; text-align: center;}
   #ib_all .ibform textarea, #ib_all .ibform select, #ib_all .ibform input[type=text], #ib_all .ibform input[type=password] { width: 96%; margin: 0 5px; max-width: none; }
   #ib_all .ibform span select { width: auto; margin: 0 }
-
-
+  
   #ib_all .main_menu .sandwich ~ ul { display: none }
   #ib_all .main_menu .sandwich:checked ~ ul { display: block; position: absolute; background: #fff; border: #339 2px solid;
   top: 40px; right: 5px; z-index: 65011; padding: 4px 10px; max-width: 90%; box-shadow: #888 5px 5px 5px; }

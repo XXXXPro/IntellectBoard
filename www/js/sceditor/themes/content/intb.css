@@ -1,0 +1,97 @@
+/*! SCEditor | (C) 2011-2013, Sam Clarke | sceditor.com/license */
+body,
+code:before,
+html,
+p,
+table {
+  color: #111;
+  font-family: 'Liberation Sans','Nimbus Sans','Open Sans', Tahoma, Verdana, Arial, sans-serif;
+  line-height: 133%;
+  margin: 0;
+  overflow: visible;
+  padding: 0
+}
+
+body { font-size: 86%; }
+
+html {
+  height: 100%
+}
+
+.ios {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch
+}
+
+.ios body {
+  overflow: auto;
+  position: relative
+}
+
+body {
+  min-height: 100%;
+  word-wrap: break-word
+}
+
+body.placeholder:before {
+  color: #555;
+  content: attr(placeholder);
+  font-style: italic
+}
+
+ol,
+ul {
+  margin: 1.25em 2em;
+  padding: 0;
+  vertical-align: top;
+  list-style-position: inside;
+}
+
+table { table-layout: fixed; border-collapse: collapse; border: #C1DEFF 1px solid; empty-cells: show }
+table td { border: #C1DEFF 1px solid; padding: 5px 8px }
+
+table td {
+  min-width: 5px
+}
+
+code {
+  background: #f1f1f1;
+  direction: ltr;
+  display: block;
+  margin: .25em 0;
+  padding: 1em;
+  text-align: left;
+  white-space: pre
+}
+
+blockquote{border:#dcddde 1px solid;font-size:90%;background:#f4f4ff;padding:4px;overflow:auto;margin:5px 20px } 
+
+blockquote cite {
+  border-bottom: 1px solid #C1DEFF;
+  display: block;
+  font-size: 1em;
+  font-weight: 700;
+  margin: 0 -.5em .25em -.75em;
+  padding: 0 .5em .15em .75em
+}
+
+pre { display: block; white-space: pre; line-height: 100%; border: #A3CEFF 1px solid; padding: 10px; margin: 5px 20px; background: #eee; font-size: 125%; max-height: 15em; }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  padding: 0
+}
+
+div,
+p {
+  min-height: 1.25em
+}
+
+.offtopic { font-size: 90%; color: #666 }
+.offtopic:before { content: 'Оффтопик: '; color: #999 }
+

@@ -417,31 +417,92 @@ function IntB_main(opts) {
   }
 
   if (opts.wysiwyg && opts.wysiwyg!='0' && bbcode_nodes.length) {
-    head.load([scepath+'minified/themes/default.min.css',scepath+'minified/jquery.sceditor.min.js',
-      opts.basedir+'js/sceditor/minified/formats/bbcode.js',scepath+'languages/ru.js'],function() {
-      var exclude = 'print,date,time,ltr,rtl,table,indent,cut,copy,paste,pastetext,horizontalrule,outdent'+(typeof(opts.emoticons)==="undefined" ? ",emoticon" : "");
+    head.load([scepath+'themes/quill.min.css',scepath+'jquery.sceditor.min.js',
+      opts.basedir+'js/sceditor/formats/bbcode.js',scepath+'languages/ru.js',opts.basedir+'js/sceditor/icons/quill.js',/*opts.basedir+'js/sceditor/plugins/dragdrop.js',*/opts.basedir+'js/sceditor/plugins/undo.js'],function() {
+      var exclude = 'print,date,time,ltr,rtl,indent,cut,copy,paste,font,outdent'+(typeof(opts.emoticons)==="undefined" ? ",emoticon" : "");
       if (/Android|webOS|Phone|iPad|iPod|Tablet|BlackBerry|Mobile|Opera Mini/i.test(navigator.userAgent)) {
-        exclude+=",left,center,right,justify,subscript,superscript,font,size,color,removeformat";
+        exclude+=",left,center,right,justify,subscript,superscript,font,size,color,removeformat,table,pastetext,horizontalrule";
       }
       bbcode_nodes.sceditor({
         format: 'bbcode',
+        parserOptions: {
+          breakBeforeBlock: true,
+          breakStartBlock: true,
+          breakEndBlock: true,
+          breakAfterBlock: true
+        },
         locale: "ru",
-        style: opts.basedir+"js/sceditor/minified/jquery.sceditor.default.min.css",
+        style: opts.basedir+"js/sceditor/themes/content/intb.css",
         toolbarExclude: exclude,
         emoticonsEnabled : typeof(opts.emoticons)!=="undefined",
         emoticonsRoot : opts.emoticonsRoot,
         emoticons : opts.emoticons,
         autoExpand : true,
-        resizeEnabled : true
+        resizeEnabled : false,
+	      icons: 'quill',
+	      plugins: 'dragdrop,undo',
+        allowedTags: ['audio','video'],
+        allowedAttributes: ['src'],
+        dragdrop: {
+          allowedTypes: ['image/jpeg', 'image/png', 'image/gif'],
+          handlePaste: true,
+          isAllowed: function(file) {
+              return true;
+          },          
+          handleFile: function (file, createPlaceholder) {
+            // createPlaceholder function will insert a
+            // loading placeholder into the editor and
+            // return an object with inert(html) and
+            // cancel() methods
+
+            // For example:
+            // var placeholder = createPlaceholder();
+            // console.log(file);
+            // placeholder.insert('Файл тут!');
+
+            /* asyncUpload(file).then(function (url) {
+                // Replace the placeholder with the image HTML
+                placeholder.insert('<img src=\'' + url + '\' />');
+            }).catch(function () {
+                // Error so remove the placeholder
+                placeholder.cancel();
+            });
+            */
+          }
+        }
       });
       if (opts.wysiwyg==1) bbcode_nodes.sceditor('instance').sourceMode(true);
       bbcode_nodes.each(function (idx,node) {
+        var prev_dropdown =sceditor.commands.link._dropDown;
         jQuery(node).sceditor('instance').keyDown(function(e) {        
           if (e.ctrlKey && e.keyCode==13) {
             bbcode_nodes.sceditor('instance').updateOriginal();
             node.form.requestSubmit();
           }
-        })
+        });
+        sceditor.commands.link._dropDown = function() {
+          prev_dropdown(...arguments);
+          var dd_element = jQuery('.sceditor-insertlink div div');
+          let list_elm = document.createElement('datalist');
+          list_elm.id = 'topic_url_search_list';
+          dd_element[0].appendChild(list_elm);
+          var dd_input = jQuery(dd_element).find('input').first();
+          dd_input.attr('list','topic_url_search_list');
+          dd_input.attr('placeholder','https:// или название темы');
+
+          let prev_timer = null;
+          dd_input.on('input', function (e) {
+            if (e.type !== undefined) {
+              if (prev_timer!=null) clearTimeout(prev_timer);
+              prev_timer = setTimeout(function() {
+                jQuery.get(opts.basedir+'search/complete_topic.htm','q='+dd_input[0].value,function(topics) {
+                  var opts = topics.map(function (item) { let elm = document.createElement('option'); elm.value=item.full_hurl; elm.label=item.title; return elm });
+                  list_elm.replaceChildren(...opts);
+                },'json');
+              },800);
+            }
+          });
+        }
       });
 
       var mini_nodes=$('.miniform');
@@ -613,6 +674,7 @@ function IntB_main(opts) {
     });
   }
 
+
   jQuery('input.topic_id_finder').each(function (i,el) {
     let list_id = el.getAttribute('list');
     let list_elm = document.getElementById(list_id);
@@ -630,7 +692,8 @@ function IntB_main(opts) {
         },800);
       }
     });
-  });    
+  });
+
 
   var sandwich_main = document.getElementById('intb_sandwich_main');
   if (sandwich_main) {

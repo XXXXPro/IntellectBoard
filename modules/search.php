@@ -341,7 +341,8 @@ class search extends Application {
     $query = $_GET['q'];
     if (!empty($query)) {
       $forum_ids = $this->get_forum_list('read'); // поиск возможен только в тех разделах, в которых у пользователя есть права на чтения
-      $sql = 'SELECT t.id, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl, t.title, '.$this->db->full_relevancy('t.title,t.descr',$query).' AS relevancy '.
+      $root_url = $this->http($this->url(''));
+      $sql = 'SELECT t.id, CONCAT(\''.$root_url.'\',f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl, t.title, '.$this->db->full_relevancy('t.title,t.descr',$query).' AS relevancy '.
           'FROM '.DB_prefix.'topic t '.
           'LEFT JOIN '.DB_prefix.'forum f ON (f.id=t.fid) '.
           'WHERE ('.$this->db->full_match('t.title,t.descr',$query.'*').' OR t.hurl LIKE \''.$this->db->slashes($query).'%\') AND t.status=\'0\''.

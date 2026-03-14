@@ -154,9 +154,9 @@ class Library_bbcode extends Library {
       self::$search[]='|\[email=([a-zA-Z0-9_\-\.]+@[a-zA-Z0-9\.\-]+)\]|'; self::$replace[]='<a href="mailto:$1">$1</a>';
 
       // теги таблиц
-      self::$search[]='|\[table\](.*?)\[/table\]|s'; self::$replace[]='<table class="ib_outer_table"><tr><td><table class="ib_user_table">$1</table></td></tr></table>';
-      self::$search[]='!\s*\[td(\s+(col|row)span=&quot;\d+&quot;)?\](.*?)\[/td\]\s*!s'; self::$replace[]='<td$1>$3</td>';
-      self::$search[]='|\s*\[tr\](.*?)\[/tr\]\s*|s'; self::$replace[]='<tr>$1</tr>';
+      self::$search[]='|(\r?\n)*\[table\](.*?)\[/table\](\r?\n)*|s'; self::$replace[]='<table class="ib_outer_table"><tr><td><table class="ib_user_table">$2</table></td></tr></table>';
+      self::$search[]='!\s*\[td(\s+(col|row)span=&quot;\d+&quot;)?\](\r?\n)*(.*?)\[/td\]\s*!s'; self::$replace[]='<td$1>$4</td>';
+      self::$search[]='|\s*\[tr\](\r?\n)*(.*?)\[/tr\]\s*|s'; self::$replace[]='<tr>$2</tr>';
 
       if ($link) {
         self::$search[]='|\[url=([\d\w\./\?][^\]"\']+)\](.*?)\[/url\]|s'; self::$replace[]='<a href="$1">$2</a>'; // первый символ URL всегда либо буква, либо косая черта, либо точка. Все остальное -- подозрительно и не должно вызывать срабатывания regexp
@@ -229,7 +229,7 @@ class Library_bbcode extends Library {
       $matches[4]=str_replace('[li]','<li>',$matches[4]);
       $matches[4]=str_replace('[/li]','</li>',$matches[4]);
     }
-    $matches[4]=str_replace("</li>\r\n<li>",'</li><li>',$matches[4]);
+    $matches[4]=preg_replace("|(\r?\n)*<li>(\r?\n)*|s",'<li>',$matches[4]);
     if ($matches[2]) $matches[2] = ' style="list-style-type: '.$matches[2].'"';
     if ($matches[1]==='list') $matches[1]='ul';
 
@@ -556,7 +556,6 @@ class Library_bbcode extends Library {
     $ch = curl_init();
     $result = array();
     $all_done = true;
-echo "Blocklink".PHP_EOL;
     foreach ($params['links'] as $url) {
       curl_setopt($ch, CURLOPT_URL, $url);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
