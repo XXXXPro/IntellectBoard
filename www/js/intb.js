@@ -96,7 +96,6 @@ function FormStorage(form_element,storage_key,headers=null) {
   self.onSave = function (data) {}  
   self.onLoad = function (data) {}
   self.gotoUrl = function (url) {
-    console.log(url);
     var new_url = new URL(url);
     new_url.hash = '';
     var old_url = new URL(window.location);
@@ -107,7 +106,6 @@ function FormStorage(form_element,storage_key,headers=null) {
     }
   }
   self.onSubmitResult = function (xhr) {
-    console.log(xhr);
     if (xhr.status===200 || xhr.status===206 || xhr.status===204) {
         self.gotoUrl(xhr.responseURL);
     } 
@@ -480,6 +478,9 @@ function IntB_main(opts) {
             node.form.requestSubmit();
           }
         });
+        jQuery(node).sceditor('instance').nodeChanged(function () {
+          fstor.save_mode = true;
+        });
         sceditor.commands.link._dropDown = function() {
           prev_dropdown(...arguments);
           var dd_element = jQuery('.sceditor-insertlink div div');
@@ -662,7 +663,6 @@ function IntB_main(opts) {
   });  */
 
   if (jQuery('input.tag_finder').length>0) {
-    console.log('Amsify loading!');
     head.load([opts.basedir+'js/amsify/js/jquery.amsify.suggestags.js',opts.basedir+'js/amsify/css/amsify.suggestags.css'], function(){
 				jQuery('input.tag_finder').amsifySuggestags({
 					type : 'amsify',
@@ -738,13 +738,11 @@ function IntB_main(opts) {
 
   window.addEventListener('online', function (e) {
     $('.prating a').removeClass('unclickable');
-    console.log('Going online');
     $('.submit button').attr('disabled',false);
   });
 
   window.addEventListener('offline', function (e) {
     $('.prating a').addClass('unclickable');
-    console.log('Going offline');
     $('.submit button').attr('disabled',true);
   });  
 
