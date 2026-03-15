@@ -75,7 +75,7 @@ table.design { padding: 0; margin: 0; border-spacing: 0; empty-cells: show; bord
 /* Общие элементы сайта */
 #ib_all { margin: auto; padding: 0 50px; font-size: 1.25em; max-width: 1220px; min-width: 992px }
 #ib_all .main_menu li, #ib_all .welcome li { display: inline-block; list-style: none}
-#ib_all a { color : #3c5cc0 }
+#ib_all a, #ib_all .usermenu a:visited { color : #3c5cc0 }
 #ib_all a:visited { color : #283E7F }
 #ib_all .fa, #ib_all .fas { padding-right: 5px }
 #ib_all .header { background: #E5F1FF; border-left: #D8EAFF 1px solid;
@@ -298,7 +298,7 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
   #ib_all .main_menu .sandwich { width: 30px; height: 30px; cursor: pointer; clip: rect(0,0,0,0); position: absolute; }
   #ib_all .main_menu .sandwich ~ label { width: 30px; height: 30px; display: inline-block; font-size: 30px; position: absolute; top: 8px; right: 5px; color: #339; }
   #ib_all .main_menu { padding: 0 }
-  #ib_all .postform input[type=text] { width: 98% }
+  #ib_all .postform input[type=text] { width: 100%; box-sizing: border-box; }
   #ib_all .postform .postboxes label { flex-basis: 50% }
   #ib_all a.actionicon { padding: 4px; margin: 0 0 0 8px; }
   #ib_all .topic_start { margin-bottom: 0 }

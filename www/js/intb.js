@@ -417,9 +417,9 @@ function IntB_main(opts) {
   if (opts.wysiwyg && opts.wysiwyg!='0' && bbcode_nodes.length) {
     head.load([scepath+'themes/quill.min.css',scepath+'jquery.sceditor.min.js',
       opts.basedir+'js/sceditor/formats/bbcode.js',scepath+'languages/ru.js',opts.basedir+'js/sceditor/icons/quill.js',/*opts.basedir+'js/sceditor/plugins/dragdrop.js',*/opts.basedir+'js/sceditor/plugins/undo.js'],function() {
-      var exclude = 'print,date,time,ltr,rtl,indent,cut,copy,paste,font,outdent'+(typeof(opts.emoticons)==="undefined" ? ",emoticon" : "");
+      var exclude = 'print,date,time,ltr,rtl,horizontalrule,indent,cut,copy,paste,font,outdent'+(typeof(opts.emoticons)==="undefined" ? ",emoticon" : "");
       if (/Android|webOS|Phone|iPad|iPod|Tablet|BlackBerry|Mobile|Opera Mini/i.test(navigator.userAgent)) {
-        exclude+=",left,center,right,justify,subscript,superscript,font,size,color,removeformat,table,pastetext,horizontalrule";
+        exclude+=",left,center,right,justify,subscript,superscript,font,size,color,removeformat,table,pastetext";
       }
       bbcode_nodes.sceditor({
         format: 'bbcode',
