@@ -8,7 +8,7 @@
  *  Основной модуль сайтового движка Intellect Board 3 Pro
  *  ================================ */
 define('AUTH_SYSTEM_USERS', 3);
-define('INTB_VERSION', '3.05 Rebuild');
+define('INTB_VERSION', '3.05 Rebuild 2');
 
 class Application {
 

@@ -440,6 +440,7 @@ class Library_bbcode extends Library {
       $text = preg_replace_callback('|\[video=(https?://[\d\w\.:/\?][^\]"\']+)\]|is',array($this,'process_video_link'),$text);
       $text = preg_replace_callback('|\[youtube\](https?://[\d\w\.:/\?][^\]"\']+)\[/youtube\]|is',array($this,'process_video_link'),$text);
       $text = preg_replace_callback('|\[youtube=(https?://[\d\w\.:/\?][^\]"\']+)\]|is',array($this,'process_video_link'),$text);
+      $text = preg_replace('|\[youtube\]([\d\w]+)\[/youtube\]|is','<iframe class="video_embed" width="560" height="315" src="https://www.youtube.com/embed/$1" loading="lazy" title="YouTube video player" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',$text);
       return $text;
   }
 
