@@ -160,7 +160,7 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
 #ib_all .postform div.sceditor-group {padding:2px 8px}
 #ib_all .postform div.sceditor-group:first-child {padding-left: 0}
 #ib_all .postform fieldset div{padding:2px 5px}
-#ib_all .postform textarea{width:100%; box-sizing: border-box; min-height: 25vh} 
+#ib_all .postform textarea{width:100%; box-sizing: border-box; min-height: 20vh} 
 #ib_all .postform .extended{display:flex;flex-wrap:wrap}
 #ib_all .postform .postboxes{display:flex;flex-wrap:wrap;flex-basis:70%;flex-grow:1}
 #ib_all .postform .postboxes label{display:block;flex-basis:33%}
