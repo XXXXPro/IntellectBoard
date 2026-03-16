@@ -141,8 +141,8 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
 #ib_all .post.marked { border: #A00 5px solid }
 #ib_all .post .offtopic { font-size: 90%; color: #666 }
 #ib_all .post .offtopic:before { content: 'Оффтопик: '; color: #999 }
-#ib_all .post ul, #ib_all .post ol { margin: 1.25em 2em; }
-#ib_all blockquote{border:#dcddde 1px solid;font-size:90%;background:#eaecef;padding:4px;overflow:auto;max-height:7em;margin:5px 20px}
+#ib_all .post ul, #ib_all .post ol { margin: 1.25em 2em; list-style-position: outside;}
+#ib_all blockquote{border:#dcddde 1px solid;font-size:90%;background:#eaecef;padding:4px;overflow:auto;max-height:7em;margin:5px 20px;border-left-width: 8px;}
 #ib_all details.inline[open] summary { display: none;}
 #ib_all details.inline summary { text-decoration: underline dotted #3c5cc0; cursor: pointer; }
 #ib_all details.inline summary::marker { content: ""; }

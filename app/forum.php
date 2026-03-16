@@ -89,8 +89,8 @@ class Application_Forum extends Application {
   protected function init_style() {
     parent::init_style();
     if ($this->forum['template']) { // если в настройках раздела указан какой-то шаблон
-      if ($this->forum['template_override']) $this->style=$this->forum['template']; // если включено безусловное переопределение, то заменяем текущий шаблон на тот, который указан в настройках раздела
-      elseif (!$this->get_opt('template','user')) $this->style=$this->forum['template']; // если у пользователя не выбран шаблон (т.е. стоит в настройках использовать шаблон сайта), используем шаблон раздела
+      if ($this->forum['template_override']) $this->template=$this->forum['template']; // если включено безусловное переопределение, то заменяем текущий шаблон на тот, который указан в настройках раздела
+      elseif (!$this->get_opt('template','user')) $this->template=$this->forum['template']; // если у пользователя не выбран шаблон (т.е. стоит в настройках использовать шаблон сайта), используем шаблон раздела
     }
   }
 

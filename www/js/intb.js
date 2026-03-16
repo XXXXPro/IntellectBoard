@@ -340,15 +340,26 @@ function IntB_main(opts) {
   var scepath=opts.basedir+'js/sceditor/';
   var wysiwyg_nodes=$('.wysiwyg');
   if (wysiwyg_nodes.length) {
-    head.load([scepath+'minified/themes/default.min.css',scepath+'minified/jquery.sceditor.min.js',
-      scepath+'languages/ru.js'],function() {
+    head.load([scepath+'themes/quill.min.css',scepath+'jquery.sceditor.min.js',
+      scepath+'languages/ru.js',opts.basedir+'js/sceditor/icons/quill.js',/*opts.basedir+'js/sceditor/plugins/dragdrop.js',*/opts.basedir+'js/sceditor/plugins/undo.js'],function() {
+      var exclude = 'print,date,time,ltr,rtl,horizontalrule,indent,cut,copy,paste,font,outdent'+(typeof(opts.emoticons)==="undefined" ? ",emoticon" : "");
+      if (/Android|webOS|Phone|iPad|iPod|Tablet|BlackBerry|Mobile|Opera Mini/i.test(navigator.userAgent)) {
+        exclude+=",left,center,right,justify,subscript,superscript,font,size,color,removeformat,table,pastetext";
+      }
+      if (!opts.wysiwyg_style) opts.wysiwyg_style=opts.basedir+"js/sceditor/themes/content/intb.css";
       wysiwyg_nodes.sceditor({
-        height: '600px',
         locale: "ru",
-        style: scepath+"minified/jquery.sceditor.default.min.css",
-        toolbarExclude: 'emoticon,print,date,time,ltr,rtl',
+        style: opts.wysiwyg_style,
+        toolbarExclude: exclude,
+        emoticonsEnabled : typeof(opts.emoticons)!=="undefined",
         emoticonsRoot : opts.emoticonsRoot,
         emoticons : opts.emoticons,
+        autoExpand : true,
+        resizeEnabled : false,
+	      icons: 'quill',
+	      plugins: 'dragdrop,undo',
+        allowedTags: ['audio','video'],
+        allowedAttributes: ['src'],
       });
       wysiwyg_nodes.sceditor('instance').keyDown(function(e) {
           if (e.ctrlKey && e.keyCode==13) $(e.target).closest('form').submit();
@@ -421,16 +432,16 @@ function IntB_main(opts) {
       if (/Android|webOS|Phone|iPad|iPod|Tablet|BlackBerry|Mobile|Opera Mini/i.test(navigator.userAgent)) {
         exclude+=",left,center,right,justify,subscript,superscript,font,size,color,removeformat,table,pastetext";
       }
+      if (!opts.wysiwyg_style) opts.wysiwyg_style=opts.basedir+"js/sceditor/themes/content/intb.css";
       bbcode_nodes.sceditor({
         format: 'bbcode',
         parserOptions: {
           breakBeforeBlock: true,
-          breakStartBlock: true,
           breakEndBlock: true,
           breakAfterBlock: true
         },
         locale: "ru",
-        style: opts.basedir+"js/sceditor/themes/content/intb.css",
+        style: opts.wysiwyg_style,
         toolbarExclude: exclude,
         emoticonsEnabled : typeof(opts.emoticons)!=="undefined",
         emoticonsRoot : opts.emoticonsRoot,

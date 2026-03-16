@@ -64,7 +64,7 @@ code {
   white-space: pre
 }
 
-blockquote{border:#dcddde 1px solid;font-size:90%;background:#f4f4ff;padding:4px;overflow:auto;margin:5px 20px } 
+blockquote{border:#dcddde 1px solid;font-size:90%;background:#f4f4ff;padding:4px;overflow:auto;margin:5px 20px;border-left-width: 8px; } 
 
 blockquote cite {
   border-bottom: 1px solid #C1DEFF;

@@ -66,9 +66,6 @@ class Application {
   /** Данные о текущей теме, если они есть */
   public $topic = false;
 
-  /** Данные о выбранном стиле */
-  protected $style = 'def';
-
   /** Главная функция, из нее вызывается все остальное
    * Действия:
    * Вызов процедуры инициализации
@@ -781,6 +778,12 @@ class Application {
     $this->out->intb->is_admin = $this->is_admin();
     $this->out->intb->action = $this->action;
     $this->out->now = $this->time;
+
+    // если выбрана отличная от def тема, проверяем, есть ли для неё стиль для WYSIWYG-режима
+    if ($this->template!='def') {
+      $wysiwyg_style_file = 's/'.$this->template.'/sceditor.css';
+      if ($this->get_request_type()==0 && is_readable(BASEDIR.'www/'.$wysiwyg_style_file)) $this->out->wysiwyg_style = $this->url($wysiwyg_style_file);
+    }
 
     /* Название правильного обработчика должно быть выставлено заранее в переменной template_lib.
       Предполгается, что это делается в функции init_style, но возможна и модификация где-то еще * */
