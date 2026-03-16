@@ -54,7 +54,7 @@ define('CONFIG_topics_per_page','20');
 define('CONFIG_posts_per_page','20');
 define('CONFIG_posts_preview_x','240');
 define('CONFIG_posts_preview_y','180');
-define('CONFIG_posts_preview_jpeg_qty','70');
+define('CONFIG_posts_preview_jpeg_qty','90');
 define('CONFIG_bottom_location','1');
 define('CONFIG_post_maxlength','32768');
 define('CONFIG_post_minlength','1');
