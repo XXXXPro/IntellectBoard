@@ -8,7 +8,7 @@
 <thead><tr><th>Название</th><th>Ссылка</th><th>Порядок отображения</th><th>Доступность</th></tr></thead>
 <tbody>{% for item in menu_items %}
 <tr><td>{{ macros.input('items['~item.id~'][title]',item.title,30) }}</td>
-<td>{{ macros.input('items['~item.id~'][url]',item.url,25) }} <label>{{ macros.checkbox('items['~item.id~'][hurl_mode]',1,item.hurl_mode) }} Относительно корня</label></td>
+<td>{{ macros.input('items['~item.id~'][url]',item.url,25,255) }} <label>{{ macros.checkbox('items['~item.id~'][hurl_mode]',1,item.hurl_mode) }} Относительно корня</label></td>
 <td>{{ macros.input('items['~item.id~'][sortfield]',item.sortfield,3) }}</td><td>
 <label>{{ macros.checkbox('items['~item.id~'][show_guests]',1,item.show_guests) }} Гости</label>
 <label>{{ macros.checkbox('items['~item.id~'][show_users]',1,item.show_users) }} Пользователи</label>
