@@ -41,7 +41,7 @@
 
 <ul class="microblog h-feed">
 {% for topic in topics %}
-<li id="p{{topic.post.id}}" class="post h-entry">
+<li id="p{{topic.post.id}}" class="post h-entry post">
 <div class="mb_top"><span class="h-card p-author">
 {% if topic.post.uid>3 %}<a href="{{ url(sprintf(get_opt('user_hurl'),topic.post.uid)) }}" class="avatar">{{ macros.avatar(topic.post.uid,topic.post.avatar,topic.post.author,"u-photo") }}</a>
 {% else %}{{ macros.avatar(topic.post.uid,topic.post.avatar,topic.post.author,"u-photo") }} {% endif %}
@@ -50,13 +50,6 @@
 {{ macros.user(topic.post.author,topic.post.uid,"p-name") }}
 </span></span>
 <time datetime="{{ topic.post.postdate|date('Y-m-d\\TH:i:sP') }}" class="mb_date dt-published"> · {{ topic.post.postdate|shortdate }}</time>
-<div class="postact">
-{% if is_moderator %}<a href="https://nic.ru/whois/?searchWord={{ topic.post.ip }}">IP</a> {% endif %}
-{% if is_moderator %}<a href="edit.htm?id={{ topic.post.id }}" title="Редактировать"><i class="fas fa-pencil-alt"></i></a>{% endif %}
-{% if is_moderator
-%}<a class="ajax confirm" title="Удалить" href="{{ url('moderate/'~topic.full_hurl~'delete_post.htm?id='~post.id~'&authkey='~delete_key) }}"><i class="far fa-trash-alt"></i></a>{%
-endif %}</div>
-</div>
 <div class="mb_item e-content p-name">{{ topic.post.text|raw }}</div>
 <div class="mb_bottom">
 {% if not post.preview %}{% include 'stdforum/postact.tpl' with { 'post': topic.post } %}{% endif %}

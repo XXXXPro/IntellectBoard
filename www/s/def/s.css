@@ -188,8 +188,8 @@ text-decoration: none; font-size: 110%; color: #0101C4 }
 #ib_all .postform input.amsify-suggestags-input { border: 0 }
 #ib_all .amsify-suggestags-input-area .amsify-select-tag.col-bg { background: #def; color:#24292e }
 
-#ib_all .postact { display:none; position: absolute; bottom: -1px; right: -1px;  border: #A3CEFF 1px solid; background: #f8f8f8; margin: 0; list-style: none }
-#ib_all .post:hover .postact { display: block }
+#ib_all .post ul.postact { display:none; position: absolute; bottom: -1px; right: -1px;  border: #A3CEFF 1px solid; background: #f8f8f8; margin: 0; list-style: none }
+#ib_all .post:hover ul.postact { display: block }
 #ib_all .postact li { display: inline-block; font-size: 1.6em; padding: 5px 16px }
 #ib_all .post { position: relative; }
 #ib_all .post .pu, #ib_all .post .ptop, #ib_all .post .postact { user-select: none; }
