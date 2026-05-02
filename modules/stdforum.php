@@ -385,7 +385,10 @@ class stdforum extends Application_Forum {
 
     if ($this->is_guest() && $this->get_opt('captcha')) { // для гостя необходим ввод CAPTCHA
       $antibot = class_exists('Library_antibot') ? new Library_antibot :  false;;
-      if ($antibot) $antibot->captcha_generate();
+      if ($antibot) {
+        $antibot->captcha_generate();
+        $this->lastmod=$this->time;
+      }
     }
     if ($this->get_opt('subscribe','user')=='All') $editpost['subscribe']=1;
     return $editpost;
