@@ -3,7 +3,7 @@
 {% block meta %}
 {% endblock %}
 {% block css %}
-<link rel="preload" as="style" href="{{ style('forums.css') }}" onload="this.rel='stylesheet'" />
+<link rel="stylesheet" href="{{ style('forums.css') }}" />
 {% endblock %}
 {% block content %}
 <div id="mainpage_view">

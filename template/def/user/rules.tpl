@@ -7,6 +7,7 @@
 <div style="width: 96.5%; margin: auto; height: 27em; overflow: auto; text-align: left; border: #ccc 1px solid; padding: 5px" >{{ rules|raw }}</div>
 </div>
 <div class="accept"><label><input type="checkbox" name="accepted" value="1" required="required">Я принимаю эти правила и обязуюсь их соблюдать</label></div>
+
 {% if social_login %}
 <div>Учетная запись, с помощью которой вы входите, не связана ни с одним из профилей пользователей форума. Вы будете зарегистрированы как новый пользователь со следующими данными:
 <ul><li>Логин: <b>{{ social_login }}</b></li>

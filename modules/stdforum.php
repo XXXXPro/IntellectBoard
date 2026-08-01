@@ -385,7 +385,10 @@ class stdforum extends Application_Forum {
 
     if ($this->is_guest() && $this->get_opt('captcha')) { // для гостя необходим ввод CAPTCHA
       $antibot = class_exists('Library_antibot') ? new Library_antibot :  false;;
-      if ($antibot) $antibot->captcha_generate();
+      if ($antibot) {
+        $antibot->captcha_generate();
+        $this->lastmod=$this->time;
+      }
     }
     if ($this->get_opt('subscribe','user')=='All') $editpost['subscribe']=1;
     return $editpost;
@@ -1448,6 +1451,8 @@ class stdforum extends Application_Forum {
           'После отправки вашего предыдущего сообщения прошло меньше %d секунд',
           'После отправки вашего предыдущего сообщения прошло меньше %d секунд'),'level'=>3);
     }
+
+    if (!$this->out->IntB_agree_pd) $result[]=array('text'=>'Без согласия на обработку персональных данных отправка сообщения невозможна!','level'=>3);
     return $result;
   }
 
@@ -1528,6 +1533,11 @@ class stdforum extends Application_Forum {
         $parsed.='</div>'.PHP_EOL;
       }
     }
+
+    if ($this->is_guest()) {
+      $cookie_val = !empty($_COOKIE['IntB_agree_pd']) ? intval('IntB_agree_pd') | 1 : 1; // в IntB_agree_pd младший бит — согласие на обработку ПД, следующий — на использование cookie и аналитики
+      setcookie('IntB_agree_pd',1,$this->time+365*60*60*24, $this->url('/'),$_SERVER['HTTP_HOST']); // устанавливаем cookie  признаком согласия на обработку ПД
+    }    
 
     // подключение библиотеки для уведомлеий о новом сообщении
     // (по умолчанию уведомления отправляются на EMail в соответствии с настройками подписки,

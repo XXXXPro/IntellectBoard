@@ -115,7 +115,7 @@
 
 {% block footer %}
 <footer>
-<address class="copyright">&copy; {{ get_opt('site_copyright') }}<br />
+<address class="copyright">&copy; {{ get_opt('site_copyright') }} &bullet; <a href="{{ url('privacy_policy.htm') }}">Политика конфиденциальности</a> &bullet; <a id="cookie-consent-open" href="#cookie-consent-banner">Настройки cookies</a><br />
 {# Внимание! Удаление или изменение ссылки в строке ниже будет нарушением Лицензионного Соглашения. Будьте достойными людьми и не трогайте ее!  #}
 Форум работает на <a href="https://intbpro.ru">Intellect Board Pro</a>
 {{ intb.intb_version }} &copy; 2013-2026, 4X_Pro.

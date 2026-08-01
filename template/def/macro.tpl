@@ -10,14 +10,18 @@
   <input type="hidden" name="{{ name }}" value="{{ value|e }}" />
 {% endmacro %}
 
-{% macro checkbox(name, value, realvalue) %}
-  <input type="checkbox" name="{{ name }}" value="{{ value|e }}" {% if (value==realvalue) %}checked="checked"{% endif %} />
+{% macro checkbox(name, value, realvalue, extdata) %}
+  <input type="checkbox" name="{{ name }}" value="{{ value|e }}" {% if (value==realvalue) %}checked="checked"{% endif %} {{ extdata|raw }}/>
 {% endmacro %}
 
 {% macro radio(name, values, realvalue) %}
 {% for value,descr in values
 %}<label><input type="radio" name="{{ name }}" value="{{ value|e }}" {% if (value==realvalue) %}checked{% endif %} />{{ descr }}</label> {%
 endfor %}
+{% endmacro %}
+
+{% macro datetime(name, value, size, maxlen,extdata) %}
+  <input type="datetime-local" name="{{ name }}" value="{{ value|e }}" size="{{ size|default(40) }}" maxlength="{{ maxlen|default(40) }}" {{ extdata|raw }}/>
 {% endmacro %}
 
 {% macro textarea(name, value, rows, cols) %}

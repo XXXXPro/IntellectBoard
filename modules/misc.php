@@ -56,6 +56,20 @@ class misc extends Application {
     $this->out->onlytext = !empty($_GET['onlytext']);
     if (empty($this->out->rules)) $this->output_404('Для данного раздела не предусмотрено отдельных правил!');
   }
+
+  /** Вывод согласия на обработку персональных данных **/
+  function action_pd_agreement() {
+    $rules_id = $this->get_forum_id();
+    $this->out->rules = $this->get_text(0,6);
+    $this->out->onlytext = !empty($_GET['onlytext']);
+  }
+
+  /** Вывод политики конфиденциальности **/
+  function action_privacy_policy() {
+    $rules_id = $this->get_forum_id();
+    $this->out->rules = $this->get_text(0,7);
+    $this->out->onlytext = !empty($_GET['onlytext']);
+  }  
   
   /** Функция отметки всех сообщений в разделе как прочитанных.
   * TODO: подумать, возможно, переместить действие в bookmark.php или еще какой-то модуль.
@@ -124,6 +138,60 @@ class misc extends Application {
     $sql = 'SELECT * FROM '.DB_prefix.'group WHERE level>0 ORDER BY level';
     $this->out->groups = $this->db->select_all($sql);
   }
+
+  function validate_upload() {
+    // TODO: сделать нормальную проверку — размер, права на загрузку соответствующего типа файлов и т. п.
+    if ($this->is_guest()) return array('text'=>'Гости не могут загружать файлы!','level'=>3);
+    return array();
+  }
+
+  function action_check_upload() {
+
+  }
+
+/*  function action_upload() {
+    $result = [];
+    if (empty($_FILES['attach'])) {
+      http_response_code(400);
+      $result['status']='error';
+      $result['message']='Нет приложенных файлов';
+    }
+    else {
+      $errors = $this->validate_upload();
+      if (empty($errors)) {
+        $attach_lib = new Library_attach;
+        $processed = $attach_lib->process_files($_FILES['attach'],0,2);
+        if (empty($processed)) {
+          $result['status']='error';
+          $result['errors']=array('text'=>'Ошибка загрузки файла, возможно, слишком большой размер','level'=>3);
+        }
+        else {
+          $result['status']='ok';
+          $result['code']='';
+          foreach ($processed as $item) {
+            if ($item['size']>5*1024*1024) {
+              $size_txt = ceil($item['size']/1024*1024).' Мб';
+            }          
+            else $size_txt = ceil($item['size']/1024).' Кб';
+            $result['url']=$this->http($this->url('f/up/2/'.$item['oid'].'-'.$item['fkey'].'/'.$item['filename']));
+            if ($result['format']==='image') {
+              $preview_x = $this->get_opt('posts_preview_x') or 180;
+              $preview_y = $this->get_opt('posts_preview_y') or 240;
+              $result['preview']=$this->url('f/up/2/pr/'.$preview_x.'x'.$preview_y.'/'.$item['oid'].'-'.$item['fkey'].'.'.$item['extension']);
+              $result['code'].='<a class="lightbox" href="'.$this->url($item['path']).'">'.
+              '<img src="'.$result['preview'].'" alt="'.htmlspecialchars($item['filename']).'" /></a> ';
+            }
+            else $result['code'].=' <a href="'.$result['url'].'">Приложенный файл '.htmlspecialchars($item['filename']).' ('.$size_txt.')</a>';
+          }
+        }
+      }
+      else {
+        $result['errors']=$errors;
+        $result['status']='error';
+      }
+    }
+    return json_encode($result);
+  } */
 
   function action_manifest() {
     if (!$this->get_opt('pwa_enabled')) $this->output_404('Поддержка PWA на этом форуме выключена!');
@@ -197,6 +265,12 @@ class misc extends Application {
     elseif ($this->action==='rules') {
       $result='Правила форума &laquo;'.$this->get_opt('site_title').'&raquo;';
     }
+    elseif ($this->action==='privacy_policy') {
+      $result='Политика конфиденциальности сайта &laquo;'.$this->get_opt('site_title').'&raquo;';
+    }
+    elseif ($this->action==='pd_agreement') {
+      $result='Согласие на обработку персональных данных сайта &laquo;'.$this->get_opt('site_title').'&raquo;';
+    }    
     elseif ($this->action==='team') {
       $result='Команда форума &laquo;'.$this->get_opt('site_title').'&raquo;';
     }
@@ -225,6 +299,8 @@ class misc extends Application {
       }
       else $result[]=array('Правила форума');
     }
+    elseif ($this->action==='pd_agreement') $result[]=array('Согласие на обработку персональных данных');
+    elseif ($this->action==='privacy_policy') $result[]=array('Политика конфиденциальности');
     elseif ($this->action==='team') $result[]=array('Наша команда');
     elseif ($this->action==='levels') $result[]=array('Уровни доступа участников');
     elseif ($this->action==='smiles') $result[]=array('Смайлики');
@@ -243,11 +319,13 @@ class misc extends Application {
 
   function get_request_type() {
     if ($this->action==='manifest') return 4;
+    if ($this->action==='upload') return 4;
     return parent::get_request_type();
   }
 
   function get_mime() {
     if ($this->action==='manifest') return 'application/manifest+json';
+    if ($this->action==='upload') return 'application/json';
     return parent::get_mime();
   }
   

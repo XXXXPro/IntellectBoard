@@ -36,6 +36,7 @@ class user extends Application {
         for ($i=0,$count=count($answers);$i<$count;$i++) $answers[$i]=trim(strtolower($answers[$i]));
         if (count($answers)>0 && !in_array(trim(strtolower($_POST['answer'])), $answers)) $errors[]=array('text'=>'Неправильный ответ на проверочный вопрос!','level'=>3);
       }
+      if (empty($_POST['agree_pd'])) $errors[]=array('text'=>'Без согласия на обработку персональных данных регистрация невозможна!','level'=>3);
       if (!empty($errors)) $this->message($errors);
       else {
         $result=$userlib->register_user($data['basic'],$data['settings']);

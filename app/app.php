@@ -94,6 +94,8 @@ class Application {
         $this->out->post_max_size = $this->return_bytes(ini_get('post_max_size')) ?: 2 * 1024 * 1024;
         $this->out->max_file_uploads = ini_get('max_file_uploads');
       }
+      if (!$this->is_guest() || (!empty($_COOKIE['IntB_agree_pd']) && (intval($_COOKIE['IntB_agree_pd']) & 1))) $this->out->IntB_agree_pd = 2; // выставляем признак того, что принята Политика Конф.: 0 -- нет, 1 -- галочка из формы, 2 -- запомнено через cookies или при регистрации
+      else $this->out->IntB_agree_pd = !empty($_POST['agree_pd']) ? 1 : 0;
       $template = $this->process();
 
       $this->set_lastmod(); // выставляем время последней модификации
@@ -1514,8 +1516,8 @@ class Application {
     $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
     $data['hash'] = substr($data['hash'], 0, 12); // 12 символов будет достаточно для идентификации пользователя, а эффект
     $buffer.=$data['hash'];
-    if ($this->get_opt('enable_user_cookies')) {
-      setcookie('IntB_uh', $data['hash'], 180 * 60 * 60 * 24, $this->url('/'));
+    if ($this->get_opt('enable_user_cookies') && !empty($_COOKIE['IntB_agree_pd']) && intval($_COOKIE['IntB_agree_pd']) & 2) { // В cookie IntB_agree_pd второй бит выставляется тогда, когда пользователь дал согласие на аналитику
+      setcookie('IntB_uh', $data['hash'], $this->time+180 * 60 * 60 * 24, $this->url('/'));
     }
     $buffer.=','.$referer.',';
     if ($this->get_opt('enable_log_action'))

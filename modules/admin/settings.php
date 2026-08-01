@@ -122,6 +122,24 @@ class settings extends Application_Admin {
       $this->message('Вводный текст сохранен!',1);
     }
     $this->out->rules = $this->get_text(0, 2);
+  }
+  
+  function action_edit_pd_agreement() {
+    if ($this->is_post()) {
+      $misclib = new Library_misc;
+      $misclib -> save_text($_POST['text'],0,6); // 6 -- код согласия на ПД
+      $this->message('Текст согласия на обработку персональных данных сохранен!',1);
+    }
+    $this->out->rules = $this->get_text(0, 6);
+  }
+
+  function action_edit_privacy_policy() {
+    if ($this->is_post()) {
+      $misclib = new Library_misc;
+      $misclib -> save_text($_POST['text'],0,7); // 6 -- код согласия на ПД
+      $this->message('Вводный политики конфиденциальности сохранен!',1);
+    }
+    $this->out->rules = $this->get_text(0, 7);
   }  
   
   function action_announce() {

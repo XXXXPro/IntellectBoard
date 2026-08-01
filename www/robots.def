@@ -18,5 +18,7 @@ Disallow: /admin
 Disallow: *?tags=*
 Disallow: */tags.htm
 Disallow: */webmention.htm
+Disallow: /pd_agreement.htm
+Disallow: /privacy_policy.htm
 
 Disallow: /test

@@ -75,6 +75,9 @@
 </fieldset>
 {% endif %}
 <fieldset><legend style="display: none"></legend>
+{% if IntB_agree_pd!=2 %}
+<div><label>{{ macros.checkbox('agree_pd',1,agree_pd,'required="required"') }} Даю своё <a href="{{ url('pd_agreement.htm') }}">согласие на обработку персональных данных</a> в соответствии с <a href="{{ url('privacy_policy.htm') }}">политикой конфиденциальности сайта</a></label></div>
+{% endif %}
 <div class="submit"><button type="submit" name="sbm">Отправить</button> <input type="submit" name="preview" value="Предпросмотр"/>
 {% if authkey and not is_guest() %}<input type="hidden" name="authkey" value="{{ authkey }}" />
 {% endif %}<input type="hidden" name="id" value="{{ editpost.post.id }}" /></div>

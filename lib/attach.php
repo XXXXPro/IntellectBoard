@@ -11,7 +11,7 @@
 class Library_attach extends Library {
 /** Проверка корректности загруженных файлов
  * @param array $files Массив с данными загруженных файлов (по формату такой же, как в $_FILES)
- * @param ineter $types Допустимые типы файлов (битовая маска):
+ * @param integer $types Допустимые типы файлов (битовая маска):
  *       255 -- все, 1 -- только картинки, 2 -- видео, 4 -- аудио, 8 -- текст
  * @param integer $maxsize Максимальный размер файла (в байтах)
  * @param string $maxcount Максимальное количество файлов
@@ -45,7 +45,7 @@ class Library_attach extends Library {
 /** Обработка прикрепленных файлов и сохранение данных о них в базу
  * @param array $files Массив с данными о загруженных файлах  (по формату такой же, как в $_FILES)
  * @param int $oid Идентификатор объекта (например, сообщения), к которому прикрепляется файл
- * @param int $objtype Тип объекта, к которому привязан файл
+ * @param int $objtype Тип объекта, к которому привязан файл. 1 -- к форумному сообщению, 2 -- свободная загрузка
  * @param bool $set_main Если true, то первому из загруженных файлов выставляется признак is_main
  */
   function process_files($files,$oid,$objtype=1,$set_main=true) {
@@ -92,8 +92,8 @@ class Library_attach extends Library {
                  $imglib->save($imgdata,$filename,$qty);
               }
             }
-          }
-          $data=array('fkey'=>$key,'oid'=>intval($oid),'type'=>intval($objtype),'filename'=>$files['name'][$i],'size'=>$files['size'][$i],'format'=>$type,'is_main'=>($set_main ? '1' : '0'));
+          }         
+          $data=array('fkey'=>$key,'oid'=>intval($oid),'type'=>intval($objtype),'filename'=>$files['name'][$i],'size'=>$files['size'][$i],'format'=>$type,'is_main'=>($set_main ? '1' : '0'),'owner'=>$this->app()->get_uid());
           $data['extension']=substr($files['name'][$i],strrpos($files['name'][$i], '.')+1); 
           if (!empty($exifjson)) $data['exif']=str_replace('\\u0000','',$exifjson); // замена \u0000 нужна для Postgres, который не позволяет хранить нулевой символ в тексте
           // пытаемся автоматически определить название фото                

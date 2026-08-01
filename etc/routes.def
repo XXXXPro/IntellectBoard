@@ -30,11 +30,14 @@
 ^(.*)/rules\.htm$ misc.php?a=rules&forum=$1
 ^rules\.htm$ misc.php?a=rules
 ^team\.htm$ misc.php?a=team
+^pd_agreement\.htm$ misc.php?a=pd_agreement
+^privacy_policy\.htm$ misc.php?a=privacy_policy
 ^mark_all\.htm$ misc.php?a=mark_all
 ^(.*)/mark_all\.htm$ misc.php?a=mark_all&forum=$1
 category/(\d+)\.htm mainpage.php?cat=$1
 ^admin/(\w+)/(\w+).htm$ admin.php?m=$1&a=$2
 ^manifest\.json$ misc.php?a=manifest
+^misc/upload.htm$ misc.php?a=upload
 
 ^about/((\w+)\.htm)?$ statpage.php?f=1&a=$2
 ^moderate/about/edit_foreword.htm$ statpage.php?f=1&a=edit

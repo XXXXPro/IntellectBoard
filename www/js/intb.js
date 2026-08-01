@@ -356,6 +356,7 @@ function IntB_main(opts) {
         emoticons : opts.emoticons,
         autoExpand : true,
         resizeEnabled : false,
+        height: "20vh",
 	      icons: 'quill',
 	      plugins: 'dragdrop,undo',
         allowedTags: ['audio','video'],
@@ -524,6 +525,7 @@ function IntB_main(opts) {
          mini_nodes.find('.captcha').hide();
          mini_nodes.find('.user_field').hide();
          bbcode_nodes.sceditor('instance').focus(function() {
+           $('.sceditor-container').css('height','auto');
            mini_nodes.find('.sceditor-toolbar').slideDown();
            mini_nodes.find('.submit').slideDown();
            mini_nodes.find('.captcha').slideDown();

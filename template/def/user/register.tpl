@@ -10,8 +10,9 @@
 		<div><label><span>Email</span>{{ macros.input("basic[email]",formdata.basic.email,32,128,'required="required" autocomplete="email"') }}</label></div>
 		<div><label><span>Часовой пояс</span>{{ macros.select("settings[timezone]",formdata.settings.timezone,timezones) }}</label></div>
 		{% if captcha_key %}<div><label><span>Защитный код<small>Введите символы с картинки справа</small></span>{{ macros.captcha(captcha_key,captcha_code,captcha_data) }}</label></div>{% endif %}
-		{% if get_opt('userlib_reg_question') %}
+		{% if get_opt('userlib_reg_question') %}		
 		<div><label><span>Контрольный вопрос: {{ get_opt('userlib_reg_question') }}<small>Для регистрации необходимо правильно ответить на вопрос</small></span>{{ macros.input('answer',answer,40,'required="required"') }}</label></div>{% endif %}
+		<div><label><span>Подтверждение согласия</span>{{ macros.checkbox('agree_pd',1,agree_pd,'required="required"') }} Даю своё <a href="{{ url('pd_agreement.htm') }}">согласие на обработку персональных данных</a><br /> в соответствии с <a href="{{ url('privacy_policy.htm') }}">политикой конфиденциальности сайта</a></label></div>
 		<div class="center"><small>После регистрации вы сможете указать дополнительные настройки в профиле пользователя</small></div>
 		<div class="submit"><button type="submit">Зарегистрироваться</button></div>
 		<input type="hidden" name="referer" value="{{ referer }}">
