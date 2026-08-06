@@ -23,7 +23,7 @@ class Library_mail extends Library {
       $headers ="From: ".$maildata[$i]['from']."\r\n";
       $headers.="Return-Path: $return_path\r\n";
       if (isset($maildata[$i]['reply'])) $headers.="Reply-To: ".$maildata[$i]['reply']."\r\n";
-      $headers.="MIME-Version: 1.0\n";
+      $headers.="MIME-Version: 1.0\r\n";
       if (empty($maildata[$i]['html'])) $headers.="Content-Type: text/plain; charset=utf-8\r\n";
       else $headers.="Content-Type: text/html; charset=utf-8\r\n";
       $headers.="Content-Transfer-Encoding: 8bit\r\n";
