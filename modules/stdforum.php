@@ -1108,6 +1108,8 @@ class stdforum extends Application_Forum {
     $cond['topics']=true;
     $cond['noflood']=true;
     $cond['sort']='DESC';
+    $cond['user']=true;
+    $cond['is_start']=true;
 
     $period = $this->get_opt('topics_period','user');
     if ($period<=0 || $period>30) $period=30; // если у пользователя не выставлен лимит или он слишком велик, выставляем его равным 30 дням во избежание выгрузки всей базы
@@ -1120,6 +1122,7 @@ class stdforum extends Application_Forum {
 
     $bbcode = new Library_bbcode;
     /* @var $bbcode Library_bbcode */
+    $teaser_lib = new Library_teaser;
 
     if (empty($this->topic)) { // если запрошен RSS для форума
       $this->out->intb->link=$this->http($this->url($this->forum['hurl'].'/'));
@@ -1130,9 +1133,17 @@ class stdforum extends Application_Forum {
       if (empty($data) && $this->if_modified_time) $this->output_304();
       $count=count($data);
       for ($i=0; $i<$count; $i++) {
-        $data[$i]['text']=$bbcode->parse_msg($data[$i]);
+        if ($data[$i]['avatar']=='none') $avatar_src = $this->http($this->url($this->sitepath.'/f/av/no.jpg'));
+        else $avatar_src = $this->http($this->url('f/av/'.$data[$i]['uid'].'.'.$data[$i]['avatar']));
+        $text2=$bbcode->parse_msg($data[$i]);
+
+        $text='<div class="p_data"><img src="'.$avatar_src.'" alt="'.htmlspecialchars($data[$i]['author']).'" style="height: 24px; width: 24px; float: left" height="24" width="24"/><strong>'.$data[$i]['author'].'</strong><br />';
+        $text.='</div><br /><div class="p_text">'.$text2.'</div>';
+
+        $data[$i]['text']=$text;
         $data[$i]['link']=$this->http($this->url($data[$i]['full_hurl'].'post-'.$data[$i]['id'].'.htm'));
-        $data[$i]['title']=$data[$i]['t_title'].', сообщение от '.($this->long_date($data[$i]['postdate']));
+        $data[$i]['title']=$teaser_lib->get_title($text2,72,20);   
+        if (!$data[$i]['is_start']) $data[$i]['title']='↳'.$data[$i]['title']; // для сообщений-ответов добавляем в заголовок специальный символ
       }
     }
     else {
@@ -1144,11 +1155,18 @@ class stdforum extends Application_Forum {
       if (empty($data) && $this->if_modified_time) $this->output_304();
 
       $count=count($data);
-      $start=$this->topic['post_count']-$count;
+//      $start=$this->topic['post_count']-$count;
       for ($i=0; $i<$count; $i++) {
-        $data[$i]['text']=$bbcode->parse_msg($data[$i]);
+        if ($data[$i]['avatar']=='none') $avatar_src = $this->http($this->url($this->sitepath.'/f/av/no.jpg'));
+        else $avatar_src = $this->http($this->url('f/av/'.$data[$i]['uid'].'.'.$data[$i]['avatar']));
+        $text2=$bbcode->parse_msg($data[$i]);
+
+        $text='<div class="p_data"><img src="'.$avatar_src.'" alt="'.htmlspecialchars($data[$i]['author']).'" style="height: 24px; width: 24px; float: left" height="24" width="24"/><strong>'.$data[$i]['author'].'</strong><br />';
+        $text.='</div><br /><div class="p_text">'.$text2.'</div>';
+
+        $data[$i]['text']=$text;
         $data[$i]['link']=$this->http($this->url($this->topic['full_hurl'].'post-'.$data[$i]['id'].'.htm'));
-        $data[$i]['title']=$this->topic['title'].', сообщение #'.($start+$i+1);
+        $data[$i]['title']=$teaser_lib->get_title($text2,72,20);  //$this->topic['title'].', сообщение #'.($start+$i+1);
       }
     }
     $this->out->items=$data;
@@ -1579,73 +1597,6 @@ class stdforum extends Application_Forum {
         }
       }
     }
-  }
-
-   /** Определяет позицию, где должен заканчиваться teaser сообщения так, чтобы разрезание было максимально корректным. 
-   * Обработка выполняется следующим образом: вырезается содержимое тегов <pre> и <table>, HTML-комментарии.
-   * Приоритеты такие:
-   * разрезание по началу абзаца
-   * разрезание по переводу строки
-   * разрезание по началу некоторых тегов (img, audio, video, code, pre, hr, iframe, object)
-   * Если при попытках такого разрезания результат оказывается короче $min_length, делается попытка разрезать по точке, восклицательному или вопросительному знакам. 
-   * В случае невозможности и этого — по знакам препинания (двоеточие, запятая, точка с запятой, тире).
-   * Если невозможно и это — по пробелу, а в случае его отсутствия — берётся просто $length символов
-   * @param string $parsed HTML-код сообщения (уже обработанный Library_bbcode)
-   * @param integer $length — желаемая длина 
-   * @return string — Teaser статьи без HTML-тегов.
-   */
-
-  function get_teaser($parsed,$length,$min_length=0) {
-    $teaser = chop($this->get_teaser_preprocess($parsed,$length,$min_length));
-    $teaser = preg_replace("|\n\n+|","<p>",$teaser);
-    $teaser = str_replace('<p class="intb_wrap_code">','',$teaser);
-    $teaser = preg_replace('|<p>\s*(<p>)+|','<p>',$teaser);
-    $teaser = nl2br($teaser);
-    $teaser = preg_replace('|<p>(<br\s*/?>)+|','<p>',$teaser);
-    $teaser = Library_tagcloser::fix_unclosed($teaser);
-    return $teaser;
-  }
-
-  /** Почти вся обработка teaser делается тут. Разбиение на две функции сделано из-за необходимости постобработки и большого количества return */
-  private function get_teaser_preprocess($parsed,$length,$min_length=0) {
-     // предварительная обработка — расстановка переводов строк
-     $parsed = preg_replace('|(<p\W)|is',"\n\n\n$1",$parsed);
-     $parsed = preg_replace('|(<br\W)|is',"\n\n$1",$parsed);
-     $parsed = preg_replace('|(</h\d>)|is',"\n\n$1",$parsed); // перевод строки после заголовка
-     $parsed = preg_replace('/(<(img|audio|video|pre|hr|iframe|object|code|blockquote)\W)/is',"\n$1",$parsed); // место, где вставлены указанные теги, тоже может служить точкой разбиения
-     $parsed = preg_replace('/\s*\n\*s/',"\n",$parsed); // убираем лишние пробелы рядом с переводами строк
-     $parsed = preg_replace('|<table\W.*?</table>|is','',$parsed); // содержимое таблиц удаляется, так как его вывод в teaser всё равно бессмысленен
-     $parsed = preg_replace('|<pre\W.*?</pre>|is','',$parsed); // из тех же соображений удаляем исходный код
-     $parsed = preg_replace('|<code\W.+</code>|is','<code>См. код в полном сообщении.</code>',$parsed); //
-     $parsed = preg_replace('|<audio\W.*?</audio>|is','',$parsed); // удаляем теги audio, video и object, так как внутри них может быть fallback-содержимое
-     $parsed = preg_replace('|<video\W.*?</video>|is','',$parsed); // 
-     $parsed = preg_replace('|<object\W.*?</object>|is','',$parsed); // 
-
-//     $parsed = trim(strip_tags($parsed)); // TODO: возможно, разрешить теги u,i,b,em,strong?
-     $slen = mb_strlen($parsed);
-
-     if ($slen<=$length) return $parsed; // если строка и так короче желаемой длины, просто ограничимся её очисткой
-     $parsed = mb_substr($parsed,0,$length);
-     
-     $pos = mb_strrpos($parsed,"\n\n\n");
-     if ($pos>=$min_length && $pos!==false) return mb_substr($parsed,0,$pos+1);
-
-     $pos = mb_strrpos($parsed,"\n\n");
-     if ($pos>=$min_length && $pos!==false) return mb_substr($parsed,0,$pos+1);
-
-     $pos = mb_strrpos($parsed,"\n");
-     if ($pos>=$min_length && $pos!==false) return mb_substr($parsed,0,$pos+1);
-
-     $pos = max(mb_strrpos($parsed,"."),mb_strrpos($parsed,"!"),mb_strrpos($parsed,"?"));
-     if ($pos>=$min_length && $pos!==false) return mb_substr($parsed,0,$pos+1);
-
-     $pos = max(mb_strrpos($parsed,":"),mb_strrpos($parsed,","),mb_strrpos($parsed,";"),mb_strrpos($parsed,'—'));
-     if ($pos>=$min_length && $pos!==false) return mb_substr($parsed,0,$pos+1);
-
-     $pos = mb_strrpos($parsed," ");
-     if ($pos>=$min_length && $pos!==false) return mb_substr($parsed,0,$pos+1);
-     
-     return mb_substr($parsed,0,$length); // крайний случай, если не удалось найти ни одного подходящего разделителя
   }
 
   /** Проверка на то, что пользователь может прорейтинговать данное сообщение.

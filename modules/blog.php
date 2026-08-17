@@ -102,8 +102,9 @@ class blog extends stdforum {
       $descr_min_len = $this->get_opt('blog_mindescr');
       if (empty($descr_len)) $descr_len = 200; // подставляем значение по умолчанию
       if (empty($descr_min_len)) $descr_len = 70; // подставляем значение по умолчанию
-      $descr = $this->get_teaser($this->out->article['text'],$descr_len,$descr_min_len);
-      $this->meta('description',strip_tags($descr));
+      $teaser_lib = new Library_teaser;
+      $descr = $teaser_lib->get_title($this->out->article['text'],$descr_len,$descr_min_len);
+      $this->meta('description',$descr);
     }
   }
 
@@ -130,43 +131,48 @@ class blog extends stdforum {
   }
 
   function action_rss() {
-    $tlib = new Library_topic;
-    $cond['topics']=true;
-    $cond['noflood']=true;
-    $cond['sort']='DESC';
-    $cond['first']=true;
-
-    $period = 10;
-    $cond['after_time']=max(intval($this->if_modified_time),$this->time-$period*24*60*60);
-
-    $limit = $this->get_opt('rss_max_items');
-    if (!$limit) $limit=250;
-    $cond['offset']=0;
-    $cond['perpage']=$limit; //
-
-    /* @var Library_bbcode */
-    $bbcode = new Library_bbcode;
-
-    $this->out->intb->link=$this->http($this->url($this->forum['hurl'].'/'));
-    $this->out->intb->descr=$this->forum['descr'];
-
-    $cond['order']='first_post_date';
-    $cond['fid']=$this->forum['id'];
-
-    $data = $tlib->list_topics($cond);
-    $data = $tlib->get_first_posts($data);
-
-    if (empty($data) && $this->if_modified_time) $this->output_304();
-    $count=count($data);
-    for ($i=0; $i<$count; $i++) {
-      $data[$i]['text']=$data[$i]['post']['text']; // сообщение уже обработано на предмет boardcode в get_first_posts
-      $data[$i]['link']=$this->http($this->url($this->forum['hurl'].'/'.$data[$i]['t_hurl']));
-      $data[$i]['title']=$data[$i]['title'];
-      $data[$i]['postdate']=$data[$i]['post']['postdate'];
-      $data[$i]['author']=$data[$i]['post']['author'];
-      $data[$i]['comments']=intval($data[$i]['post_count'])-1;
+    if (!empty($this->topic)) { // если смотрим RSS внутри темы, то отдаём комментарии точно так же, как обычные сообщения форума
+      parent::action_rss();      
     }
-    $this->out->items=$data;
+    else { // если смотрим RSS раздела, то отдаём только статьи
+      $tlib = new Library_topic;
+      $cond['topics']=true;
+      $cond['noflood']=true;
+      $cond['sort']='DESC';
+      $cond['first']=true;
+
+      $period = 10;
+      $cond['after_time']=max(intval($this->if_modified_time),$this->time-$period*24*60*60);
+
+      $limit = $this->get_opt('rss_max_items');
+      if (!$limit) $limit=250;
+      $cond['offset']=0;
+      $cond['perpage']=$limit; //
+
+      /* @var Library_bbcode */
+      $bbcode = new Library_bbcode;
+
+      $this->out->intb->link=$this->http($this->url($this->forum['hurl'].'/'));
+      $this->out->intb->descr=$this->forum['descr'];
+
+      $cond['order']='first_post_date';
+      $cond['fid']=$this->forum['id'];
+
+      $data = $tlib->list_topics($cond);
+      $data = $tlib->get_first_posts($data);
+
+      if (empty($data) && $this->if_modified_time) $this->output_304();
+      $count=count($data);
+      for ($i=0; $i<$count; $i++) {
+        $data[$i]['text']=$data[$i]['post']['text']; // сообщение уже обработано на предмет boardcode в get_first_posts
+        $data[$i]['link']=$this->http($this->url($this->forum['hurl'].'/'.$data[$i]['t_hurl']));
+        $data[$i]['title']=$data[$i]['title'];
+        $data[$i]['postdate']=$data[$i]['post']['postdate'];
+        $data[$i]['author']=$data[$i]['post']['author'];
+        $data[$i]['comments']=intval($data[$i]['post_count'])-1;
+      }
+      $this->out->items=$data;
+    }
   }
 
   // переопределим action_edit для того, чтобы для записи блога выводить другую форму редактирования
@@ -256,7 +262,8 @@ class blog extends stdforum {
           $minteaser = $this->get_opt('blog_minteaser'); 
           if (empty($minteaser)) $minteaser = 140; // по умолчанию минимальная длина тизера равна 140 символам
           // TODO: длина тизера в extra-данных раздела может переопределять длину по умолчанию
-          $teaser = $this->get_teaser($post['text'],$maxteaser,$minteaser);
+          $teaser_lib = new Library_teaser;
+          $teaser = $teaser_lib->get_teaser($post['text'],$maxteaser,$minteaser);
           if (strlen($teaser)<strlen($post['text'])) $post['text']=$teaser.'<a href="'.$topic['t_hurl'].'#readmore">'.$nexttext.'</a>';
         }
       }

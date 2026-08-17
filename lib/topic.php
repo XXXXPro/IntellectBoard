@@ -253,6 +253,8 @@ class Library_topic extends Library {
   * desc -- сортировка в обратном порядке (по умолчанию -- нет)
   * relation -- получать информацию об отношениях пользователей (для скрытия сообщений от игнорируемых)
   * ratings -- получение данных о том, было ли прорейтинговано сообщение текущим пользователем
+  * user -- получение безовой информации об авторе сообщения 
+  * is_start -- признак, что сообщение начинает новую тему
   * По умолчанию возвращаются только сообщения в нормальном состоянии, однако это можно изменить с помощью следующих параметров:
   * deleted -- возвращать только темы, помеченные к удалению
   * premod -- возвращать только темы, стоящие на премодерации
@@ -275,6 +277,7 @@ class Library_topic extends Library {
       'g.level, CASE WHEN u.title!=\'\' AND custom_title=\'1\' THEN u.title ELSE g.name END AS user_title, g.links_mode, '.
       'ue.post_count, ue.rating AS user_rating, ue.warnings, ue.reg_date, CAST(u.status=\'2\' OR ue.banned_till>='.intval($this->app()->time).' AS INTEGER) AS banned, ue.banned_till';
     if (!empty($cond['topics'])) $columns.=', t.title AS t_title, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl, f.id AS fid, f.title AS f_title, f.hurl AS f_hurl';
+    if (!empty($cond['is_start'])) $columns .= ', t.first_post_id=p.id AS is_start';
     if (!empty($cond['relation'])) $columns .= ', rl.type AS relation';
     if (!empty($cond['ratings'])) $columns .= ', CAST(r.value IS NOT NULL AS INTEGER) AS rated, r.value AS rating_value';
     if (empty($cond['notext'])) $columns.= ', tx.data AS text, tx.tx_lastmod '; // если не указана выборка "без текста", то получаем и текст сообщения

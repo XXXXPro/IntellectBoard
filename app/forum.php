@@ -168,13 +168,17 @@ class Application_Forum extends Application {
   }
 
   function set_title() {
+    $short_title = $this->get_opt('site_start');
+    if (empty($short_title)) $this->get_opt('site_title');     
     $result='';
     $page = isset($this->out->pages['page']) ? $this->out->pages['page'] : false;
     if (!empty($this->topic)) {
       if ($page && $page>1) $result=$this->topic['title'].' (стр. '.$page.' из '.$this->out->pages['pages'].') | '.$this->forum['title']; //.' :: '.$this->get_opt('site_title');
+      elseif ($this->action==='rss') $result=$short_title.' : '.$this->topic['title']; // для RSS сначала идёт название сайта
       else $result=$this->topic['title'].' | '.$this->forum['title']; //.' :: '.$this->get_opt('site_title');
     }
      elseif (empty($this->topic) && $page>1) $result=$this->forum['title'].' (стр. '.$page.' из '.$this->out->pages['pages'].')'; // :: '.$this->get_opt('site_title');
+    elseif ($this->action==='rss') $result=$short_title.' : '.$this->forum['title']; // для RSS сначала идёт название сайта
     else $result=$this->forum['title'].' | '.$this->get_opt('site_title');
     if ($this->action==='reply') $result = 'Отправка сообщения в тему '.$result;
     if ($this->action==='newtopic') $result = 'Создание темы в разделе '.$result;

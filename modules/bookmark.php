@@ -252,6 +252,8 @@ function action_updated_rss() {
     $cond['noflood']=true;
     $cond['fid'] = $this->get_forum_list('read',0,true);
     $cond['topics'] = true;
+    $cond['user'] = true;
+    $cond['is_start']=true;
     $cond['sort']='DESC';
 
     // определяем время, за которое выдавать сообщения в RSS-поток.
@@ -265,11 +267,25 @@ function action_updated_rss() {
     $data = $tlib->get_posts($cond);
 //    if (empty($data)) $this->output_304();
     $bbcode = new Library_bbcode;
+    $teaser_lib = new Library_teaser;
     $count=count($data);
     for ($i=0; $i<$count; $i++) {
-      $data[$i]['text']=$bbcode->parse_msg($data[$i]);
+      if ($data[$i]['avatar']=='none') $avatar_src = $this->http($this->url($this->sitepath.'/f/av/no.jpg'));
+      else $avatar_src = $this->http($this->url('f/av/'.$data[$i]['uid'].'.'.$data[$i]['avatar']));
+
+      $text2 = $bbcode->parse_msg($data[$i]);
+      $text='<div class="p_data"><img src="'.$avatar_src.'" alt="'.htmlspecialchars($data[$i]['author']).'" style="height: 24px; width: 24px; float: left" height="24" width="24"/><strong>'.$data[$i]['author'].' </strong><br />';
+      if ($data[$i]['is_start']) {
+        $text.='<small>Новая тема в «<a href="'.$this->http($this->url($data[$i]['f_hurl'].'/')).'">'.$data[$i]['f_title'].'</a>»</small>';
+        $data[$i]['title']=$data[$i]['t_title'];
+      }
+      else {
+        $text.='<small><a href="'.$this->http($this->url($data[$i]['f_hurl'].'/')).'">'.htmlspecialchars($data[$i]['f_title']).'</a> » <a href="'.$this->http($this->url($data[$i]['full_hurl'].'new.htm')).'">'.htmlspecialchars($data[$i]['t_title']).'</a></small>';
+        $data[$i]['title']='↳'.$teaser_lib->get_title($text2,72,20); // рекомендованная длина заголовка сообщения в RSS — от 30 до 80 символов, также добавляем символ ответа
+      }
+      $text.='</div><br /><div class="p_text">'.$text2.'</div>';
+      $data[$i]['text']=$text;
       $data[$i]['link']=$this->http($this->url($data[$i]['full_hurl'].'post-'.$data[$i]['id'].'.htm'));
-      $data[$i]['title']=$data[$i]['t_title'].', сообщение от '.($this->long_date($data[$i]['postdate']));
     }
     $this->out->items=$data;
   }
@@ -283,7 +299,7 @@ function action_updated_rss() {
     $this->lastmod=$this->time; // принудительно выставляем обновление страницы, т.к. использование кеширования в данном случае потребует слишком сложных запросов
   }
 
-    function set_title() {
+  function set_title() {
     $result=false;
     if ($this->action==='view') $result = 'Ваши закладки';
     elseif ($this->action==='mytopics') $result = 'Созданные вами темы';
@@ -292,8 +308,11 @@ function action_updated_rss() {
     elseif ($this->action==='unread') $result = 'Непрочитанные темы';
     elseif ($this->action==='unanswered') $result = 'Темы без ответов';
     elseif ($this->action==='favorites') $result = 'Избранные темы форума';
-    if ($this->action==='updated_rss') $result = 'Новые сообщения форума «'.$this->get_opt('site_title').'»';
-    $result.=' :: '.$this->get_opt('site_title');
+    // если задано короткое название сайта, для RSS используем его
+    $short_title = $this->get_opt('site_start');
+    if (empty($short_title)) $this->get_opt('site_title'); 
+    if ($this->action==='updated_rss') $result = $short_title.' : новые сообщения';
+    if ($this->action!=='updated_rss') $result.=' | '.$this->get_opt('site_title');
     return $result;
   }
 
