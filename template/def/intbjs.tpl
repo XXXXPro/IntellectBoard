@@ -17,7 +17,12 @@
    jquery_cdn: '{{ jquery_cdn }}',
    upload_max_filesize:  {{ upload_max_filesize }},
    post_max_size: {{ post_max_size }},
-   max_file_uploads: {{ max_file_uploads }}
+   {% if max_file_uploads %}
+   max_file_uploads: {{ max_file_uploads }},
+   attach_max_x : {{ attach_max_x }},
+   attach_max_y : {{ attach_max_y }},
+   jpeg_qty : {{ jpeg_quality }}
+   {% endif %}
   };
 --></script>
-<script src="{{ url('js/intb.js') }}" defer="defer"></script>
+<script src="{{ url(intb_js) }}" defer="defer"></script>

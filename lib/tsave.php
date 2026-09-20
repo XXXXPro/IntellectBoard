@@ -17,8 +17,6 @@ class Library_tsave extends Library {
 * количестве редактирований фиксируются автоматически, если включен -- могут быть выставлены заранее. 
 **/
   function save_post(&$data,$override=false) {
-    $text = $data['text'];
-    unset($data['text']);  
     if (empty($data['typograf'])) $data['typograf']="0";
     if (empty($data['html'])) $data['html']="0";
     if (empty($data['smiles'])) $data['smiles']="0";
@@ -32,14 +30,23 @@ class Library_tsave extends Library {
       if (empty($data['ip']) || !$override)  $data['ip']=$this->app()->get_ip();
       if (empty($data['author']) || (!$override && !$this->app()->is_guest()))  $data['author']=$this->app()->get_username();
       if (empty($data['uid']) || !$override) $data['uid']=$this->app()->get_uid();
-      $result=$this->app()->db->insert(DB_prefix.'post',$data);
+      $post_data = $data; // создаём локальную копию данных, чтобы не портить поле $text в переданных
+      $text = $data['text'];
+      unset($post_data['text']);
+
+      $result=$this->app()->db->insert(DB_prefix.'post',$post_data);
       if ($result) $data['id']=$this->app()->db->insert_id();
     }
     else {
       if (empty($data['editcount']) || !$override) $data['editcount']=isset($data['editcount']) ? $data['editcount']+1 : 1 ;
       if (empty($data['editor_id']) || !$override) $data['editor_id']=$this->app()->get_uid();
       // значения по умолчанию
-      $result = $this->app()->db->update(DB_prefix.'post',$data,'id='.intval($data['id']));
+
+      $post_data = $data; // создаём локальную копию данных, чтобы не портить поле $text в переданных
+      $text = $data['text'];
+      unset($post_data['text']);
+
+      $result = $this->app()->db->update(DB_prefix.'post',$post_data,'id='.intval($data['id']));
       $sql = 'DELETE FROM '.DB_prefix.'text WHERE type=16 AND id='.intval($data['id']);
       $this->app()->db->query($sql);    
     }

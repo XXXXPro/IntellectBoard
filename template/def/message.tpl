@@ -3,6 +3,7 @@
 <head>
 <title>{{ intb.title }}</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <style type="text/css"><!--
 html { font-size: 100.01%; height: 100%; overflow: hidden }
 body { padding: 0; margin: 0; font-size: 62.5%; color: #362b36; height: 100% }
@@ -20,6 +21,10 @@ select { margin: 2px 0 }
 #ib_all h1 { padding: 10px 15px; font-size: 1.8em; margin: -1px; text-align: center }
 #ib_all #content { padding: 15px; text-align: center; font-size: 1.4em }
 #ib_all #link { text-align: center; font-weight: bold }
+
+@media (max-width: 414px) {
+  #ib_all { width: 80%; margin-top: 100px; }  
+}
 --></style>
 {% if location and not noredirect %}
 <meta http-equiv="refresh" content="5; url={{ location }}">

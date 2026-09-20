@@ -14,7 +14,7 @@ class Library_attach extends Library {
  * @param integer $types Допустимые типы файлов (битовая маска):
  *       255 -- все, 1 -- только картинки, 2 -- видео, 4 -- аудио, 8 -- текст
  * @param integer $maxsize Максимальный размер файла (в байтах)
- * @param string $maxcount Максимальное количество файлов
+ * @param integer $maxcount Максимальное количество файлов
  * @return array Массив с ошибками загрузки
  */
   function check_files($files,$maxsize=false,$types=0xFF,$maxcount=false) {
@@ -39,6 +39,25 @@ class Library_attach extends Library {
     }
     if ($fcount>$maxcount) $result[]=array('text'=>'Общее количество загруженных файлов превышает максимально допустимое.','level'=>2);
     if ($finfo) finfo_close($finfo);
+    return $result;
+  }
+
+  /** Проверка изображений, встроенных с помощью uri:data
+   * @param string $text Текст сообщения
+   * @param integer $maxsize Максимальный размер файла (в байтах) -- на данный момент не проверяется!
+   * @param integer $types -- допустимые типы файлов (битовая маска, расшифровку см для функции check_files)
+   * @param integer $maxcount Максимальное количество файлов
+   * @return array Массив с ошибками загрузки
+   */
+  function check_dataimages($text,$maxsize=false,$types=0xff,$maxcount=false,$bcode=true,$html=true) {
+    $result = array(); 
+    $count1 = 0;
+    $count2 = 0;
+    http_response_code(500);
+    if ($bcode) $count1=preg_match_all('|\[img\]data:image/\w+;base64,[A-Za-z0-9+/_\-~=]+\[/img\]|',$text);
+    if ($html) $count2=preg_match_all('|\<img src="data:image/\w+;base64,[A-Za-z0-9+/_\-~=]+"(\s+alt="Прикреплённый файл [^"]+")?\s*/?>|',$text);
+    if ($count1+$count2>0 && ($types & 0x01)==0) $result[]=array('text'=>'Встраивание изображений в данном разделе форума запрещено!','level'=>2);
+    if ($count1+$count2>$maxcount) $result[]=array('text'=>$this->app()->incline($maxcount,'В сообщении допускается не более %d вставленного изображения!','В сообщении допускается не более %d вставленных изображений!','В сообщении допускается не более %d вставленных изображений!'),'level'=>2);
     return $result;
   }
 
@@ -77,22 +96,8 @@ class Library_attach extends Library {
                 $exifjson=json_encode($exif);
               }
             }
-            $imglib =class_exists('Library_image') ? new Library_image : false;
-            if ($imglib) {
-               $imgdata = $imglib->load($filename);
-               if (!empty($imgdata)) {
-                 $maxx = $this->app()->get_opt('attach_max_x') ?: 1200; // если не заданы максимальные размеры, вписываем фото в 1200x1080
-                 $maxy = $this->app()->get_opt('attach_max_y') ?: 1080;
-                 $qty=NULL; // для прочих форматов, кроме JPEG
-                 if ($imgdata['type']==IMAGETYPE_JPEG) { // для JPEG берем качество из настройки качества пользовательского фото
-                   $qty=$this->app()->get_opt('userlib_photo_jpeg_qty');
-                   if (empty($qty)) $qty=80;
-                 }
-                 $imgdata = $imglib->fit_to($imgdata,$maxx,$maxy);
-                 $imglib->save($imgdata,$filename,$qty);
-              }
-            }
-          }         
+            $this->postprocess_image($filename);
+          }
           $data=array('fkey'=>$key,'oid'=>intval($oid),'type'=>intval($objtype),'filename'=>$files['name'][$i],'size'=>$files['size'][$i],'format'=>$type,'is_main'=>($set_main ? '1' : '0'),'owner'=>$this->app()->get_uid());
           $data['extension']=substr($files['name'][$i],strrpos($files['name'][$i], '.')+1); 
           if (!empty($exifjson)) $data['exif']=str_replace('\\u0000','',$exifjson); // замена \u0000 нужна для Postgres, который не позволяет хранить нулевой символ в тексте
@@ -118,6 +123,78 @@ class Library_attach extends Library {
       }
     }
     if ($finfo) finfo_close($finfo);
+    return $result;
+  }
+
+  function postprocess_image($filename) {
+    $imglib =class_exists('Library_image') ? new Library_image : false;
+    if ($imglib) {
+        $imgdata = $imglib->load($filename);
+        if (!empty($imgdata)) {
+          $maxx = $this->app()->get_opt('attach_max_x') ?: 1200; // если не заданы максимальные размеры, вписываем фото в 1200x1080
+          $maxy = $this->app()->get_opt('attach_max_y') ?: 1080;
+          $qty=NULL; // для прочих форматов, кроме JPEG
+          if ($imgdata['type']==IMAGETYPE_JPEG) { // для JPEG берем качество из настройки качества пользовательского фото
+            $qty=$this->app()->get_opt('userlib_photo_jpeg_qty');
+            if (empty($qty)) $qty=80;
+          }
+          $imgdata = $imglib->fit_to($imgdata,$maxx,$maxy);
+          $imglib->save($imgdata,$filename,$qty);
+          return true;
+      }
+    }
+    return false;
+  }
+
+  function process_dataimages($text,$oid,$objtype=3,$bcode=true,$html=true) {
+    $result = array();
+
+    if ($bcode) preg_match_all('|\[img\]data:image/(\w+);base64,([A-Za-z0-9+/_\-~=]+)\[/img\]|',$text,$matches1,PREG_SET_ORDER); // используем set order для удобства склейки двух массивов в один
+    else $matches1=array();
+    if ($html) preg_match_all('|\<img src="data:image/(\w+);base64,([A-Za-z0-9+/_\-~=]+)"(\s+alt="Прикреплённый файл ([^"]+)")?\s*/?>|',$text,$matches2,PREG_SET_ORDER);
+    else $matches2=array();
+
+    $matches = array_merge($matches1,$matches2); 
+    $set_main=true;
+    for ($i=0, $count = count($matches); $i<$count; $i++) {
+      $match = $matches[$i];
+
+      if (empty($match[4])) $match[4] = 'upload_'.date('ymd_Gi').'_'.$i.'.'.$match[1];
+      $key = substr(hash('sha256',rand().$_SERVER['REMOTE_ADDR'].$_SERVER['REMOTE_PORT'].$this->app()->time.$this->app()->get_opt('site_secret').$match[4]),0,12);
+      $url_part = 'f/up/'.intval($objtype).'/'.intval($oid).'-'.$key;
+      $url = $this->app()->http($this->app()->url($url_part.'/'.$match[4]));
+      $filename = BASEDIR.'www/'.$url_part.'.dat';
+      // $written = file_put_contents($filename,base64_decode($match[2])); // заменили на запись через stream с фильтром, чтобы потреблять меньше памяти
+      $outputFile = fopen($filename, 'wb');
+      if ($outputFile) {
+          stream_filter_append($outputFile, 'convert.base64-decode', STREAM_FILTER_WRITE);
+          $chunkSize = 512*1024; // декодируем и пишем по 512 Кб
+          $length = strlen($match[2]);
+          
+          for ($j = 0; $j < $length; $j += $chunkSize) {
+              $chunk = substr($match[2], $j, $chunkSize);
+              fwrite($outputFile, $chunk);
+          }
+          fclose($outputFile);
+      }
+
+      if ($outputFile && $this->postprocess_image($filename)) { // resize_image также выполняет проверку, является ли файл изображением вообще и возвращает false, если нет
+        $size = filesize($filename);
+
+        $data=array('fkey'=>$key,'oid'=>$oid,'type'=>intval($objtype),'filename'=>$match[3],'size'=>$size,'format'=>'image','is_main'=>($set_main ? '1' : '0'),'owner'=>$this->app()->get_uid());
+        $this->app()->db->insert(DB_prefix.'file',$data);
+        $result[]=$data; // добавляем данные файла в массив результатов
+
+        $set_main = false; // для остальных файлов (кроме первого) признак set_main в любом случае выставляем в false
+        
+        $text = str_replace('data:image/'.$match[1].';base64,'.$match[2],$url,$text); 
+      } else {
+        $text = str_replace($match[0],'Некорректное изображение или неподдерживаемый формат!');
+        // unlink($filename); // удаляем некорректный файл
+      }
+    }
+    $sql = 'UPDATE '.DB_prefix.'text SET data=\''.$this->app()->db->slashes($text).'\' WHERE id='.intval($oid).' AND type=16';
+    $this->app()->db->query($sql);
     return $result;
   }
 

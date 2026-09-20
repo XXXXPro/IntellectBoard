@@ -74,7 +74,7 @@ class Library_cleaner extends Library {
    * @return string Sanitized HTML code
    */
   public static function clean(string $html,array $tags=self::TAGS_INLINE,
-                               array $schemas=['http','https','ftp','magnet','gemini','gopher','tel','mailto'],
+                               array $schemas=['http','https','ftp','magnet','gemini','gopher','tel','mailto','data'],
                                array $css_properties=['color', 'background-color', 'background','font','font-size','font-family']):string {
     $charset = 'UTF-8';
     if (empty($html)) return ''; // чтобы избежать ошибок loadHTML, которая не принимает пустые строки

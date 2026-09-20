@@ -93,6 +93,11 @@ class Application {
         $this->out->upload_max_filesize = $this->return_bytes(ini_get('upload_max_filesize')) ?: 2 * 1024 * 1024;
         $this->out->post_max_size = $this->return_bytes(ini_get('post_max_size')) ?: 2 * 1024 * 1024;
         $this->out->max_file_uploads = ini_get('max_file_uploads');
+        if ($this->forum['max_attach']>=0) $this->out->max_file_uploads = min($this->out->max_file_uploads,$this->forum['max_attach']);
+        if (!$this->check_access('attach')) $this->out->max_file_uploads = 0;
+        $this->out->attach_max_x = $this->get_opt('attach_max_x') ?: 1200; // если не заданы максимальные размеры, вписываем фото в 1200x1080 при качестве 80
+        $this->out->attach_max_y = $this->get_opt('attach_max_y') ?: 1080;
+        $this->out->jpeg_quality = $this->get_opt('userlib_photo_jpeg_qty') ?: 80;
       }
       if (!$this->is_guest() || (!empty($_COOKIE['IntB_agree_pd']) && (intval($_COOKIE['IntB_agree_pd']) & 1))) $this->out->IntB_agree_pd = 2; // выставляем признак того, что принята Политика Конф.: 0 -- нет, 1 -- галочка из формы, 2 -- запомнено через cookies или при регистрации
       else $this->out->IntB_agree_pd = !empty($_POST['agree_pd']) ? 1 : 0;
@@ -1604,7 +1609,8 @@ class Application {
   /** Форматирование даты и времени. Ввиду глюков стандартных функций под Windows названия месяцев и дней недели формируются вручную.* */
   function format_date($date, $format,$short=false,$relative=true) {
     $timezone = $this->get_opt('timezone', 'user');
-    $date = $date + $timezone;
+    $date = $date + $timezone;    
+
     $time = $this->time;
     if ($this->get_opt('date_today') && $relative) { // если в настройках включен вывод "вчера" и "сегодня"
       if (gmdate('d m Y', $time + $timezone) === gmdate('d m Y', $date)) { // если выводимая дата -- сегодня
@@ -1903,7 +1909,7 @@ class Application {
     }
     else {
       if ($dbg_on)
-        $this->log_entry('warn', $errno, $errfile, $errstr);
+        $this->log_entry('warn', $errno, $errfile, $errstr, $errline);
       _dbg(str_replace('<p>', '', str_replace('</p>', '', $errmsg)));
       //echo $errmsg;
     }

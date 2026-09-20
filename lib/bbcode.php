@@ -165,9 +165,9 @@ class Library_bbcode extends Library {
       }
 
       if ($img) {
-        self::$search[]='|\[img=(\d+)x(\d+)\]([\d\w\./\?][^\]"\']+)\[/img\]|'; self::$replace[]='<img src="$3" alt="" width="$1" height="$2" class="lightbox" />';
-        self::$search[]='|\[img\]([\d\w\./\?][^\]"\']+)\[/img\]|'; self::$replace[]='<img src="$1" alt="" class="lightbox" />';
-        self::$search[]='|\[img=([\d\w\./\?][^\]"\']+)\]|'; self::$replace[]='<img src="$1" alt="" class="lightbox" />';
+        self::$search[]='|\[img=(\d+)x(\d+)\]([\d\w\./\?][^\]"\']+)\[/img\]|'; self::$replace[]='<img src="$3" alt="" width="$1" height="$2" class="lightbox" loading="lazy" />';
+        self::$search[]='|\[img\]([\d\w\./\?][^\]"\']+)\[/img\]|'; self::$replace[]='<img src="$1" alt="" class="lightbox" loading="lazy" />';
+        self::$search[]='|\[img=([\d\w\./\?][^\]"\']+)\]|'; self::$replace[]='<img src="$1" alt="" class="lightbox" loading="lazy" />';
       }
     }
     $text = preg_replace(self::$search,self::$replace,$text); // и все замены делаем одним regexpом
@@ -190,11 +190,11 @@ class Library_bbcode extends Library {
       self::$ext_search[]='|\[quote\](.*?)\[/quote\]|s'; self::$ext_replace[]='<div class="quote"><blockquote class="qfold">$1</blockquote></div>';
       self::$ext_search[]='|\[q\](.*?)\[/q\]|s'; self::$ext_replace[]='<div class="quote"><blockquote class="folded">$1</blockquote></div>';
 
-      self::$ext_search[]='|\[quote=([^\]"\',]+),(\d+)\](.*?)\[/quote\]|s'; self::$ext_replace[]='<div class="quote"><span class="username">$1</span> <a href="post-$2.htm">написал(а)</a>: <blockquote>$3</blockquote></div>';
-      self::$ext_search[]='|\[q=([^\]"\',]+),(\d+)\](.*?)\[/q\]|s'; self::$ext_replace[]='<div class="quote"><span class="username">$1</span> <a href="post-$2.htm">написал(а)</a>: <blockquote>$3</blockquote></div>';
+      self::$ext_search[]='|\[quote=([^\]"\',]+),(\d+)\](.*?)\[/quote\]|s'; self::$ext_replace[]='<div class="quote"><span class="intb_quotelink"><span class="username">$1</span> <a href="post-$2.htm">написал(а)</a>: </span><blockquote>$3</blockquote></div>';
+      self::$ext_search[]='|\[q=([^\]"\',]+),(\d+)\](.*?)\[/q\]|s'; self::$ext_replace[]='<div class="quote"><span class="intb_quotelink"><span class="username">$1</span> <a href="post-$2.htm">написал(а)</a>: </span><blockquote>$3</blockquote></div>';
 
-      self::$ext_search[]='|\[quote=([^\]"\']+)\](.*?)\[/quote\]|s'; self::$ext_replace[]='<div class="quote"><span class="username">$1</span> написал(а): <blockquote>$2</blockquote></div>';
-      self::$ext_search[]='|\[q=([^\]"\']+)\](.*?)\[/q\]|s'; self::$ext_replace[]='<div class="quote"><span class="username">$1</span> написал(а): <blockquote>$2</blockquote></div>';
+      self::$ext_search[]='|\[quote=([^\]"\']+)\](.*?)\[/quote\]|s'; self::$ext_replace[]='<div class="quote"><span class="intb_quotelink"><span class="username">$1</span> написал(а): </span><blockquote>$2</blockquote></div>';
+      self::$ext_search[]='|\[q=([^\]"\']+)\](.*?)\[/q\]|s'; self::$ext_replace[]='<div class="quote"><span class="intb_quotelink"><span class="username">$1</span> написал(а): </span><blockquote>$2</blockquote></div>';
         // TODO: доделать обработку тегов quote большой вложенности
 
       self::$ext_search[]='|\[off\](.*?)\[/off\]|s'; self::$ext_replace[]='<p class="offtopic">$1</p>';

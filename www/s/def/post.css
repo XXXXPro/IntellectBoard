@@ -19,7 +19,7 @@
 #ib_all .post p.intb_wrap_code { display: block; white-space: pre; line-height: 100%; border: #A3CEFF 1px solid; padding: 10px; max-height: 20em; overflow: auto; margin: 5px 20px; background: #eee; font-size: 125%; max-height: 15em; overflow: auto }
 #ib_all .post pre { display: block; white-space: pre; overflow: auto }
 #ib_all .post .ptext { font-size: 110%; line-height: 133%; overflow: hidden; }
-#ib_all .post .ptext img { max-width: 100% }
+#ib_all .post .ptext img { max-width: 100%; user-select: text; pointer-events: none; }
 #ib_all .post .postnumber { float: right; text-decoration: none; font-size: 120%; padding-right: 3px; }
 #ib_all .post .unfolded { max-height: none }
 #ib_all .post .foldlink { position: relative; display: block; left: 86%; text-align: center; width: 6.4em; background: #234; padding: 5px; 

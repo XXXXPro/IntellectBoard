@@ -90,7 +90,7 @@ class Library_notify extends Library implements iNotifier {
           $full_hurl = $this->app()->http($this->app()->url($topic['full_hurl'].'post-'.$post['id'].'.htm')); // ссылаемся не просто на тему, а на конкретное сообщение
           if ($fdata['extdata']['telegram_mode'] == 3) {
             $text = '<b>'.$post['author']."</b> ответил в теме: \r\n<a href=\"".$full_hurl."\">".$topic['title'].'</a>';
-            $this->notify_tg($fdata['extdata']['telegram_key'],$text, $fdata['extdata']['telegram_id']);
+            $this->notify_tg($text, $fdata['extdata']);
           }
           if ($fdata['extdata']['telegram_mode'] == 4) {
             $max_len = 3600;
@@ -101,7 +101,7 @@ class Library_notify extends Library implements iNotifier {
               $parsed .= "[…]\r\n<a href=\"$full_hurl\">Читать продолжение на сайте</a>";
             } else $parsed .= "\r\n<a href=\"$full_hurl\">Прокомментировать на сайте</a>";
             $text = '<b>'.$post['author']."</b> написал:\r\n".$parsed;
-            $this->notify_tg($text, $fdata['extdata']['telegram_id']);
+            $this->notify_tg($text, $fdata['extdata']);
           }
         }
       }

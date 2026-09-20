@@ -714,7 +714,9 @@ class stdforum extends Application_Forum {
           $tslib->save_post($post,$anonym); // при сохранении должен был проставиться id
 
           // обработка приложенных файлов
-          if (!empty($_FILES['attach']) && $atlib) $post['attach']=$atlib->process_files($_FILES['attach'],$post['id'],1); // 1 означает что файл загружается как прикрепленный к сообщению
+          if (!empty($_FILES['attach']) && $atlib) $post['attach']=$atlib->process_files($_FILES['attach'],$post['id'],1); // 1 означает что файл загружается как прикрепленный к сообщению          
+          if ($atlib) $atlib->process_dataimages($post['text'],$post['id'],3,$post['bcode'],$post['html']); // обрабатываем изображения, вставленные с помощью uri:data          
+
 //          if (!empty($_POST['preattach']) && $atlib) $atlib->process_preuploads($_POST['preattach'],$post['id'],1);
 
           $lock=false;
@@ -888,10 +890,13 @@ class stdforum extends Application_Forum {
             $lock=false;
             if (!empty($_POST['topic']['locked']) && $this->out->perms['lock']) $lock=true; // если запрошено закрытие темы и есть необходимые права
             // обработка приложенных файлов
-            if (!empty($_FILES['attach']) && $this->out->perms['attach']) {
-              $atlib = new Library_attach;
-              if ($atlib) $post['attach']=$atlib->process_files($_FILES['attach'],$post['id'],1); // 1 означает что файл загружается как прикрепленный к сообщению
-            }            
+            if ($this->out->perms['attach']) {
+              $atlib = new Library_attach;   
+              if (!empty($_FILES['attach'])) {
+                $post['attach']=$atlib->process_files($_FILES['attach'],$post['id'],1); // 1 означает что файл загружается как прикрепленный к сообщению
+              }
+              $atlib->process_dataimages($post['text'],$post['id'],3,$post['bcode'],$post['html']); // обрабатываем изображения, вставленные с помощью uri:data          
+            }
             if ($post['status']==0) { // обновляем данные $this->topic, чтобы избежать лишнего SQL-запроса, но только в том случае
               $this->topic['last_post_id']=$post['id'];
               $this->topic['post_count']=1;
@@ -995,10 +1000,9 @@ class stdforum extends Application_Forum {
                 $atlib->delete_uploads($_POST['detach'],$post['id'],1);
               }
               if (!empty($_FILES['attach']) && $this->out->perms['attach']) {
-                if ($atlib) {
                   $post['attach']=$atlib->process_files($_FILES['attach'],$post['id'],1,false); // 1 означает что файл загружается как прикрепленный к сообщению, false — не трогаем главные файлы
-                }
               }
+              $atlib->process_dataimages($post['text'],$post['id'],3,$post['bcode'],$post['html']); // обрабатываем изображения, вставленные с помощью uri:data          
             }
           }
           if ($this->out->perms['lock']) $_POST['topic']['locked']=isset($_POST['topic']['locked'])?1:0; // если нет прав на закрытие темы, сбрасываем соответствующий параметр
@@ -1137,7 +1141,7 @@ class stdforum extends Application_Forum {
         else $avatar_src = $this->http($this->url('f/av/'.$data[$i]['uid'].'.'.$data[$i]['avatar']));
         $text2=$bbcode->parse_msg($data[$i]);
 
-        $text='<div class="p_data"><img src="'.$avatar_src.'" alt="'.htmlspecialchars($data[$i]['author']).'" style="height: 24px; width: 24px; float: left" height="24" width="24"/><strong>'.$data[$i]['author'].'</strong><br />';
+        $text='<div class="p_data"><img src="'.$avatar_src.'" alt="'.htmlspecialchars($data[$i]['author']).'" style="height: 24px; width: 24px; float: left" height="24" width="24"/> <strong>'.$data[$i]['author'].'</strong><br />';
         $text.='</div><br /><div class="p_text">'.$text2.'</div>';
 
         $data[$i]['text']=$text;
@@ -1404,12 +1408,16 @@ class stdforum extends Application_Forum {
       $result[]=array('text'=>'Сработала защита от спам-ботов!','level'=>3);
     }
     // проверка длины
-    if (function_exists('mb_strlen')) $len = mb_strlen($post['text']);
-    else $len = strlen($post['text'])*1.6; // если нет модуля
+    $test_str = $post['text']; // копируем текст сообщения в отдельную строку, чтобы убрать из него изображения в base6e и проверять длину уже без них
+    if ($perms['bcode'] && $post['bcode']) $test_str=preg_replace('|\[img\]data:image/\w+;base64,[A-Za-z0-9+/_\-~=]+\[/img\]|',' ',$test_str);
+    if ($perms['html'] && $post['html']) $test_str=preg_replace('|<img src="data:image/\w+;base64,[A-Za-z0-9+/_\-~=]+\"( alt="Прикреплённый файл [^"]+")?\s*/?>|',' ',$test_str);
+
+    if (function_exists('mb_strlen')) $len = mb_strlen($test_str);
+    else $len = strlen($test_str)*1.6; // если нет модуля mbstring, используем обычную 
     $minlen = $this->get_opt('post_minlength');
     $maxlen = $this->get_opt('post_maxlength');
     if ($len==0 || $len<$minlen) $result[]=array('text'=>'Длина сообщения меньше минимально допустимой!','level'=>3);
-    if ($maxlen && $len>$maxlen) $result[]=array('text'=>'Длина сообщения больше максимально допустимой!','level'=>3);
+    if ($maxlen && $len>$maxlen) $result[]=array('text'=>'Длина сообщения больше максимально допустимой! '.$post['text'],'level'=>3);
 
     // определение количества смайликов
     $bbcode = class_exists('Library_bbcode') ? new Library_bbcode : false;;
@@ -1450,7 +1458,10 @@ class stdforum extends Application_Forum {
       if (!$perms['attach']) $result[]=array('text'=>'У вас нет прав на загрузку файлов','level'=>3);
       else { // проверка загружаемых файлов
         $atlib = class_exists('Library_attach') ? new Library_attach : false;
-        if ($atlib) $result=$result+$atlib->check_files($_FILES['attach'],$this->get_opt('max_attach','group')*1024,$this->forum['attach_types'],$this->forum['max_attach']); // умножаем на 1024, т.к. max_attach  в базе хранится в Кб.
+        if ($atlib) {
+          $result=$result+$atlib->check_files($_FILES['attach'],$this->get_opt('max_attach','group')*1024,$this->forum['attach_types'],$this->forum['max_attach']); // умножаем на 1024, т.к. max_attach  в базе хранится в Кб.
+          $result=$result+$atlib->check_dataimages($post['text'],$this->get_opt('max_attach','group')*1024,$this->forum['attach_types'],$this->forum['max_attach'],$post['html'],$post['bcode']);
+        }
       }
     }
     // проверка, что гость не использует имя зарегистрированного пользователя
@@ -1621,7 +1632,7 @@ class stdforum extends Application_Forum {
       $result['topic_descr']=true;
       $result['topic_hurl']=true;
     }
-    $result['area_class']='bbcode'; // класс (или классы) для вывода основного блока textarea
+    $result['area_class']= $perms['bcode'] ? 'bbcode' : ($perms['html'] ? 'wysiwyg' : ''); // класс (или классы) для вывода основного блока textarea: bbcode -- если разрешён BoardCode,  wysiwyg -- если разрешён только HTML
     $result['area_rows']=10; // высота основного блока textarea в строках
     $result['attach']=$perms['attach']; // если есть права, выводим блок прикрепления файлов
     $result['allowed']=true; // список разрешенного: HTML, BBCode и т.п.

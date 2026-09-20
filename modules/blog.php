@@ -332,7 +332,7 @@ class blog extends stdforum {
       $result['topic_descr']=true;
       $result['topic_hurl']=true;
     }
-    $result['area_class']='bbcode'; // класс (или классы) для вывода основного блока textarea
+    $result['area_class']= $perms['bcode'] ? 'bbcode' : ($perms['html'] ? 'wysiwyg' : ''); // класс (или классы) для вывода основного блока textarea: bbcode -- если разрешён BoardCode,  wysiwyg -- если разрешён только HTML
 //    if (!$topic) $result['form_class']='miniform';
     $result['area_rows']=$topic ? 40 : 6; // если пишем сообщение, высота строк должна быть большой, если комментарий — нет.
     $result['attach']=$perms['attach']; // если есть права, выводим блок прикрепления файлов

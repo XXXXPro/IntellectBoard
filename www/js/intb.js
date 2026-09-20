@@ -21,7 +21,7 @@ function FormStorage(form_element,storage_key,headers=null) {
     let data = {};
     for (let i=0, count=self.form_element.elements.length; i<count; i++) {
       let element = self.form_element.elements[i];
-      if (!element.name) continue; // skipping elements without name attribute
+      if (!element.name || element.name==='authkey') continue; // skipping elements without name attribute and authenticiation key (this may cause problems when user logged off or changed password)
       if (element.getAttribute('autocomplete')==='off') continue; // skipping elements with autocomplete="off" (i.e. CAPTCHA)
       if (element.tagName==='SELECT') {
         data[element.name]=new Array;
@@ -51,6 +51,7 @@ function FormStorage(form_element,storage_key,headers=null) {
       for (var i=0; i<elements.length; i++) {
         var element = elements[i];
         if (element!==null) {
+          if (element.name==='authkey') continue; // skipping elements without name attribute and authenticiation key (this may cause problems when user logged off or changed password)          
           if (element.tagName==='SELECT') { // processing select tag
             for (let j=0; j<element.options.length; j++) element.options.item(j).selected=data[field].includes(element.options.item(j).value);
           }
@@ -149,26 +150,23 @@ function FormStorage(form_element,storage_key,headers=null) {
 // Intellect Board Script
 
 function IntB_main(opts) {
-//  head.load('https://use.fontawesome.com/releases/v5.0.8/css/all.css');
   // функция вставки данных в поле ввода или визуальный редактор, если он используется
   this.get_quote = function (target) {
     var pnode = $(target).parents('.postin');
-    var post_id = false;
-    var username = '';
-    if (pnode) { 
-      post_id = $(target).parents('.post').get(0).id.replace('p', '');
-      username = pnode.find('.pu .username').text();
-      if (post_id) username = username+','+post_id;
+    self.stored_id = undefined;
+    self.stored_user = undefined;
+    if (pnode) {
+      self.stored_id = $(target).parents('.post').get(0).id.replace('p', '');
+      self.stored_user = pnode.find('.pu .username').text();
     }
-    self.stored_user = username;
     try {
       var selection = window.getSelection();
-      var quoted = selection.toString();
-      if (quoted) {
-        if ($(selection.anchorNode).parents('.postin').get(0) != pnode.get(0) ||
-          $(selection.anchorNode).parents('.postin').get(0) != pnode.get(0)) quoted = '';
-      }      
-      return quoted;
+      if (!selection.rangeCount || selection.isCollapsed) return null;
+      var sel_elm = document.createElement('blockquote'); //
+      sel_elm.appendChild(selection.getRangeAt(0).cloneContents());
+      sel_elm.querySelectorAll('.intb_quotelink').forEach(child => child.remove());
+      sel_elm.querySelectorAll('.foldlink').forEach(child => child.remove());      
+      return sel_elm;
     }
     catch (ex) {
     }
@@ -176,9 +174,41 @@ function IntB_main(opts) {
 
   this.paste_quoted = function(quoted) {
     if (!quoted || quoted==null) return;
-    if (opts.wysiwyg && opts.wysiwyg!='0' && $('.bbcode').sceditor('instance').val()!=quoted) {
-      if ($('.bbcode').sceditor('instance').val().length!=0) quoted="\n"+quoted;
-      $('.bbcode').sceditor('instance').insert(quoted, "\n ", true, true);
+    var instance = $('.bbcode').sceditor('instance');
+    if (opts.wysiwyg && opts.wysiwyg!='0' && instance.val()!=quoted) {
+      if (instance.val().length!=0) instance.insert("\n");
+      if (instance.inSourceMode()) {
+        var quote_str = "[quote";
+        if (self.stored_user) quote_str += "="+self.stored_user;
+        if (self.stored_id) quote_str +=","+self.stored_id;
+        quote_str += "]";
+        instance.insert(quote_str+instance.toBBCode(quoted.innerHTML)+"[/quote]","");
+      }
+      else {
+        var elm = document.createElement('div');
+        if (self.stored_user) {
+          var cite = document.createElement('cite');
+          cite.innerText = self.stored_user;
+          if (self.stored_id) cite.innerText += ","+self.stored_id;
+          quoted.insertBefore(cite,quoted.firstChild);
+        }
+        elm.appendChild(quoted);
+        instance.wysiwygEditorInsertHtml(elm.innerHTML,"\n");
+      }
+      self.stored_user = undefined;
+      self.stored_id = undefined;
+
+
+/*      if (range) {
+        range.setStart(range.startContainer,range.startOffets+1);
+        console.log(range);
+          
+        // Collapse the range to the end (moves caret to the very end of the selection)
+        range.collapse(true); 
+          
+        // Apply the newly targeted range to the editor selection
+        rangeHelper.selectRange(range);
+      } */
     }
     else {
       head.load([opts.basedir+'js/jquery.selection.js'], function() {
@@ -341,7 +371,7 @@ function IntB_main(opts) {
   var wysiwyg_nodes=$('.wysiwyg');
   if (wysiwyg_nodes.length) {
     head.load([scepath+'themes/quill.min.css',scepath+'jquery.sceditor.min.js',
-      scepath+'languages/ru.js',opts.basedir+'js/sceditor/icons/quill.js',/*opts.basedir+'js/sceditor/plugins/dragdrop.js',*/opts.basedir+'js/sceditor/plugins/undo.js'],function() {
+      scepath+'languages/ru.js',opts.basedir+'js/sceditor/icons/quill.js',opts.basedir+'js/sceditor/plugins/dragdrop.js',opts.basedir+'js/sceditor/plugins/undo.js'],function() {
       var exclude = 'print,date,time,ltr,rtl,horizontalrule,indent,cut,copy,paste,font,outdent'+(typeof(opts.emoticons)==="undefined" ? ",emoticon" : "");
       if (/Android|webOS|Phone|iPad|iPod|Tablet|BlackBerry|Mobile|Opera Mini/i.test(navigator.userAgent)) {
         exclude+=",left,center,right,justify,subscript,superscript,font,size,color,removeformat,table,pastetext";
@@ -361,10 +391,17 @@ function IntB_main(opts) {
 	      plugins: 'dragdrop,undo',
         allowedTags: ['audio','video'],
         allowedAttributes: ['src'],
+        dragdrop: {
+          allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+          handlePaste: true,
+          isAllowed: self.isUploadAllowed
+        }        
       });
       wysiwyg_nodes.sceditor('instance').keyDown(function(e) {
           if (e.ctrlKey && e.keyCode==13) $(e.target).closest('form').submit();
       });
+      var prev_img_dropdown = sceditor.commands.image._dropDown;
+      sceditor.commands.image._dropDown = self.makeImageDropdown(prev_img_dropdown);
     });
   }
 
@@ -426,10 +463,142 @@ function IntB_main(opts) {
     });
   }
 
+  this.resizeImage = function(imageURL,mimeType, maxWidth, maxHeight, quality) {
+    return new Promise(function (resolve, reject) {
+    const img = new Image();
+      img.onload = function () {
+          // Расчет пропорциональных размеров
+          let width = img.width;
+          let height = img.height;
+
+          // console.log('Resizing from '+width+'x'+height+' to '+maxWidth+'x'+maxHeight);
+
+          if (width<=maxWidth && height<=maxHeight) resolve(imageURL);
+
+          if (width > height) {
+              if (width > maxWidth) {
+                  height = Math.round((height * maxWidth) / width);
+                  width = maxWidth;
+              }
+          } else {
+              if (height > maxHeight) {
+                  width = Math.round((width * maxHeight) / height);
+                  height = maxHeight;
+              }
+          }
+
+          // Создание canvas и отрисовка
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Получаем Data URL вместо Blob
+          // Используем image/jpeg, так как он поддерживает сжатие (quality)
+          if (mimeType!=='image/png' && mimeType!=='image/webp') mimeType='image/jpeg';
+          const dataUrl = canvas.toDataURL(mimeType, quality);
+          resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = imageURL;    
+    });
+  }
+
+  this.handeFileUpload = function (file,position=null) {
+    placeholder=$('.bbcode').sceditor('instance');
+    var filename = "";
+    if (typeof(file)=='File') filename = file.name.replace('"',"&quot;");
+    var mimetype = file.type.replace('"',"&quot;");
+
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      const base64Source = e.target.result; // результат в формате base64
+      self.resizeImage(base64Source,mimetype,opts.attach_max_x,opts.attach_max_y,opts.jpeg_qty).then(function (base64String) {
+        if (position!==null) position.cancel();        
+        if (base64String.length>opts.upload_max_filesize) {
+          alert('Размер файла превышает допустимый! Загрузка отменена!');
+          return false;
+        }
+
+        if (placeholder.val().length>opts.post_max_size-2*1024) {
+          alert('Общий размер сообщения превысит допустимый, загрузка отменена!');
+          return false;
+        }
+
+        if (placeholder.opts.format==='bbcode') {
+          placeholder.insert('[img]'+base64String+'[/img]');
+        }
+        else placeholder.wysiwygEditorInsertHtml('<img src="'+base64String+'" alt="Прикреплённый файл '+filename+'" />');
+      }).catch(function () {
+        alert('Ошибка: не удалось распознать формат изображения!');
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  this.makeImageDropdown = function(prev_img_dropdown) {
+    return function () {
+      prev_img_dropdown(...arguments);
+      if (opts.max_file_uploads===undefined || opts.max_file_uploads==0) return;
+      var sceditor_instance = arguments[0];
+      var upload_elm = document.createElement('input');
+      upload_elm.type="file";
+      upload_elm.accept="image/*";
+      upload_elm.multiple=true;
+      var upload_div = document.createElement('div');
+      var upload_btn = document.createElement('input');
+      upload_btn.value = '📎 Загрузить';
+      upload_btn.type="button";
+      upload_btn.className='button';
+      upload_btn.style.margin="0 0 6px 0";
+      upload_elm.addEventListener('change', function (event) {
+        const files = event.target.files;
+        if (!files || files.length==0) {
+          return;            
+        }
+        if (files.length+self.countFiles()>opts.max_file_uploads) {
+          alert('В сообщении допускается не более '+opts.max_file_uploads+' вставленных изображений!');
+          return;
+        }
+        for (var i=0; i<files.length; i++) self.handeFileUpload(files[i]);
+        sceditor_instance.closeDropDown();
+      });
+      upload_btn.addEventListener('click',function(e) {
+        upload_elm.click();
+      });
+      upload_div.appendChild(upload_btn);
+      var dd_element = jQuery('.sceditor-insertimage div div');
+      dd_element[0].append(upload_div);
+    }
+  }
+
+  this.countSubstrings = function(str,substring) {
+    if (!substring) return 0;
+    var count = 0;
+    var index = 0;
+
+    while ((index = str.indexOf(substring, index)) !== -1) {
+        count++;
+        index += substring.length;
+    }
+    return count;    
+  }
+
+  this.countFiles = function() {
+    if (opts.max_file_uploads==undefined) return 0;
+    if (opts.max_file_uploads==0) return 0x7fffffff;
+    var text = bbcode_nodes.sceditor('instance').val();
+    var count1 = self.countSubstrings(text,'[img]data:image/');
+    var count2 = self.countSubstrings(text,'<img src="data:image/');
+    return count1+count2;
+  }
+
   if (opts.wysiwyg && opts.wysiwyg!='0' && bbcode_nodes.length) {
     head.load([scepath+'themes/quill.min.css',scepath+'jquery.sceditor.min.js',
-      opts.basedir+'js/sceditor/formats/bbcode.js',scepath+'languages/ru.js',opts.basedir+'js/sceditor/icons/quill.js',/*opts.basedir+'js/sceditor/plugins/dragdrop.js',*/opts.basedir+'js/sceditor/plugins/undo.js'],function() {
-      var exclude = 'print,date,time,ltr,rtl,horizontalrule,indent,cut,copy,paste,font,outdent'+(typeof(opts.emoticons)==="undefined" ? ",emoticon" : "");
+      opts.basedir+'js/sceditor/formats/bbcode.js',scepath+'languages/ru.js',opts.basedir+'js/sceditor/icons/quill.js',opts.basedir+'js/sceditor/plugins/dragdrop.js',opts.basedir+'js/sceditor/plugins/undo.js'],function() {
+      var exclude = 'print,date,time,ltr,rtl,horizontalrule,indent,cut,copy,paste,font,outdent'+(typeof(opts.emoticons)==="undefined" ? ",emoticon" : "");      
       if (/Android|webOS|Phone|iPad|iPod|Tablet|BlackBerry|Mobile|Opera Mini/i.test(navigator.userAgent)) {
         exclude+=",left,center,right,justify,subscript,superscript,font,size,color,removeformat,table,pastetext";
       }
@@ -454,30 +623,14 @@ function IntB_main(opts) {
         allowedTags: ['audio','video'],
         allowedAttributes: ['src'],
         dragdrop: {
-          allowedTypes: ['image/jpeg', 'image/png', 'image/gif'],
+          allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
           handlePaste: true,
-          isAllowed: function(file) {
-              return true;
-          },          
-          handleFile: function (file, createPlaceholder) {
-            // createPlaceholder function will insert a
-            // loading placeholder into the editor and
-            // return an object with inert(html) and
-            // cancel() methods
-
-            // For example:
-            // var placeholder = createPlaceholder();
-            // console.log(file);
-            // placeholder.insert('Файл тут!');
-
-            /* asyncUpload(file).then(function (url) {
-                // Replace the placeholder with the image HTML
-                placeholder.insert('<img src=\'' + url + '\' />');
-            }).catch(function () {
-                // Error so remove the placeholder
-                placeholder.cancel();
-            });
-            */
+          isAllowed: function() {
+            return self.countFiles()<opts.max_file_uploads;
+          },
+          handleFile : function (file,createPlaceholder) {
+            var placeholder = createPlaceholder();
+            self.handeFileUpload(file,placeholder);
           }
         }
       });
@@ -496,7 +649,7 @@ function IntB_main(opts) {
         sceditor.commands.link._dropDown = function() {
           prev_dropdown(...arguments);
           var dd_element = jQuery('.sceditor-insertlink div div');
-          let list_elm = document.createElement('datalist');
+          var list_elm = document.createElement('datalist');
           list_elm.id = 'topic_url_search_list';
           dd_element[0].appendChild(list_elm);
           var dd_input = jQuery(dd_element).find('input').first();
@@ -532,7 +685,11 @@ function IntB_main(opts) {
            mini_nodes.find('.user_field').slideDown();
          });
       }
-    });
+      
+      var prev_img_dropdown = sceditor.commands.image._dropDown;
+      sceditor.commands.image._dropDown = self.makeImageDropdown(prev_img_dropdown);
+    }
+  );
   }
 
   var mini_bbcode_nodes=$('.mini_bbcode');
@@ -580,19 +737,18 @@ function IntB_main(opts) {
       postquote_nodes.click(function (e) {
         e.preventDefault();
         let quoted = self.get_quote(e.target);
-        if (quoted == '') alert('Выделите часть сообщения для цитирования и пользуйтесь той ссылкой "Цитировать", которая расположена рядом с соответствующим сообщением!');
+        if (quoted === null) alert('Выделите часть сообщения для цитирования и пользуйтесь той ссылкой "Цитировать", которая расположена рядом с соответствующим сообщением!');
         else {
-          quoted = '[quote=' + self.stored_user + ']' + quoted + '[/quote]';
           self.paste_quoted(quoted);
         }
       });
   }
-  if ($('#uLogin').length>0 && !/Android|webOS|Phone|iPad|iPod|Tablet|BlackBerry|Mobile|Opera Mini/i.test(navigator.userAgent)) {
+/*  if ($('#uLogin').length>0 && !/Android|webOS|Phone|iPad|iPod|Tablet|BlackBerry|Mobile|Opera Mini/i.test(navigator.userAgent)) {
     setTimeout(function(){head.load(['https://ulogin.ru/js/ulogin.js'])},0);
   }
   if ($('#uLogin_big').length>0) {
     setTimeout(function(){head.load(['https://ulogin.ru/js/ulogin.js'])},0);
-  }
+  }*/
 
   $('.flipper').not(':checked').parent().next().hide();
   $('.flipper').click(function (e){
@@ -657,24 +813,6 @@ function IntB_main(opts) {
     });
   });
 
-/*  jQuery('input.tag_finder').each(function (i,el) {
-    let list_id = el.getAttribute('list');
-    let list_elm = document.getElementById(list_id);
-    if (!list_elm) return;
-    let prev_timer = null;
-    el.addEventListener('input', function (e) {
-      if (e.inputType !== undefined) {
-        if (prev_timer!=null) clearTimeout(prev_timer);
-        prev_timer = setTimeout(function() {
-          jQuery.get(opts.basedir+'search/complete_tag.htm','q='+el.value,function(users) {
-            var opts = users.map(function (item) { let elm = document.createElement('option'); elm.value=item; return elm });
-            list_elm.replaceChildren(...opts);
-          },'json');
-        },800);
-      }
-    });
-  });  */
-
   if (jQuery('input.tag_finder').length>0) {
     head.load([opts.basedir+'js/amsify/js/jquery.amsify.suggestags.js',opts.basedir+'js/amsify/css/amsify.suggestags.css'], function(){
 				jQuery('input.tag_finder').amsifySuggestags({
@@ -686,7 +824,6 @@ function IntB_main(opts) {
 				});
     });
   }
-
 
   jQuery('input.topic_id_finder').each(function (i,el) {
     let list_id = el.getAttribute('list');
@@ -706,7 +843,6 @@ function IntB_main(opts) {
       }
     });
   });
-
 
   var sandwich_main = document.getElementById('intb_sandwich_main');
   if (sandwich_main) {
@@ -772,7 +908,7 @@ function IntB_main(opts) {
   var quote_menu_elm = document.getElementById('quotemenu_quote');
   if (quote_menu_elm) {
     document.getElementById('quotemenu_quote').addEventListener("click", function(e) {
-      self.paste_quoted('[quote=' + self.stored_user + ']' + self.stored_quote + '[/quote]');
+      self.paste_quoted(self.stored_quote);
       $('#quotemenu').addClass('invis');
     });
     document.getElementById('quotemenu_copy').addEventListener("click", async function (e) {
