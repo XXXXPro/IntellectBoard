@@ -8,29 +8,29 @@
  *  Библиотека модераторских действий и пересинхронизации тем и разделов
  *  ================================ */
 
-class Library_moderate extends Library {   
-  /** Перенос сообщений в другую тему. 
+class Library_moderate extends Library {
+  /** Перенос сообщений в другую тему.
   * @param $pids array Массив ID сообщений, которые требуется перенести
   * @param $old_topic integer Номер темы, из которой осуществляется перенос
   * @param $new_topic integer Номер темы, в которую осуществляется перенос
   * @param $params array Хеш с настройками переноса темы:
   * nosync -- не проводить пересинхронизацию тем и разделов
   * nolog -- не делать записи в лог модерации
-  * nomsg -- не вставлять сообщения от имени System том, что был сделан перенос 
-  * 
+  * nomsg -- не вставлять сообщения от имени System том, что был сделан перенос
+  *
   **/
   function move_posts($pids,$old_topic,$new_topic,$opts=array()) {
       $sql = 'UPDATE '.DB_prefix.'post SET tid='.intval($new_topic).' '.
       'WHERE '.$this->app()->db->array_to_sql($pids,'id').' AND tid='.intval($old_topic);
       $result=$this->app()->db->query($sql);
-    $result = $result && $this->app()->db->affected_rows();       
-      
+    $result = $result && $this->app()->db->affected_rows();
+
       if ($result) {
         if (empty($opts['nosync']) || empty($opts['nolog']) || empty($opts['nomsg'])) { // если синхронизация тем не отключена
             if (!empty($this->app()->topic) && $this->app()->topic['id']==$old_topic) { // если тема совпадает с той, которая загружена как текущая, берем данные оттуда, чтобы не делать лишний запрос
-              $old_data = $this->app()->topic;                 
+              $old_data = $this->app()->topic;
             }
-            else {          
+            else {
             $sql = 'SELECT fid, t.title, CONCAT(f.hurl,\'/\',CASE WHEN t.hurl!=\'\' THEN t.hurl ELSE CAST(t.id AS CHAR(11)) END,\'/\') AS full_hurl '.
             'FROM '.DB_prefix.'topic t, '.DB_prefix.'forum f '.
             'WHERE t.id='.intval($old_topic).' AND f.id=t.fid';
@@ -40,7 +40,7 @@ class Library_moderate extends Library {
         'FROM '.DB_prefix.'topic t, '.DB_prefix.'forum f '.
         'WHERE t.id='.intval($new_topic).' AND f.id=t.fid';
           $new_data = $this->app()->db->select_row($sql);
-          
+
           if (empty($opts['nomsg'])) { // если не отключена вставка сообщений о переносе
             $tsave=class_exists('Library_tsave') ? new Library_tsave : false;
             $sql = 'SELECT MIN(postdate) FROM '.DB_prefix.'post '.
@@ -59,56 +59,56 @@ class Library_moderate extends Library {
               'uid'=>2,
               'author'=>'System',
               'html'=>1,
-              'text'=>'К данной теме присоединены сообщения из темы &laquo;<a href="'.$this->app()->url($old_data['full_hurl']).'">'.htmlspecialchars($old_data['title']).'</a>&raquo;');           
+              'text'=>'К данной теме присоединены сообщения из темы &laquo;<a href="'.$this->app()->url($old_data['full_hurl']).'">'.htmlspecialchars($old_data['title']).'</a>&raquo;');
             if ($tsave) $tsave->save_post($pdata_new,true);
           }
           }
-          
+
         if (empty($opts['nosync'])) { // если в настройках не указан отказ от пересинхронизации
             $this->topic_resync($old_topic);
             $this->topic_resync($new_topic);
             $this->forum_resync($old_data['fid']);
             if ($old_data['fid']!==$new_data['fid']) $this->forum_resync($new_data['fid']); // проверка нужна для того, чтобы дважды не пересинхронизировать один и тот же форум
           }
-        } 
+        }
         if (empty($opts['nolog'])) { // если не отключео сохранение в лог
           $logdata=array('type'=>3,'tid'=>$old_topic,'data'=>array('pids'=>$pids,'tid'=>$new_topic));
           if (!empty($pdata_old)) $logdata['data']['old_move_msg']=$pdata_old['id'];
-          if (!empty($pdata_new)) $logdata['data']['new_move_msg']=$pdata_new['id'];   
+          if (!empty($pdata_new)) $logdata['data']['new_move_msg']=$pdata_new['id'];
           $this->log_action($logdata);
         }
       }
       return $result;
   }
-  
-  /** Массовое изменение свойств сообщений. 
+
+  /** Массовое изменение свойств сообщений.
   * Изменения признаков блокировки сообщений, статуса удален/на модерации и т.п. очень похожи, поэтому имеет смысл сделать общую процедуру для них всех.
   * @param $pids array Хеш, где ключами являются ID сообщений, а значения содержат то, что будет записано в столбец, имя которого указано в $set_name
   * @param $tid integer Номер темы, в которой находятся обрабатываемые сообщения
   * @param $set_name string Имя столбца, в который будут записаны изменяемые данные.
   * @param $opcode integer Код действия для записи в лог модераторских действий
-  * @param $params array Хеш с настройками переноса темы:    
+  * @param $params array Хеш с настройками переноса темы:
   * nosync -- не проводить пересинхронизацию разделов
   * nolog -- не делать записи в лог модерации
   **/
   private function change_posts_state($pids,$tid,$set_name,$opcode,$opts=array()) {
       $vkeys = array();
       foreach ($pids as $key=>$value) $vkeys[$value][]=$key; // пе
-      
+
       if (empty($opts['nolog'])) {
         $pkeys = array_keys($pids);
         $sql = 'SELECT id,"'.$this->app()->db->slashes($set_name).'" FROM '.DB_prefix.'post '.
         'WHERE '.$this->app()->db->array_to_sql($pkeys,'id').' AND tid='.intval($tid);
         $undo = $this->app()->db->select_simple_hash($sql);
       }
-      
+
       $result = false;
       foreach ($vkeys as $val=>$ids) {
         $sql = 'UPDATE '.DB_prefix.'post SET "'.$this->app()->db->slashes($set_name).'"=\''.$this->app()->db->slashes($val).'\' '.
         'WHERE '.$this->app()->db->array_to_sql($ids,'id').' AND tid='.intval($tid);
         $result = ($this->app()->db->query($sql) && $this->app()->db->affected_rows()) || $result;
     }
-    
+
     if (empty($opts['nosync'])) { // если в настройках не указан отказ от пересинхронизации
       $this->topic_resync($tid);
       if (!empty($this->app()->topic['id']) && $tid==$this->app()->topic['id']) $fid=$this->app()->topic['fid']; // если запрос выполнен для текущей темы, то берем ее раздел из объекта
@@ -118,9 +118,9 @@ class Library_moderate extends Library {
       }
       $this->forum_resync($fid);
     }
-      
+
       if ($result) {
-        // при изменении статуса сообщений 
+        // при изменении статуса сообщений
         if (empty($opts['nolog'])) { // если не отключео сохранение в лог
           $logdata=array('type'=>$opcode,'tid'=>$tid,'data'=>$undo);
           if (count($pids)===1) $logdata['pid']=$pkeys[0]; // если затронуто всего одно сообщение, то запись в логе будет приписана ему
@@ -129,31 +129,31 @@ class Library_moderate extends Library {
       }
       return $result;
   }
-  
+
   /** Блокировка/разблокировка редактирования сообщений **/
   function lock_posts($pids,$tid,$opts=array()) {
       if (!isset($opts['nosync'])) $opts['nosync']=true; // при блокировке/разблокировке сообщений нет смысла делать пересинхронизацию по умолчанию
       return $this->change_posts_state($pids,$tid,'locked',4);
   }
-  
+
   /** Изменение состояния сообщений (нормальное, на премодерации, удалено) **/
   function status_posts($pids,$tid,$opts=array()) {
-    if (!isset($opts['nolog'])) $opts['nolog']=true; // изменение статуса сообщений не логгируется, так как откат производится не через лог, а через Корзину      
+    if (!isset($opts['nolog'])) $opts['nolog']=true; // изменение статуса сообщений не логгируется, так как откат производится не через лог, а через Корзину
       $result=$this->change_posts_state($pids,$tid,'status',2,$opts);
       if ($result && empty($opts['nousersync'])) {
-        // обновляем время последней модификации сообщения при его удалении/восстановлении 
+        // обновляем время последней модификации сообщения при его удалении/восстановлении
         // это нужно, чтобы не требовалось хранить отдельную дату удаления (дата удаления нужна для "очистки корзины" в АЦ)
         $sql='UPDATE '.DB_prefix.'text SET tx_lastmod='.intval($this->app()->time).' WHERE type=16 AND '.$this->app()->db->array_to_sql(array_keys($pids),'id');
         $this->app()->db->query($sql);
-        
+
         $uids = $this->get_post_owners($tid,array_keys($pids));
         $userlib = class_exists('Library_userlib') ? new Library_userlib : false;
         if ($userlib) for ($i=0, $count=count($uids);$i<$count;$i++) $userlib->user_resync($uids[$i]);
       }
       return $result;
   }
-  
-  /** Перенос тем в другой раздел  
+
+  /** Перенос тем в другой раздел
   * @param $tids array Массив ID тем, которые требуется перенести
   * @param $old_forum integer Номер темы, из которой осуществляется перенос
   * @param $new_forum integer Номер темы, в которую осуществляется перенос
@@ -166,58 +166,58 @@ class Library_moderate extends Library {
       'WHERE '.$this->app()->db->array_to_sql($tids,'id').' AND fid='.intval($old_forum);
       $result=$this->app()->db->query($sql);
     $result = $result && $this->app()->db->affected_rows();
-      
-      if ($result) {           
+
+      if ($result) {
       if (empty($opts['nosync'])) { // если в настройках не указан отказ от пересинхронизации
         $this->forum_resync($old_forum);
         if ($old_forum!==$new_forum) $this->forum_resync($new_forum); // проверка нужна для того, чтобы дважды не пересинхронизировать один и тот же форум
       }
         if (empty($opts['nolog'])) { // если не отключео сохранение в лог
           $logdata=array('type'=>16,'fid'=>$old_forum,'data'=>array('tids'=>$tids,'fid'=>$new_forum));
-          if (count($tids)===1) $logdata['tid']=$tids[0]; // если тема всего одна, то  
+          if (count($tids)===1) $logdata['tid']=$tids[0]; // если тема всего одна, то
           $this->log_action($logdata,true);
         }
       }
       return $result;
   }
-  
-  /** Массовое изменение свойств сообщений. 
+
+  /** Массовое изменение свойств сообщений.
   * Изменения признаков блокировки сообщений, статуса удален/на модерации и т.п. очень похожи, поэтому имеет смысл сделать общую процедуру для них всех.
   * @param $pids array Хеш, где ключами являются ID сообщений, а значения содержат то, что будет записано в столбец, имя которого указано в $set_name
   * @param $tid integer Номер темы, в которой находятся обрабатываемые сообщения
   * @param $set_name string Имя столбца, в который будут записаны изменяемые данные.
   * @param $opcode integer Код действия для записи в лог модераторских действий
-  * @param $params array Хеш с настройками переноса темы:    
+  * @param $params array Хеш с настройками переноса темы:
   * nosync -- не проводить пересинхронизацию разделов
   * nolog -- не делать записи в лог модерации
   **/
   private function change_topics_state($tids,$fid,$set_name,$opcode,$opts=false) {
       $vkeys = array();
       foreach ($tids as $key=>$value) $vkeys[$value][]=$key; // пе
-      
+
       if (empty($opts['nolog'])) {
         $tkeys = array_keys($tids);
         $sql = 'SELECT id,"'.$this->app()->db->slashes($set_name).'" FROM '.DB_prefix.'topic '.
         'WHERE '.$this->app()->db->array_to_sql($tkeys,'id').' AND fid='.intval($fid);
         $undo = $this->app()->db->select_simple_hash($sql);
       }
-      
+
       $result = false; // в этой переменной будем отслеживать, были ли сделаны хоть какие-то изменения в БД
       foreach ($vkeys as $val=>$ids) {
         $sql = 'UPDATE '.DB_prefix.'topic SET "'.$this->app()->db->slashes($set_name).'"=\''.$this->app()->db->slashes($val).'\' '.
         'WHERE '.$this->app()->db->array_to_sql($ids,'id').' AND fid='.intval($fid);
         $result = ($this->app()->db->query($sql) && $this->app()->db->affected_rows()) || $result;
     }
-    
+
     if (empty($opts['nosync'])) { // если в настройках не указан отказ от пересинхронизации
       $this->forum_resync($fid);
     }
-      
+
       if ($result) {
-        // при изменении статуса сообщений 
+        // при изменении статуса сообщений
         if (empty($opts['nolog'])) { // если не отключео сохранение в лог
           $logdata=array('type'=>$opcode,'fid'=>$fid,'data'=>$undo);
-          if (count($tids)===1) $logdata['tid']=$tkeys[0]; // если затронуто всего одно сообщение, то запись в логе будет приписана ему  
+          if (count($tids)===1) $logdata['tid']=$tkeys[0]; // если затронуто всего одно сообщение, то запись в логе будет приписана ему
           $this->log_action($logdata,true);
         }
       }
@@ -229,25 +229,25 @@ class Library_moderate extends Library {
       if (!isset($opts['nosync'])) $opts['nosync']=true; // при блокировке/разблокировке сообщений нет смысла делать пересинхронизацию по умолчанию
       return $this->change_topics_state($tids,$fid,'locked',18,$opts);
   }
-  
+
   /** Приклеивание/ отклеивание тем **/
   function stick_topics($tids,$fid,$opts=false) {
     if (!isset($opts['nosync'])) $opts['nosync']=true; // при приклеивании тем нет смысла делать пересинхронизацию по умолчанию
     return $this->change_topics_state($tids,$fid,'sticky',19,$opts);
   }
-  
+
   /** Приклеивание/ отклеивание первого сообщения в теме **/
   function stick_posts($tids,$fid,$opts=false) {
-    if (!isset($opts['nosync'])) $opts['nosync']=true; 
+    if (!isset($opts['nosync'])) $opts['nosync']=true;
     return $this->change_topics_state($tids,$fid,'sticky_post',20,$opts);
   }
-  
+
   /** Добавление/удаление тем из "Избранного" форума **/
   function fav_topics($tids,$fid,$opts=false) {
     if (!isset($opts['nosync'])) $opts['nosync']=true; // при изменении статуса «В Избранном» нет необходимости в пересинхронизации
     return $this->change_topics_state($tids,$fid,'favorites',21,$opts);
   }
-  
+
   /** Изменение состояния тем целиком (нормальное, на премодерации, удалено) **/
   function status_topics($tids,$fid,$opts=false) {
 //      if (!isset($opts['nolog'])) $opts['nolog']=true; // TODO: пока откат удаления темы целиком будет делаться не через Корзину, а через Лог действий, но над этим еще стоит подумать
@@ -259,9 +259,9 @@ class Library_moderate extends Library {
       }
       return $result;
   }
-      
+
   // TODO: подумать, нужна ли copy_posts
-  
+
   /** Пересчет показателей (ресинхронизация) темы: даты первого и последнего сообщения, количества сообщений и т.п.
   * При пересчете делается допущение, что самое последнее по времени сообщение всегда обладает наибольшим id во всей теме.
   * **/
@@ -279,7 +279,7 @@ class Library_moderate extends Library {
 
   /** Пересчет показателей (ресинхронизация) раздела: даты последнего сообщения и количества тем и сообщений.
   * При пересчете делается допущение, что все темы раздела уже ресинхронизированы.
-  * **/    
+  * **/
   function forum_resync($fid=false) {
       if (!$fid) $fid=$this->app()->forum['id'];
       $sql = 'SELECT MAX(last_post_id) AS last_post_id, COUNT(*) AS topic_count, SUM(post_count) AS post_count '.
@@ -288,9 +288,9 @@ class Library_moderate extends Library {
       if (empty($forum_data['last_post_id'])) $forum_data['last_post_id']=0;
       if (empty($forum_data['post_count'])) $forum_data['post_count']=0;
       $forum_data['lastmod']=$this->app()->time; // при пересинхронизации темы всегда временем последней синхронизации считаем текущее
-      return $this->app()->db->update(DB_prefix.'forum',$forum_data,'id='.intval($fid));       
+      return $this->app()->db->update(DB_prefix.'forum',$forum_data,'id='.intval($fid));
   }
-  
+
   /** Сохранение модераторского действия в лог вместе с даннными для его отката. Данные для отката должны содержаться в $data['data'], вид этих данных зависит от выполняемого действия
   * В настоящее время поддерживаются следующие действия:
   * 1 -- редактирование сообщения (данные для отката: post, хеш со старыми данными сообщения, text -- старый текст сообщения)
@@ -309,24 +309,24 @@ class Library_moderate extends Library {
       if (empty($data['tid'])) $data['tid']=(isset($this->app()->topic) && $this->app()->topic['id']) ? $this->app()->topic['id'] : 0; // если не включено переопределение, то тема создается в текущем разделе
       if (empty($data['tid'])) $data['pid']=0;
       if (empty($data['time']) || !$override) $data['time']=$this->app()->time; // по умолчанию берем текущее время
-      if (empty($data['uid']) || !$override) $data['uid']=$this->app()->get_uid(); // и текущего пользователя 
+      if (empty($data['uid']) || !$override) $data['uid']=$this->app()->get_uid(); // и текущего пользователя
       if (empty($data['data'])) $data['data']='';
       else $data['data']=serialize($data['data']);
-      
+
       if (empty($data['type'])) { // если код модераторского действия не задан
         trigger_error('Не определен код модераторского действия, сохранение в базу произведено не будет!',E_USER_WARNING);
         return false;
       }
       return $this->app()->db->insert(DB_prefix.'log_action',$data);
   }
-  
-  /** Откат действия, выполненного модератором 
+
+  /** Откат действия, выполненного модератором
   **/
   function rollback($id) {
       $sql = 'SELECT * FROM '.DB_prefix.'log_action WHERE id='.intval($id);
       $logdata = $this->app()->db->select_row($sql);
       if (!$logdata) return false; // если не удалось достать данные, возвращаем ошибку и ничего не делаем
-      if ($logdata['data']) $undo = unserialize($logdata['data']);
+      if ($logdata['data']) $undo = unserialize($logdata['data'],array('allowed_classes'=>false));
       else $undo = false;
       if (!empty($this->app()->forum) && $this->app()->forum['id']!=$logdata['fid']) $this->app()->output_403('Невозможно отменить действие, совершенное для другого раздела!');
       $code = intval($logdata['type']); // тип совершенной модератором операции
@@ -339,13 +339,13 @@ class Library_moderate extends Library {
         $result=$this->app()->db->update(DB_prefix.'post',$undo,'id='.intval($logdata['pid']).' AND tid='.intval($logdata['tid'])); // откатываем данные сообщения (часть после AND нужна во избежание ситуаций, когда сообщение было сначала отредактировано, а потом перенесено)
         if ($result) {
           $this->app()->db->update(DB_prefix.'text',array('data'=>$text,'tx_lastmod'=>$tx_lastmod),'id='.intval($undo['id']).' AND type=16'); // откатываем текст сообщения
-          if (!empty($undo['topic'])) $this->app()->db->update(DB_prefix.'topic',$undo['topic'],'id='.intval($logdata['tid']).' AND fid='.intval($logdata['fid'])); // откатываем данные сообщения (часть после AND нужна во избежание ситуаций, когда сообщение было сначала отредактировано, а потом перенесено) 
+          if (!empty($undo['topic'])) $this->app()->db->update(DB_prefix.'topic',$undo['topic'],'id='.intval($logdata['tid']).' AND fid='.intval($logdata['fid'])); // откатываем данные сообщения (часть после AND нужна во избежание ситуаций, когда сообщение было сначала отредактировано, а потом перенесено)
           $this->topic_resync($logdata['tid']);
           $this->forum_resync($logdata['fid']);
         }
       }
       elseif ($code===2) { // отмена удаления сообщения
-        $result=$this->status_posts($undo,$logdata['tid'],array('nolog'=>true));   
+        $result=$this->status_posts($undo,$logdata['tid'],array('nolog'=>true));
       }
       elseif ($code===3) { // отмена переноса сообщений
         if (!empty($undo['old_move_msg'])) { // удаляем сообщения о переносе
@@ -355,7 +355,7 @@ class Library_moderate extends Library {
         if (!empty($undo['new_move_msg'])) {
             $sql = 'DELETE FROM '.DB_prefix.'post WHERE id='.intval($undo['new_move_msg']);
             $this->app()->db->query($sql);
-        }          
+        }
         $result=$this->move_posts($undo['pids'],$undo['tid'],$logdata['tid'],array('nomsg'=>true,'nolog'=>true));
       }
       elseif ($code===4) { // отмена блокировки редактирования сообщения
@@ -365,10 +365,10 @@ class Library_moderate extends Library {
         $result=$this->move_topics($logdata['tid'],$undo['fid'],$logdata['fid'],array('nolog'=>true));
       }
       elseif ($code===17) { // отмена удаления/восстановления темы
-        $result=$this->status_topics($undo,$logdata['fid'],array('nolog'=>true));          
+        $result=$this->status_topics($undo,$logdata['fid'],array('nolog'=>true));
       }
       elseif ($code===18) { // отмена закрытия/открытия темы
-        $result=$this->lock_topics($undo,$logdata['fid'],array('nolog'=>true));          
+        $result=$this->lock_topics($undo,$logdata['fid'],array('nolog'=>true));
       }
       elseif ($code===19) { // отмена приклеивания/отклеивания темы
         $result=$this->stick_topics($undo,$logdata['fid'],array('nolog'=>true));
@@ -387,7 +387,7 @@ class Library_moderate extends Library {
       $this->app()->db->commit();
       return $result;
   }
-  
+
   /** Подсчет числа записей в логе модераторских действий **/
   function count_actions($cond) {
       $sql = 'SELECT COUNT(*) FROM '.DB_prefix.'log_action WHERE 1=1 ';
@@ -398,11 +398,11 @@ class Library_moderate extends Library {
       if (!empty($cond['type'])) $sql.=' AND type='.intval($cond['type']); // извлечение записей определенного типа
     return $this->app()->db->select_int($sql);
   }
-  
+
   /** Извлечение записей из лога модераторских действий **/
   function get_actions($cond) {
       $sql = 'SELECT la.*, u.display_name FROM '.DB_prefix.'log_action la '.
-          'LEFT JOIN '.DB_prefix.'user u ON (la.uid=u.id) '. 
+          'LEFT JOIN '.DB_prefix.'user u ON (la.uid=u.id) '.
           'WHERE 1=1 ';
       if (!empty($cond['fid'])) $sql.=' AND fid='.intval($cond['fid']);
       if (!empty($cond['tid'])) $sql.=' AND tid='.intval($cond['tid']);
@@ -412,13 +412,13 @@ class Library_moderate extends Library {
       $sql.= ' ORDER BY time DESC';
       $result=$this->app()->db->select_all($sql);
       for ($i=0, $count=count($result);$i<$count;$i++) {
-          $result[$i]['data']=unserialize($result[$i]['data']);
-          $result[$i]['descr']=$this->describe_action($result[$i]);           
+          $result[$i]['data']=unserialize($result[$i]['data'],array('allowed_classes'=>false));
+          $result[$i]['descr']=$this->describe_action($result[$i]);
       }
       return $result;
   }
-  
-  /** Возвращает человекочитаемое описание модераторского действия **/    
+
+  /** Возвращает человекочитаемое описание модераторского действия **/
   function describe_action($data) {
     $type=$data['type'];
     if ($type==1) $result='Редактирование сообщения';
@@ -454,17 +454,17 @@ class Library_moderate extends Library {
       $result='<b>Внесение/удаление темы в «Избранное» форума:</b><ul>';
       foreach ($data['data'] as $curtid=>$status) $result.='<li><a href="#" class="topic_popup">#'.intval($curtid).'</a> &mdash; '.($status ? 'внесено' : 'удалено').'</li>';
       $result.='</ul>';
-    }      
+    }
     return $result;
   }
-  
-  /** Получение списка авторов сообщений. 
-   * Нужно для уменьшения/увеличения счетчиков при пропуске сообщений с премодераци, 
-   * удалении и восстановлении 
+
+  /** Получение списка авторов сообщений.
+   * Нужно для уменьшения/увеличения счетчиков при пропуске сообщений с премодераци,
+   * удалении и восстановлении
    * @param $tida integer|array Идентификатор(ы) тем
    * @param $pids mixed Идентификаторы сообщений, если нужна выборка не по всей теме, а только по определенным сообщениям
    * @return array Массив с идентфикаторами пользователей. (Только зарегистрированных, сообщения гостей не считаются.)
-   * **/  
+   * **/
   function get_post_owners($tids,$pids=false) {
     if (!is_array($tids)) $tids = array($tids);
     $sql = 'SELECT DISTINCT uid FROM '.DB_prefix.'post p '.
@@ -473,6 +473,6 @@ class Library_moderate extends Library {
       if (is_array($pids)) $sql.=' AND '.$this->app()->db->array_to_sql($pids,'id');
       else $sql.=' AND id='.intval($pids);
     }
-    return $this->app()->db->select_all_numbers($sql);      
+    return $this->app()->db->select_all_numbers($sql);
   }
 }

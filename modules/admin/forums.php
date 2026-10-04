@@ -12,22 +12,22 @@
 class forums extends Application_Admin {
   /** Просмотр списка форумов **/
   function action_view() {
-    $forumlib = new Library_forums;    
+    $forumlib = new Library_forums;
     /* @var $forumlib Library_forums */
     $this->out->categories=$forumlib->list_categories(false,true);
-        
+
     $cond['typeinfo']=true; // получать информацию о типе раздела
     if (empty($_REQUEST['show_all'])) $cond['owner']=0; // извлекаем только разделы общего пользователя, если нет указания, что нужно показать все разделы вообще
-    $cond['sortfield']=true;// извлекаем данные о порядке сортировки 
-    $forums = $forumlib->list_forums($cond); 
-        
+    $cond['sortfield']=true;// извлекаем данные о порядке сортировки
+    $forums = $forumlib->list_forums($cond);
+
     foreach ( $forums as $curforum ) {
       $this->out->categories[$curforum['category_id']]['forums'][]=$curforum; // добавляем в список форумов данной категории для вывода
     }
     $this->out->sort_key = $this->gen_auth_key(false,'sort');
     $this->out->is_founder = $this->is_admin(true); // проверка, является ли пользователь Основателем, чтобы иметь возможность удалять разделы
   }
-  
+
   /** Сохранение полей сортировки для разделов и категорий **/
   function action_sort() {
     if (!empty($_POST['cat_sort'])) {
@@ -45,12 +45,12 @@ class forums extends Application_Admin {
     $this->message('Сортировка разделов и категорий выполнена!',1);
     $this->redirect($this->http(str_replace('sort.htm','view.htm',$_SERVER['REQUEST_URI'])));
   }
-  
+
   /** Провера корректности данных категории **/
   function category_pre_check($data) {
     $result = array();
     if (empty($data['title'])) $result=array('text'=>'Название категории не может быть пустым','level'=>3);
-    return $result;    
+    return $result;
   }
 
   /** Создание категории **/
@@ -66,7 +66,7 @@ class forums extends Application_Admin {
     }
     return 'forums/category.tpl';
   }
-  
+
   /** Редактирование категории (на данный момент только названия) **/
   function action_edit_category() {
     if (empty($_REQUEST['id'])) {
@@ -80,18 +80,18 @@ class forums extends Application_Admin {
         $this->message('Категория отредактирована!',1);
         $this->redirect($this->http(str_replace('edit_category.htm','view.htm',$_SERVER['REQUEST_URI'])));
       }
-      else $this->out->category = $_POST['category'];      
+      else $this->out->category = $_POST['category'];
     }
     else {
-      $forumlib = new Library_forums;    
+      $forumlib = new Library_forums;
       /* @var $forumlib Library_forums */
       $cat=$forumlib->list_categories($_REQUEST['id'],true);
       $this->out->category=$cat[$_REQUEST['id']];
     }
     $this->out->id=$_REQUEST['id'];
-    return 'forums/category.tpl';    
+    return 'forums/category.tpl';
   }
-  
+
   function action_delete_category() {
     if (empty($_REQUEST['id'])) {
       $this->message('Не указан идентификатор категории',3);
@@ -110,16 +110,16 @@ class forums extends Application_Admin {
       }
     }
     $this->redirect($this->http(str_replace('category_edit.htm','view.htm',$_SERVER['REQUEST_URI'])));
-  } 
-  
+  }
+
 
   /** Получение списка возможных р **/
   function parent_forums($id=false) {
     $sql = 'SELECT f.id, f.title FROM '.DB_prefix.'forum f, '.DB_prefix.'forum_type ft '.
         'WHERE f.module=ft.module AND ft.allow_subforums=\'1\' AND f.id!='.intval($id).' ORDER BY f.sortfield';
-    return array('0'=>'Главная страница')+$this->db->select_simple_hash($sql); 
-  }  
-  
+    return array('0'=>'Главная страница')+$this->db->select_simple_hash($sql);
+  }
+
   function action_create_forum() {
     if (empty($_REQUEST['type'])) { // если не указан тип форума, предлагаем пользователю его выбрать
       $sql = 'SELECT module, typename FROM '.DB_prefix.'forum_type ORDER BY sortfield';
@@ -131,27 +131,27 @@ class forums extends Application_Admin {
       /* @var $forumlib Library_forums */
       $sql='SELECT id, title FROM ' . DB_prefix . 'category ORDER BY sortfield';
       $this->out->categories = $this->db->select_simple_hash($sql);
-      
+
       $templatelib = new Library_template;
       /* @var $templatelib Library_template */
       if ($templatelib) $this->out->templates = array(''=>'Стиль сайта по умолчанию')+$templatelib->get_list($this->is_admin()); // если пользователь -- админ, он может выбрать любой шаблон, иначе -- только незаблокированные
       $this->out->parent_forums = $this->parent_forums();
-      
+
       if ($this->is_post()) {
         $data=$_REQUEST['forum'];
         unset($data['id']); // чтобы id форума присвоился автоматически
         $extdata = isset($_REQUEST['extdata']) ? $_REQUEST['extdata'] : array();
-        $data['attach_types'] = isset($_REQUEST['filetypes']) ? array_sum($_REQUEST['filetypes']) : 0; // суммируем значения checkboxов filetypes, чтобы получить attach_types в виде битовой маски  
+        $data['attach_types'] = isset($_REQUEST['filetypes']) ? array_sum($_REQUEST['filetypes']) : 0; // суммируем значения checkboxов filetypes, чтобы получить attach_types в виде битовой маски
         $errors = $forumlib->check_forum($data);
         if (empty($errors)) {
           $forumlib->create_forum($data,$extdata,$_REQUEST['type'],0);
           $this->message('Новый раздел создан!',1);
-          $this->reset_session_cache(); // сбрасываем, т.к. при создании нового форума нужно перекешировать информацию о разделах в сессии            
+          $this->reset_session_cache(); // сбрасываем, т.к. при создании нового форума нужно перекешировать информацию о разделах в сессии
           if ($forumlib->regenerate_routes()) $this->redirect($this->http(str_replace('create_forum.htm','view.htm',$_SERVER['REQUEST_URI'])));
-          else {            
+          else {
             $this->message('Не удалось обновить файл для управления переадресацией запросов! Вам необходимо сделать это вручную!',2);
             $this->redirect($this->http(str_replace('create_forum.htm','routes.htm',$_SERVER['REQUEST_URI'])));
-          }          
+          }
         }
         else {
           $this->out->forumdata = $data;
@@ -165,33 +165,33 @@ class forums extends Application_Admin {
       if ($_REQUEST['type']==='gallery') $this->out->forumdata['maxattach']=24; // для галерей число прикреплённых файлов увеличено
       $this->out->type = $_REQUEST['type'];
       $this->out->time = $this->time; // текущее время используется некоторыми типами разделов для генерации URL
-      return 'forums/edit_forum.tpl';      
+      return 'forums/edit_forum.tpl';
     }
   }
-  
+
   function action_edit_forum() {
     $id = $_REQUEST['id'];
     if (empty($_REQUEST['id'])) {
       $this->message('Не указан идентификатор раздела',3);
       $this->redirect($this->http(str_replace('edit_forum.htm','view.htm',$_SERVER['REQUEST_URI'])));
     }
-    
+
     $forumlib = new Library_forums;
     /* @var $forumlib Library_forums */
     $sql='SELECT id, title FROM ' . DB_prefix . 'category ORDER BY sortfield';
     $this->out->categories = $this->db->select_simple_hash($sql);
-    
+
     $templatelib = new Library_template;
     /* @var $templatelib Library_template */
     if ($templatelib) $this->out->templates = array(''=>'Стиль сайта по умолчанию')+$templatelib->get_list($this->is_admin()); // если пользователь -- админ, он может выбрать любой шаблон, иначе -- только незаблокированные
-    
+
     $this->out->parent_forums = $this->parent_forums($id);
-    
+
     if ($this->is_post()) {
       $data=$_REQUEST['forum'];
       $extdata = isset($_REQUEST['extdata']) ? $_REQUEST['extdata'] : array();
       $data['attach_types'] = isset($_REQUEST['filetypes']) ? array_sum($_REQUEST['filetypes']) : 0; // суммируем значения checkboxов filetypes, чтобы получить attach_types в виде битовой маски
-      $data['id']=$id;      
+      $data['id']=$id;
       $errors = $forumlib->check_forum($data);
       if (empty($errors)) {
         $forumlib->update_forum($data,$extdata);
@@ -201,7 +201,7 @@ class forums extends Application_Admin {
         else {
           $this->message('Не удалось обновить файл для управления переадресацией запросов! Вам необходимо сделать это вручную!',2);
           $this->redirect($this->http(str_replace('edit_forum.htm','routes.htm',$_SERVER['REQUEST_URI'])));
-        }                
+        }
       }
       else {
         $this->out->forumdata = $data;
@@ -214,10 +214,10 @@ class forums extends Application_Admin {
       if (empty($this->out->forumdata)) $this->output_404('Раздела с таким номером не существует!');
       $this->out->type = $this->out->forumdata['module'];
       $extdata = $this->get_text($id, 3); // 3 -- сериализованные расширенные данные раздела
-      if ($extdata) $this->out->extdata = unserialize($extdata); 
-    }   
+      if ($extdata) $this->out->extdata = unserialize($extdata,array('allowed_classes'=>false));
+    }
   }
-  
+
   function action_delete_forum() {
     if (!$this->is_admin(true)) $this->output_403('Только пользователь с правами Основателя может удалять разделы!');
     $forumlib = new Library_forums;
@@ -228,7 +228,7 @@ class forums extends Application_Admin {
       $this->redirect($this->http(str_replace('delete_forum.htm','view.htm',$_SERVER['REQUEST_URI'])));
     }
     $this->out->forumdata = $forumlib->get_forum($id);
-    if (empty($this->out->forumdata)) $this->output_404('Раздела с таким номером не существует!');    
+    if (empty($this->out->forumdata)) $this->output_404('Раздела с таким номером не существует!');
     if ($this->is_post()) {
       if ($this->out->forumdata['hurl']===$_POST['forum_hurl']) { // если корректно введен HURL для подтверждения
         $dellib = new Library_delete;
@@ -239,12 +239,12 @@ class forums extends Application_Admin {
         else {
           $this->message('Не удалось обновить файл для управления переадресацией запросов! Вам необходимо сделать это вручную!',2);
           $this->redirect($this->http(str_replace('delete_forum.htm','routes.htm',$_SERVER['REQUEST_URI'])));
-        }        
+        }
       }
       else $this->message('Введен некорректный HURL форума!',3);
     }
   }
-  
+
   /** Операции по изменению настроек для группы разделов **/
   function action_mass() {
     if ($this->is_post()) {
@@ -259,7 +259,7 @@ class forums extends Application_Admin {
           if ($_POST['range']!=='all') $sql.=' WHERE '.$this->db->array_to_sql($_POST['ids'], 'id');
           $this->db->query($sql);
           $this->message('Настройки разделов изменены!',1);
-          $this->redirect($this->http($_SERVER['REQUEST_URI']));          
+          $this->redirect($this->http($_SERVER['REQUEST_URI']));
         }
         else $this->message('Не выбран ни один раздел для изменения',2);
       }
@@ -268,11 +268,11 @@ class forums extends Application_Admin {
       $forumlib = new Library_forums;
       /* @var $forumlib Library_forums */
       $this->out->categories=$forumlib->list_categories(false,true);
-      
+
       $cond['allow_mass']=true; // получать информацию только о разделах, поддерживающих массовые операции
       $cond['owner']=0; // извлекаем только разделы общего пользователя, если нет указания, что нужно показать все разделы вообще
       $forums = $forumlib->list_forums($cond);
-      
+
       foreach ( $forums as $curforum ) {
         $this->out->categories[$curforum['category_id']]['forums'][]=$curforum; // добавляем в список форумов данной категории для вывода
       }
@@ -281,15 +281,15 @@ class forums extends Application_Admin {
       /* @var $templatelib Library_template */
       if ($templatelib) $this->out->templates = array('-1'=>'Оставить без изменений',''=>'Стиль сайта по умолчанию')+$templatelib->get_list($this->is_admin()); // если пользователь -- админ, он может выбрать любой шаблон, иначе -- только незаблокированные
   }
-  
+
   /** Настройка прав доступа для отдельного раздела. **/
   function action_access() {
     $id = $_REQUEST['id'];
     if (empty($_REQUEST['id'])) {
       $this->message('Не указан идентификатор раздела',3);
       $this->redirect($this->http(str_replace('access.htm','view.htm',$_SERVER['REQUEST_URI'])));
-    }    
-    $this->out->fields = $this->get_access_fields();    
+    }
+    $this->out->fields = $this->get_access_fields();
     if ($this->is_post()) {
       //$sql = $this->db->lock_tables(DB_prefix.'access',true);
       $sql = 'DELETE FROM '.DB_prefix.'access WHERE fid='.intval($id);
@@ -300,13 +300,13 @@ class forums extends Application_Admin {
           foreach ($this->out->fields as $field) $data[$field]=!empty($data[$field]) ? '1' : '0';
           $data['gid']=$group;
           $data['fid']=$id;
-          $this->db->insert(DB_prefix.'access',$data);          
+          $this->db->insert(DB_prefix.'access',$data);
         }
       }
       // $sql = $this->db->unlock_tables(DB_prefix.'access');
-      $this->reset_session_cache(); // выставляем признак необходимости обновить данные, закешированные в сесии, чтобы изменение прав повлияло сразу     
+      $this->reset_session_cache(); // выставляем признак необходимости обновить данные, закешированные в сесии, чтобы изменение прав повлияло сразу
       $this->message('Права доступа к разделу изменены!',1);
-      $this->redirect($this->http($_SERVER['REQUEST_URI']));      
+      $this->redirect($this->http($_SERVER['REQUEST_URI']));
     }
     else {
       $forums = array();
@@ -315,7 +315,7 @@ class forums extends Application_Admin {
         $sql = 'SELECT f.title, f.id, f.parent_id FROM '.DB_prefix.'forum f WHERE id='.intval($next_id);
         $curforum=$this->db->select_row($sql);
         $sql = 'SELECT * FROM '.DB_prefix.'access WHERE fid='.intval($next_id);
-        $curforum['access'] = $this->db->select_hash($sql, 'gid');       
+        $curforum['access'] = $this->db->select_hash($sql, 'gid');
         $next_id=$curforum['parent_id'];
         $forums[]=$curforum;
       }
@@ -324,16 +324,16 @@ class forums extends Application_Admin {
       $sql = 'SELECT * FROM '.DB_prefix.'access WHERE fid=0';
       $curforum['access'] = $this->db->select_hash($sql, 'gid');
       $forums[]=$curforum;
-      
+
       $sql = 'SELECT level, name FROM '.DB_prefix.'group ORDER BY level DESC';
       $groups = $this->db->select_all($sql);
       for ($i=0,$count1=count($groups);$i<$count1;$i++) {
-        for ($j=0,$count2=count($forums);$j<$count2 && !isset($groups[$i]['access']);$j++) { 
-          // в массиве forums разделы упорядочены по порядку наследования, от ближайшего предка к первой странице, поэтому в результате первым будет найден ближайший предок (или сам раздел), у которого права для текущей группы не унаследованы, а выставлены собственнные  
+        for ($j=0,$count2=count($forums);$j<$count2 && !isset($groups[$i]['access']);$j++) {
+          // в массиве forums разделы упорядочены по порядку наследования, от ближайшего предка к первой странице, поэтому в результате первым будет найден ближайший предок (или сам раздел), у которого права для текущей группы не унаследованы, а выставлены собственнные
           if (isset($forums[$j]['access'][$groups[$i]['level']])) {
             $groups[$i]['access']=$forums[$j]['access'][$groups[$i]['level']];
             $groups[$i]['inherit']=($forums[$j]['id']!=$id); // признак того, что раздел имеет свои права, а не унаследованные
-            $groups[$i]['title']=$groups[$i]['inherit'] ? (($forums[$j]['id']!=0) ? 'от раздела '.$forums[$j]['title'] : 'от главной страницы') : '';            
+            $groups[$i]['title']=$groups[$i]['inherit'] ? (($forums[$j]['id']!=0) ? 'от раздела '.$forums[$j]['title'] : 'от главной страницы') : '';
           }
         }
       }
@@ -342,7 +342,7 @@ class forums extends Application_Admin {
       $this->out->forum_id = $id;
     }
   }
-  
+
   function action_routes() {
     $forumlib = new Library_forums;
     /* @var $forumlib Library_forums */

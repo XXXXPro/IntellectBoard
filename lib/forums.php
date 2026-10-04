@@ -28,7 +28,7 @@ class Library_forums extends Library {
     if ($extdata) $sql.='LEFT JOIN '.DB_prefix.'text tx ON (tx.id=f.id AND tx.type=3) ';
     $sql.='WHERE f.id='.intval($id);
     $result=$this->app()->db->select_row($sql);
-    if ($extdata && !empty($result['extdata'])) $result['extdata']=unserialize($result['extdata']);
+    if ($extdata && !empty($result['extdata'])) $result['extdata']=unserialize($result['extdata'],array('allowed_classes'=>false));
     return $result;
   }
 
@@ -75,7 +75,7 @@ class Library_forums extends Library {
 
     if (!empty($cond['extdata'])) // десериализуем расширенные данные раздела, если таковые имеются
       for ($i=0, $count=count($result);$i<$count; $i++)
-        if (!empty($result[$i]['extdata'])) $result[$i]['extdata']=unserialize($result[$i]['extdata']);
+        if (!empty($result[$i]['extdata'])) $result[$i]['extdata']=unserialize($result[$i]['extdata'],array('allowed_classes'=>false));
     return $result;
   }
 
@@ -122,7 +122,7 @@ class Library_forums extends Library {
   /** Изменение данных раздела.
   *  Данные о разделе состоят из двух частей: основные данные, которые хранятся в таблице prefix_forum и должны соответствовать по структуре
   *  и дополнительные данные, которые хранятся в сериализованном виде prefix_text и могут иметь произвольную структуру.
-  *  
+  *
   * @param mixed $data — хеш с основными данными о разделе или номер раздела. Если передается только номер, то таблица основных данных не изменяется, а изменяются только расширенные данные.
   * @param array $extdata — хеш с расширенными данными. При записи данных происходит добавление ключей к уже имеющимся через array_merge.
   **/
@@ -166,7 +166,7 @@ class Library_forums extends Library {
     $sql = 'SELECT f.id, f.title, f.hurl, ft.route FROM '.DB_prefix.'forum f, '.DB_prefix.'forum_type ft '.
         'WHERE f.module=ft.module ORDER BY f.sortfield';
     $forums = $this->app()->db->select_all($sql);
-    $buffer = '';    
+    $buffer = '';
     $routes = file_get_contents(BASEDIR.'etc/routes.txt')."\n";
     for ($i=0, $count=count($forums);$i<$count;$i++) {
       $tmp2 = $forums[$i]['route'];
@@ -179,9 +179,9 @@ class Library_forums extends Library {
       $routes.=$tmp2."\n";
     }
     if ($mainpage=$this->app()->get_opt('forum_mainpage')) {
-      $route_index_data = '^'.$mainpage.'$ mainpage.php'; 
+      $route_index_data = '^'.$mainpage.'$ mainpage.php';
     }
-    else $route_index_data = '^$ mainpage.php'; 
+    else $route_index_data = '^$ mainpage.php';
     $routes = str_replace('<<<index_route>>>',$route_index_data,$routes);
 
     return $routes;

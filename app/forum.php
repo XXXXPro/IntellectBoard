@@ -53,7 +53,7 @@ class Application_Forum extends Application {
       $topic_url = $_REQUEST['t'];
       $tlib = new Library_topic;
       $this->topic = $tlib->get_topic($topic_url,0,true);
-      
+
       $result = true;
       if (!$this->topic) $result = false;
       elseif ($this->topic['fid']!=$this->forum['id']) { // если неправильно указан forum id, нужно сделать редирект (полезно для перемещенных тем)
@@ -74,8 +74,8 @@ class Application_Forum extends Application {
       }
       if (!$result) { // если в базе форума с таким ID/HURL не нашлось
         $this->output_404('Запрошенная тема не существует или была удалена!');
-      }      
-      
+      }
+
       if ($this->topic['hurl'] && $_REQUEST['t']!==$this->topic['hurl']) { // если у темы есть HURL, а ее загрузили по id
         $this->redirect($this->http($this->url($this->topic['full_hurl'])),true);
       }
@@ -169,7 +169,7 @@ class Application_Forum extends Application {
 
   function set_title() {
     $short_title = $this->get_opt('site_start');
-    if (empty($short_title)) $this->get_opt('site_title');     
+    if (empty($short_title)) $this->get_opt('site_title');
     $result='';
     $page = isset($this->out->pages['page']) ? $this->out->pages['page'] : false;
     if (!empty($this->topic)) {
@@ -214,7 +214,7 @@ class Application_Forum extends Application {
         array_push($result,array($parents[$i]['title'],$this->url($parents[$i]['hurl'].'/')));
       }
     }
-    if ($this->action==='view_forum') {      
+    if ($this->action==='view_forum') {
       if (isset($_REQUEST['tags'])) {
         array_push($result, array($this->forum['title'],$this->url($this->forum['hurl'].'/')));
         array_push($result,array('Записи с тегом „'.$_REQUEST['tags'].'”'));
@@ -228,7 +228,7 @@ class Application_Forum extends Application {
       if ($this->action==='edit') array_push($result,array('Редактирование сообщения'));
       elseif (empty($_POST['preview'])) array_push($result,array('Отправка сообщения'));
       else array_push($result,array('Предварительный просмотр сообщения'));
-    }    
+    }
     if ($this->action==='tags') array_push($result,array('Список тегов'));
     if ($this->action==='newtopic') array_push($result,array('Новая тема'));
     return $result;
@@ -330,11 +330,11 @@ class Application_Forum extends Application {
   /** Получение расширенных данных текущего раздела **/
   function get_ext_data() {
     $buffer = $this->get_text($this->forum['id'], 3);
-    if ($buffer) $result = unserialize($buffer);
+    if ($buffer) $result = unserialize($buffer,array('allowed_classes'=>false));
     else $resul = array();
     return $result;
   }
-  
+
   function action_update_extdata() {
     $this->update_extdata();
     $this->redirect($this->forum['hurl'].'/');
@@ -343,7 +343,7 @@ class Application_Forum extends Application {
   /** Обновление закешированных в extdata даных о последних темах или сообщениях.
   * В stdforum не используется, но нужна для унаследованных от него разделов, в частности, blog и microblog **/
   function update_extdata() {}
-  
+
 
   /** Действие для редактирования настроек раздела, которые может задавать владелец**/
   function action_owner_settings() {
@@ -365,6 +365,6 @@ class Application_Forum extends Application {
     }
     return $filename;
   }
-  
-  
+
+
 }

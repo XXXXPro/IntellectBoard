@@ -9,7 +9,7 @@
  *  Скрипт выполнения задач по таймеру
  *  ================================ */
 
-define('IntB_Crontab_mode',true); // для проверок, что работаем в Cron-режиме 
+define('IntB_Crontab_mode',true); // для проверок, что работаем в Cron-режиме
 
 
 class Application_Crontab extends Application {
@@ -67,14 +67,14 @@ class Application_Crontab extends Application {
         }
 
         for ($i=0,$count=count($tasks);$i<$count;$i++) { // а теперь само выполнение
-          $result = -1;          
+          $result = -1;
           if (microtime(true) - $start_time < $max_time*1000000 - 5000000) { // если есть достаточный запас времени для выполнения
             try {
               $classname = 'Library_'.$tasks[$i]['library'];
               if (class_exists($classname)) {
                 $module=new $classname;
                 if (method_exists($module,'task_'.$tasks[$i]['proc'])) {
-                  $params = unserialize($tasks[$i]['params']);
+                  $params = unserialize($tasks[$i]['params'],array('allowed_classes'=>false));
                   $result = call_user_func(array($module,'task_'.$tasks[$i]['proc']),$params);
                 }
                 else $this->log_entry('tasks',2,'lib/'.$tasks[$i]['library'].'.php','Не найдена процедура task_'.$tasks[$i]['proc']);
@@ -86,7 +86,7 @@ class Application_Crontab extends Application {
               $this->log_entry('tasks',1,$tasks[$i]['library'],'Процедура task_'.$tasks[$i]['proc'].' выбросила исключение: '.$e->getMessage());
             }
           }
-          if ($result==0 || $tasks[$i]['errors']>=127) { // если в процессе выполнения не произошло ошибок, задача возвращает 0 или false. Считаем её выполненной и удаляем. Если количество ошибок превышает 127, то 
+          if ($result==0 || $tasks[$i]['errors']>=127) { // если в процессе выполнения не произошло ошибок, задача возвращает 0 или false. Считаем её выполненной и удаляем. Если количество ошибок превышает 127, то
             $sql = 'DELETE FROM '.DB_prefix.'task WHERE id=?';
             $this->db->query($sql,true,array($tasks[$i]['id']));
           }

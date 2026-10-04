@@ -42,7 +42,7 @@ class Library_bbcode extends Library {
     else {
       $cleaner = new Library_cleaner;
       $tags = $this->load_tags();
-      $text = $cleaner->clean($text,$tags);  // по умолчанию разрешаем все теги, включенные в список cleanerа
+      if (!empty($text)) $text = $cleaner->clean($text,$tags);  // по умолчанию разрешаем все теги, включенные в список cleanerа
     }
     if (!empty($params['bcode'])) $text=str_ireplace(array('[code]','[/code]'),array('<p class="intb_wrap_code"><code>','</code></p>'),$text); // если включено использование тегов bcode, производим предварительное преобразование тега code в HTML
     // выявляем те последовательности, которые не должны изменяться в процессе обработки (теги <code> и [nocode])
@@ -71,7 +71,7 @@ class Library_bbcode extends Library {
     $text = $this->process_typograf($text);
 
     $links_mode = empty($params['links_mode']) ? 'allow' : $params['links_mode']; // по умолчанию ссылки разрешены
-    $text = $this->clean_html($text,$links_mode); // очистка HTML от запрещённых тегов    
+    $text = $this->clean_html($text,$links_mode); // очистка HTML от запрещённых тегов
     $text = $this->strip_links($text,$links_mode); // удаление ссылок в случае необходимости
 
     if (!empty($params['attach'])) {
@@ -83,7 +83,7 @@ class Library_bbcode extends Library {
             $attach_full = $attach_link.'<img src="'.
             $this->app()->url('f/up/1/pr/'.$preview_x.'x'.$preview_y.'/'.$params['attach'][$i]['oid'].'-'.$params['attach'][$i]['fkey'].'.'.$params['attach'][$i]['extension']).'" alt="{{ attach.filename }}" /></a>';
           }
-          else { 
+          else {
             $attach_full = $attach_link.htmlspecialchars($params['attach'][$i]['filename']).' ('.ceil($params['attach'][$i]['size']/1024.0).' Кб)</a>';
           }
           $old_text=$text;
@@ -110,7 +110,7 @@ class Library_bbcode extends Library {
     $text = $this->process_smiles($text);
     // TODO: проверка на наличие прав размещать ссылки вообще
     $text = $this->clean_html($text,$mode);
-    
+
     $text = $this->strip_links($text,$mode); // удаление ссылок в случае необходимости
     $text = nl2br($text);
     return $text;
@@ -249,15 +249,15 @@ class Library_bbcode extends Library {
     if (!empty($url_parts['scheme']) && !in_array(strtolower($url_parts['scheme']),array('http','https','ftp','tg','magnet'))) return '<!--noindex--><span class="bad_link">*** Некорректный протокол: подозрительная или повреждённая ссылка ***</span><!--/noindex-->';
     $scheme = empty($url_parts['scheme']) ? '' : $url_parts['scheme'];
     if (mb_strlen(trim($matches[5]))<2) return '<!--noindex--><span class="bad_link">*** Попытка поискового спама: ссылка из одного символа ***</span><!--/noindex-->';
-    
+
     if ($matches[3]!==$matches[5]) return $matches[0]; // if link description not match URL, making no changes
 
       // processing URL parts
     $host = (!empty($url_parts['host'])) ? mb_strtoupper(mb_substr($url_parts['host'],0,1)).mb_substr($url_parts['host'],1) : '';
     $path = (empty($url_parts['path']) || $url_parts['path']==='/') ? '' : $path = urldecode($url_parts['path']);
-    $query = (!empty($url_parts['query'])) ? $url_parts['query'] : '';	
-    $fragment = (!empty($url_parts['fragment'])) ? '#'.urldecode($url_parts['fragment']) : '';    
-    
+    $query = (!empty($url_parts['query'])) ? $url_parts['query'] : '';
+    $fragment = (!empty($url_parts['fragment'])) ? '#'.urldecode($url_parts['fragment']) : '';
+
     if (strtolower(substr($host,-14))==='.wikipedia.org' && mb_substr($path,0,6)==='/wiki/') $new_link = 'Wikipedia: '.str_replace('_',' ',mb_substr($path,6));
     elseif (strtolower(substr($host,-10))==='google.com' && $path==='/search'  && substr($query,0,2)==='q=') {
       $pos = strpos($query,'&');
@@ -271,7 +271,7 @@ class Library_bbcode extends Library {
     }
     elseif (strtolower(substr($host,-4))==='t.me' || $scheme=='tg') $new_link = 'Telegram: '.mb_substr($url_parts['path'],1);
     elseif (strtolower(substr($host,-11))==='youtube.com' || strtolower(substr($host,-8))==='youtu.be') {
-      $new_link = 'YouTube: ';		
+      $new_link = 'YouTube: ';
       if ($path==='/watchv') {
         $pos = strpos($query,'&');
         if ($pos!==false) $new_link.=substr($query,0,$pos);
@@ -279,7 +279,7 @@ class Library_bbcode extends Library {
       }
       elseif ($path==='/watch') {
         if (preg_match('|v=([\w\-]+)|',$query,$match)) $new_link.=$match[1];
-        else $new_link = $matches[5]; // if v 
+        else $new_link = $matches[5]; // if v
       }
       else $new_link.=mb_substr($path,1);
       if (preg_match('|t=(\d+)|',$query,$match)) { // if time offset specified
@@ -292,21 +292,21 @@ class Library_bbcode extends Library {
     else {
       if ($query && strpos($path,'search')===false && strpos($path,'watch')===false && !preg_match('/search=|text=|query=|filter=/i',$query)) $query='?...';
       elseif (strlen($query)>32) $query=substr($query,0,32).'…';
-      
+
       $host = idn_to_utf8($host);
-      if (empty($path)) $host=mb_strtoupper(mb_substr($host,0,1)).mb_substr($host,1);		
+      if (empty($path)) $host=mb_strtoupper(mb_substr($host,0,1)).mb_substr($host,1);
       if (mb_strtolower($host)==='vk.com' || mb_strtolower($host)==='m.vk.com') $host='VK.com';
-      
+
       if (mb_strlen($path)>48) $path = mb_substr($path,0,6).'…'.mb_substr($path,-6);
       if (mb_strlen($fragment)>32) $path = mb_substr($path,0,32).'…';
-      
+
       $new_link = $host.$path.$query.$fragment;
     }
 
     return str_replace('>'.$matches[3].'<','>'.$new_link.'<',$matches[0]);
   }
 
-  /** Обработка ссылок, вставленных без [url] или <a href>. 
+  /** Обработка ссылок, вставленных без [url] или <a href>.
    * Сюда же добавлен вызов beautify_link для каждой найденной ссылки с целью улучшения читаемости **/
   function process_links($text) {
     if (empty(self::$link_search) || empty(self::$link_replace)) {
@@ -314,7 +314,7 @@ class Library_bbcode extends Library {
       self::$link_search[]='/(^|\s)((www\.)?[\w.\-]+\.('.$domains.')(:[1-9][0-9]*)?([\/?][^\s"]*?)?)([,\.!?]?([\s"\']|$))/is'; self::$link_replace[]='$1<a href="http://$2">$2</a>$7';
       self::$link_search[]='/(^|\s)((https?:\/\/)?[\w.\-]+\.('.$domains.')(:[1-9][0-9]*)?([\/?][^\s"]*?)?)([,\.!?]?([\s"\']|$))/is'; self::$link_replace[]='$1<a href="$2">$2</a>$7';
       self::$link_search[]='/(^|\s)([а-яА-Я0-9\.\-]+\.(рф|РФ|москва|МОСКВА|бел|БЕЛ)(:[1-9][0-9]*)?([\/?][^\s"]*?)?)([,\.!?]?([\s"\']|$))/isu'; self::$link_replace[]='$1<a href="http://$2">$2</a>$6';
-      self::$link_search[]='/(^|\s)(https?:\/\/[а-яА-Я0-9\.\-]+\.(рф|РФ|москва|МОСКВА|бел|БЕЛ)(:[1-9][0-9]*)?([\/?][^\s"]*?)?)([,\.!?]?([\s"\']|$))/isu'; self::$link_replace[]='$1<a href="$2">$2</a>$6';      
+      self::$link_search[]='/(^|\s)(https?:\/\/[а-яА-Я0-9\.\-]+\.(рф|РФ|москва|МОСКВА|бел|БЕЛ)(:[1-9][0-9]*)?([\/?][^\s"]*?)?)([,\.!?]?([\s"\']|$))/isu'; self::$link_replace[]='$1<a href="$2">$2</a>$6';
     }
     $text = preg_replace(self::$link_search,self::$link_replace,$text); // и все замены делаем одним regexpом
 
@@ -327,7 +327,7 @@ class Library_bbcode extends Library {
     // обработка blocklink
     preg_match_all('|\[blocklink=(https?://[^>"\'\]\s]+)\]|i', $text, $matches);
     if (!empty($params['blocklinks'])) $links = json_decode($params['blocklinks'], true);
-    else $links = array();  
+    else $links = array();
 
     foreach ($matches[1] as $oldurl) {
       if (!empty($links[$oldurl])) $linkdata= $links[$oldurl];
@@ -420,7 +420,7 @@ class Library_bbcode extends Library {
             if (strpos($str,':=')!==false) { // тег и его атрибуты разделяются строкой :=
               list($tag_name,$tag_attrs) = explode(':=',$str,2);
               $tag_attrs = explode(',',$tag_attrs);
-              $tag_attrs = array_map('trim',$tag_attrs); // на всякий случай убираем пробелы 
+              $tag_attrs = array_map('trim',$tag_attrs); // на всякий случай убираем пробелы
             }
             else { // если разделитель := не найден, то считаем всю строку именем тега, а список атрибутов — пустым
               $tag_name=trim($str);
@@ -432,7 +432,7 @@ class Library_bbcode extends Library {
       }
       else $result = Library_cleaner::TAGS_ALL + array('*'=>array('class','style'),'span'=>array(),'div'=>array()); // если файла нет, берём разрешённые теги библиотеки Library_cleaner, добавляем к ним span и div, и разрешаем class и style для всех атрибутов
     }
-    return $result;    
+    return $result;
   }
 
   function process_videos($text) {
@@ -491,7 +491,7 @@ class Library_bbcode extends Library {
       if (!empty($parts['query'])) $path.='?'.$parts['query'];
       $result = '<iframe width="480" height="270" src="https://dzen.ru/embed/oFka07bAIAAA?from_block=partner&from=zen&mute=0&autoplay=0&tv=0" allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture; encrypted-media" data-jSXmzd0lB="embed-iframe" frameborder="0" scrolling="no" allowfullscreen></iframe>';
     } */
-   elseif ($host==='vimeo.com') { 
+   elseif ($host==='vimeo.com') {
       $path = substr($parts['path'],1).'?';
       if (!empty($parts['query'])) $path.=$parts['query'].'&amp;';
       $result = '<div style="padding:75% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/'.htmlspecialchars($path).'badge=0&amp;autopause=1&amp;player_id=0&amp;app_id=58479" loading="lazy" frameborder="0" allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="MOV_0100"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>';
@@ -508,9 +508,10 @@ class Library_bbcode extends Library {
     $text = preg_replace('|<img[^>]+src=["\']?(\w+script:.*?)["\']?[^>]+>|i','<span class="bad_link">Картинка с небезопасным адресом удалена!</span>',$text);
     $text = preg_replace('|<audio[^>]+src=["\']?(\w+script:.*?)["\']?[^>]+>(.*?)</audio>|i','<span class="bad_link">Небезопасный аудио-объект удален!</span>',$text);
     $text = preg_replace('|<video[^>]+src=["\']?(\w+script:.*?)["\']?[^>]+>(.*?)</video>|i','<span class="bad_link">Небезопасный видео-объект удален!</span>',$text); */
+    if (empty($text)) return '';
     $cleaner = new Library_cleaner;
     $tags = $this->load_tags(); // загружаем список разрешённых тегов и атрибутов
-    $text = $cleaner->clean($text,$tags); 
+    $text = $cleaner->clean($text,$tags);
     return $text;
   }
 
@@ -518,9 +519,9 @@ class Library_bbcode extends Library {
     $host=parse_url($matches[2],PHP_URL_HOST);
     if (empty($host) || $host===$_SERVER['HTTP_HOST'] || $host==='www.'.$_SERVER['HTTP_HOST']) return $matches[0];
     else return '<!--noindex--><span class="bad_link">У данного пользователя нет прав размещать ссылки!</span><!--/noindex-->';
-  }   
+  }
 
-  function strip_links($text,$mode) {  
+  function strip_links($text,$mode) {
     if ($mode==='none') $text=preg_replace_callback('|<a([^>]*\W)href=[\'"]?(.*?)[\'"]([^>])*>(.*?)</a>|i',array($this,'strip_links_callback'),$text);
     if ($mode==='none') $text=preg_replace_callback('|<a([^>]*\W)href=(.*)(\s[^>]*)?>(.*?)</a>|i',array($this,'strip_links_callback'),$text);
     if ($mode==='nofollow') $text=preg_replace('|<a\s+([^>]+)>(.*?)</a>|i','<a rel="nofollow ugc" $1>$2</a>',$text);
@@ -580,7 +581,7 @@ class Library_bbcode extends Library {
           $dom->formatOutput = false;
           $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NONET); // LIBXML_NONET — для защиты от XXE
           $xpath = new DOMXPath($dom);
-        }        
+        }
         libxml_use_internal_errors(false);
         // finding title. First from <meta property="og:title", then from title tag
         $og_title = $xpath->query('//meta[@property="og:title"]');
@@ -594,13 +595,13 @@ class Library_bbcode extends Library {
         if (!empty($og_desc[0])) $result[$url]['desc'] = $og_desc[0]->getAttribute('content');
         if (empty($result[$url]['desc'])) {
           $og_desc = $xpath->query('//meta[@name="description"]');
-          if (!empty($og_desc[0]))  $result[$url]['desc'] = $og_desc[0]->getAttribute('content');          
+          if (!empty($og_desc[0]))  $result[$url]['desc'] = $og_desc[0]->getAttribute('content');
         }
         // finding image
-        $og_img = $xpath->query('//meta[@property="og:image"]'); 
+        $og_img = $xpath->query('//meta[@property="og:image"]');
         if (!empty($og_img[0])) $result[$url]['image'] = $og_img[0]->getAttribute('content');
         if (empty($result[$url]['image'])) {
-          $og_img = $xpath->query('//link[@rel="image_src"]'); 
+          $og_img = $xpath->query('//link[@rel="image_src"]');
           if (!empty($og_img[0])) $result[$url]['image'] = $og_img[0]->getAttribute('href');
         }
         // finding url
@@ -626,4 +627,3 @@ class Library_bbcode extends Library {
     return $all_done ? 0 : -1;  // возвращаем 0 в качестве индикатора, что задача выполнена или -1, если что-то прошло не так
   }
 }
-
